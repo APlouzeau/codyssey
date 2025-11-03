@@ -86,7 +86,7 @@ symfony server:start
 
 # ou pour éviter de voir tte les logs server mettre -d
 
-symfony server -d
+symfony serve -d
 ```
 
 Le projet sera accessible sur https://localhost:8000 (ou un autre port indiqué).
