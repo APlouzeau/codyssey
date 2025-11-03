@@ -97,5 +97,3 @@ Autres Commandes Utiles
     ```bash
     php bin/console cache:clear
     ```
-
-## salut
