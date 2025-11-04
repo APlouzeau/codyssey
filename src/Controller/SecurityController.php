@@ -3,8 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Form\ChangeEmailFormType;
-use App\Form\ChangePasswordFormType;
+use App\Form\ChangeUserFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -46,7 +45,7 @@ class SecurityController extends AbstractController
         $user = $this->getUser();
 
         // Formulaire de modification d'email (mappé à l'entité)
-        $emailForm = $this->createForm(ChangeEmailFormType::class, $user);
+        $emailForm = $this->createForm(ChangeUserFormType::class, $user);
         $emailForm->handleRequest($request);
 
         if ($emailForm->isSubmitted() && $emailForm->isValid()) {
@@ -61,7 +60,7 @@ class SecurityController extends AbstractController
         }
 
         // Formulaire de modification de mot de passe (non mappé)
-        $passwordForm = $this->createForm(ChangePasswordFormType::class);
+        $passwordForm = $this->createForm(ChangeUserFormType::class);
         $passwordForm->handleRequest($request);
 
         if ($passwordForm->isSubmitted() && $passwordForm->isValid()) {
