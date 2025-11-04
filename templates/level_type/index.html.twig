@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}LevelType index{% endblock %}
+
+{% block body %}
+    <h1>LevelType index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Owned_key</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for level_type in level_types %}
+            <tr>
+                <td>{{ level_type.id }}</td>
+                <td>{{ level_type.name }}</td>
+                <td>{{ level_type.ownedKey ? 'Yes' : 'No' }}</td>
+                <td>
+                    <a href="{{ path('app_level_type_show', {'id': level_type.id}) }}">show</a>
+                    <a href="{{ path('app_level_type_edit', {'id': level_type.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_level_type_new') }}">Create new</a>
+{% endblock %}
