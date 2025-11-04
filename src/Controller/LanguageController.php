@@ -22,7 +22,7 @@ final class LanguageController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_language_new', methods: ['GET', 'POST'])]
+    #[Route('/admin/new', name: 'app_language_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $language = new Language();
@@ -42,7 +42,7 @@ final class LanguageController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_language_show', methods: ['GET'])]
+    #[Route('/admin/{id}', name: 'app_language_show', methods: ['GET'])]
     public function show(Language $language): Response
     {
         return $this->render('language/show.html.twig', [
@@ -50,7 +50,7 @@ final class LanguageController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_language_edit', methods: ['GET', 'POST'])]
+    #[Route('/admin/{id}/edit', name: 'app_language_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Language $language, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(LanguageType::class, $language);
@@ -68,7 +68,7 @@ final class LanguageController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_language_delete', methods: ['POST'])]
+    #[Route('/admin/{id}', name: 'app_language_delete', methods: ['POST'])]
     public function delete(Request $request, Language $language, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$language->getId(), $request->getPayload()->getString('_token'))) {

@@ -22,7 +22,7 @@ final class SkinController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_skin_new', methods: ['GET', 'POST'])]
+    #[Route('/admin/new', name: 'app_skin_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $skin = new Skin();
@@ -42,7 +42,7 @@ final class SkinController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_skin_show', methods: ['GET'])]
+    #[Route('/admin/{id}', name: 'app_skin_show', methods: ['GET'])]
     public function show(Skin $skin): Response
     {
         return $this->render('skin/show.html.twig', [
@@ -50,7 +50,7 @@ final class SkinController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_skin_edit', methods: ['GET', 'POST'])]
+    #[Route('/admin/{id}/edit', name: 'app_skin_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Skin $skin, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(SkinType::class, $skin);
@@ -68,7 +68,7 @@ final class SkinController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_skin_delete', methods: ['POST'])]
+    #[Route('/admin/{id}', name: 'app_skin_delete', methods: ['POST'])]
     public function delete(Request $request, Skin $skin, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$skin->getId(), $request->getPayload()->getString('_token'))) {

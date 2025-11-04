@@ -22,7 +22,7 @@ final class LevelTypeController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_level_type_new', methods: ['GET', 'POST'])]
+    #[Route('/admin/new', name: 'app_level_type_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $levelType = new LevelType();
@@ -42,7 +42,7 @@ final class LevelTypeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_level_type_show', methods: ['GET'])]
+    #[Route('/admin/{id}', name: 'app_level_type_show', methods: ['GET'])]
     public function show(LevelType $levelType): Response
     {
         return $this->render('level_type/show.html.twig', [
@@ -50,7 +50,7 @@ final class LevelTypeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_level_type_edit', methods: ['GET', 'POST'])]
+    #[Route('/admin/{id}/edit', name: 'app_level_type_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, LevelType $levelType, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(LevelTypeType::class, $levelType);
@@ -68,7 +68,7 @@ final class LevelTypeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_level_type_delete', methods: ['POST'])]
+    #[Route('/admin/{id}', name: 'app_level_type_delete', methods: ['POST'])]
     public function delete(Request $request, LevelType $levelType, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$levelType->getId(), $request->getPayload()->getString('_token'))) {

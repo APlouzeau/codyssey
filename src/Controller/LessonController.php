@@ -22,7 +22,7 @@ final class LessonController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_lesson_new', methods: ['GET', 'POST'])]
+    #[Route('/admin/new', name: 'app_lesson_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $lesson = new Lesson();
@@ -42,7 +42,7 @@ final class LessonController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_lesson_show', methods: ['GET'])]
+    #[Route('/admin/{id}', name: 'app_lesson_show', methods: ['GET'])]
     public function show(Lesson $lesson): Response
     {
         return $this->render('lesson/show.html.twig', [
@@ -50,7 +50,7 @@ final class LessonController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_lesson_edit', methods: ['GET', 'POST'])]
+    #[Route('/admin/{id}/edit', name: 'app_lesson_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Lesson $lesson, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(LessonType::class, $lesson);
@@ -68,7 +68,7 @@ final class LessonController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_lesson_delete', methods: ['POST'])]
+    #[Route('/admin/{id}', name: 'app_lesson_delete', methods: ['POST'])]
     public function delete(Request $request, Lesson $lesson, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$lesson->getId(), $request->getPayload()->getString('_token'))) {
