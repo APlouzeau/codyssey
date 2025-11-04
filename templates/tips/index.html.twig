@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tips index{% endblock %}
+
+{% block body %}
+    <h1>Tips index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for tip in tips %}
+            <tr>
+                <td>{{ tip.id }}</td>
+                <td>{{ tip.name }}</td>
+                <td>
+                    <a href="{{ path('app_tips_show', {'id': tip.id}) }}">show</a>
+                    <a href="{{ path('app_tips_edit', {'id': tip.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_tips_new') }}">Create new</a>
+{% endblock %}
