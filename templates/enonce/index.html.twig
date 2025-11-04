@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Enonce index{% endblock %}
+
+{% block body %}
+    <h1>Enonce index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Title</th>
+                <th>Content</th>
+                <th>Expected_results</th>
+                <th>Xp_gain</th>
+                <th>Life_number</th>
+                <th>Timer</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for enonce in enonces %}
+            <tr>
+                <td>{{ enonce.id }}</td>
+                <td>{{ enonce.title }}</td>
+                <td>{{ enonce.content }}</td>
+                <td>{{ enonce.expectedResults }}</td>
+                <td>{{ enonce.xpGain }}</td>
+                <td>{{ enonce.lifeNumber }}</td>
+                <td>{{ enonce.timer ? enonce.timer|date('H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_enonce_show', {'id': enonce.id}) }}">show</a>
+                    <a href="{{ path('app_enonce_edit', {'id': enonce.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="8">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_enonce_new') }}">Create new</a>
+{% endblock %}
