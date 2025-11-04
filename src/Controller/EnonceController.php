@@ -22,7 +22,7 @@ final class EnonceController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_enonce_new', methods: ['GET', 'POST'])]
+    #[Route('/admin/new', name: 'app_enonce_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $enonce = new Enonce();
@@ -42,7 +42,7 @@ final class EnonceController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_enonce_show', methods: ['GET'])]
+    #[Route('/admin/{id}', name: 'app_enonce_show', methods: ['GET'])]
     public function show(Enonce $enonce): Response
     {
         return $this->render('enonce/show.html.twig', [
@@ -50,7 +50,7 @@ final class EnonceController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_enonce_edit', methods: ['GET', 'POST'])]
+    #[Route('/admin/{id}/edit', name: 'app_enonce_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Enonce $enonce, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(EnonceType::class, $enonce);
@@ -68,7 +68,7 @@ final class EnonceController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_enonce_delete', methods: ['POST'])]
+    #[Route('/admin/{id}', name: 'app_enonce_delete', methods: ['POST'])]
     public function delete(Request $request, Enonce $enonce, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$enonce->getId(), $request->getPayload()->getString('_token'))) {

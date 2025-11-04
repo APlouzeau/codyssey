@@ -7,13 +7,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
-#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -39,17 +37,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(options: ['default' => 0])]
     private ?int $XP = 0;
-    #[ORM\Column(options: ['default' => 0])]
-    private ?int $XP = 0;
-
     /**
      * @var Collection<int, Language>
      */
     #[ORM\ManyToMany(targetEntity: Language::class, inversedBy: 'users')]
     private Collection $languages;
-
-    #[ORM\Column(length: 255)]
-    private ?string $pseudo = null;
 
     #[ORM\Column(length: 255)]
     private ?string $pseudo = null;

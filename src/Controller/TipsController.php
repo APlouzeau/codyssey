@@ -22,7 +22,7 @@ final class TipsController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_tips_new', methods: ['GET', 'POST'])]
+    #[Route('/admin/new', name: 'app_tips_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $tip = new Tips();
@@ -42,7 +42,7 @@ final class TipsController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_tips_show', methods: ['GET'])]
+    #[Route('/admin/{id}', name: 'app_tips_show', methods: ['GET'])]
     public function show(Tips $tip): Response
     {
         return $this->render('tips/show.html.twig', [
@@ -50,7 +50,7 @@ final class TipsController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_tips_edit', methods: ['GET', 'POST'])]
+    #[Route('/admin/{id}/edit', name: 'app_tips_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Tips $tip, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(TipsType::class, $tip);
@@ -68,7 +68,7 @@ final class TipsController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_tips_delete', methods: ['POST'])]
+    #[Route('/admin/{id}', name: 'app_tips_delete', methods: ['POST'])]
     public function delete(Request $request, Tips $tip, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$tip->getId(), $request->getPayload()->getString('_token'))) {

@@ -31,7 +31,14 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
+        # pour les lessons accessible sans etre connecté
+        - { path: ^/lessons, roles: PUBLIC_ACCESS }
+        - { path: ^/login, roles: PUBLIC_ACCESS } # Allows accessing the login page
+        - { path: ^/register, roles: PUBLIC_ACCESS } # Allows accessing the registration page
         # - { path: ^/admin, roles: ROLE_ADMIN }
+        # 🔑 Règle unique pour sécuriser tous les chemins contenant /admin
+        - { path: '.*\/admin', roles: ROLE_ADMIN }
+        - { path: ^/, roles: ROLE_USER }
         # - { path: ^/profile, roles: ROLE_USER }
 
 when@test:

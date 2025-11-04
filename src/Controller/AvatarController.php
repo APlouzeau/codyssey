@@ -22,7 +22,7 @@ final class AvatarController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_avatar_new', methods: ['GET', 'POST'])]
+    #[Route('/admin/new', name: 'app_avatar_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $avatar = new Avatar();
@@ -42,7 +42,7 @@ final class AvatarController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_avatar_show', methods: ['GET'])]
+    #[Route('/admin/{id}', name: 'app_avatar_show', methods: ['GET'])]
     public function show(Avatar $avatar): Response
     {
         return $this->render('avatar/show.html.twig', [
@@ -50,7 +50,7 @@ final class AvatarController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_avatar_edit', methods: ['GET', 'POST'])]
+    #[Route('/admin/{id}/edit', name: 'app_avatar_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Avatar $avatar, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(AvatarType::class, $avatar);
@@ -68,7 +68,7 @@ final class AvatarController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_avatar_delete', methods: ['POST'])]
+    #[Route('/admin/{id}', name: 'app_avatar_delete', methods: ['POST'])]
     public function delete(Request $request, Avatar $avatar, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$avatar->getId(), $request->getPayload()->getString('_token'))) {

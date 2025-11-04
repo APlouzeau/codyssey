@@ -22,7 +22,7 @@ final class LessonCodePartController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_lesson_code_part_new', methods: ['GET', 'POST'])]
+    #[Route('/admin/new', name: 'app_lesson_code_part_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $lessonCodePart = new LessonCodePart();
@@ -42,7 +42,7 @@ final class LessonCodePartController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_lesson_code_part_show', methods: ['GET'])]
+    #[Route('/admin/{id}', name: 'app_lesson_code_part_show', methods: ['GET'])]
     public function show(LessonCodePart $lessonCodePart): Response
     {
         return $this->render('lesson_code_part/show.html.twig', [
@@ -50,7 +50,7 @@ final class LessonCodePartController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_lesson_code_part_edit', methods: ['GET', 'POST'])]
+    #[Route('/admin/{id}/edit', name: 'app_lesson_code_part_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, LessonCodePart $lessonCodePart, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(LessonCodePartType::class, $lessonCodePart);
@@ -68,7 +68,7 @@ final class LessonCodePartController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_lesson_code_part_delete', methods: ['POST'])]
+    #[Route('/admin/{id}', name: 'app_lesson_code_part_delete', methods: ['POST'])]
     public function delete(Request $request, LessonCodePart $lessonCodePart, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$lessonCodePart->getId(), $request->getPayload()->getString('_token'))) {
