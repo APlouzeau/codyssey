@@ -22,13 +22,19 @@ stop:
 
 check-deps:
 	@echo "🔍 Vérification des dépendances..."
-	@which composer > /dev/null || (echo "❌ Composer n'est pas installé" && exit 1)
+	@which composer > /dev/null || (echo "❌ Composer n'est pas installé\n   👉 Télécharge-le sur https://getcomposer.org/download/" && exit 1)
+	@which node > /dev/null || (echo "❌ Node.js n'est pas installé\n   👉 Télécharge-le sur https://nodejs.org/" && exit 1)
+	@which npm > /dev/null || (echo "❌ npm n'est pas installé (devrait venir avec Node.js)\n   👉 Réinstalle Node.js depuis https://nodejs.org/" && exit 1)
 	@which pnpm > /dev/null || (echo "⚠️  pnpm n'est pas installé, installation..." && npm install -g pnpm)
 	@echo "✅ Toutes les dépendances système sont présentes"
 
 install-deps: check-deps
 	@echo "📦 Installation des dépendances PHP..."
-	composer install
+	@if [ -f "composer.json" ]; then \
+		composer install; \
+	else \
+		echo "⚠️  Pas de composer.json trouvé"; \
+	fi
 	@echo "📦 Installation des dépendances JS..."
 	@if [ ! -d "node_modules" ]; then \
 		pnpm install; \
