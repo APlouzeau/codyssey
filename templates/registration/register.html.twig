@@ -1,19 +1,92 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Inscription
+{% endblock %}
+
+{% block stylesheets %}
+	{{ parent() }}
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Kumar+One&family=Orbitron:wght@800;900&display=swap" rel="stylesheet">
+{% endblock %}
 
 {% block body %}
-    <h1>Register</h1>
+  <div class="min-h-screen w-full bg-[#151B28] relative flex items-center">
+    <div class="absolute inset-0 -z-10 bg-center bg-cover"></div>
 
-    {{ form_errors(registrationForm) }}
+    <div class="container mx-auto px-6 flex items-center justify-center">
+      <div class="w-full max-w-2xl rounded-[10px]">
+        <h1 class="text-white text-4xl ont-black tracking-wide mb-10" style="font-family: 'Orbitron', sans-serif;">
+          // INITIALISATION DU PROFIL //
+        </h1>
 
-    {{ form_start(registrationForm) }}
-        {{ form_row(registrationForm.email) }}
-        {{ form_row(registrationForm.plainPassword, {
-            label: 'Password'
-        }) }}
-        {{ form_row(registrationForm.agreeTerms) }}
+        {{ form_start(registrationForm, {'attr': {'class': 'space-y-6'}}) }}
+        {% if app.user %}
+          <div class="text-white/80 text-sm mb-3">
+            Connecté en tant que
+            {{ app.user.userIdentifier }},
+            <a href="{{ path('app_logout') }}" class="text-[#2AFEFC] hover:underline">Déconnexion</a>
+          </div>
+        {% endif %}
 
-        <button type="submit" class="btn">Register</button>
-    {{ form_end(registrationForm) }}
+        <div class="rounded-[10px] border border-[#2D404D] bg-white/5 backdrop-blur-sm px-6 pt-4 pb-4">
+          {{ form_row(registrationForm.pseudo, {
+                label: 'PSEUDONYME',
+                label_attr: {
+                  class: 'block text-white text-xl',
+                  style: "font-family: 'Kumar One', serif;"
+                },
+                attr: {
+                  class: 'w-full bg-transparent text-white placeholder-white/70 font-semibold border-0 focus:outline-none focus:ring-0',
+                  autocomplete: 'username',
+                  style: "font-family: 'Inter', sans-serif;"
+                }
+              }) }}
+          <div class="h-px w-full bg-[#29FDFD] mt-3"></div>
+        </div>
+
+        <div class="rounded-[10px] border border-[#2D404D] bg-white/5 backdrop-blur-sm px-6 pt-4 pb-4">
+          {{ form_row(registrationForm.email, {
+                label: 'E-MAIL DE CONTACT',
+                label_attr: {
+                  class: 'block text-white text-xl',
+                  style: "font-family: 'Kumar One', serif;"
+                },
+                attr: {
+                  class: 'w-full bg-transparent text-white placeholder-white/70 font-semibold border-0 focus:outline-none focus:ring-0',
+                  autocomplete: 'email',
+                  style: "font-family: 'Inter', sans-serif;"
+                }
+              }) }}
+          <div class="h-px w-full bg-[#29FDFD] mt-3"></div>
+        </div>
+
+        <div class="rounded-[10px] border border-[#2D404D] bg-white/5 backdrop-blur-sm px-6 pt-4 pb-4">
+          {{ form_row(registrationForm.plainPassword, {
+                label: 'CODE D’ACCÈS (8+ CARACTÈRES)',
+                label_attr: {
+                  class: 'block text-white text-xl',
+                  style: "font-family: 'Kumar One', serif;"
+                },
+                attr: {
+                  class: 'w-full bg-transparent text-white placeholder-white/70 font-semibold border-0 focus:outline-none focus:ring-0',
+                  autocomplete: 'new-password',
+                  style: "font-family: 'Inter', sans-serif;"
+                }
+              }) }}
+          <div class="h-px w-full bg-[#29FDFD] mt-3"></div>
+        </div>
+
+        <button type="submit" class="w-full rounded-md py-4 text-2xl font-black tracking-wide bg-[#151B28] text-[#2AFEFC] border-2 border-[#2AFEFC] hover:bg-[#0f1420] transition" style="font-family: 'Orbitron', sans-serif;">
+          ⌜ ACTIVER LE COMPTE ⌟
+        </button>
+        {{ form_end(registrationForm) }}
+
+        <p class="text-white/80 text-center text-base" style="font-family: 'Inter', sans-serif;">
+          Compte déjà actif ?
+          <a href="{{ path('app_login') }}" class="text-[#2AFEFC] hover:underline">⌜ Connexion ⌟</a>
+        </p>
+      </div>
+    </div>
+  </div>
 {% endblock %}

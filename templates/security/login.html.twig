@@ -1,28 +1,90 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Log in!{% endblock %}
+{% block title %}Connexion{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Kumar+One&family=Orbitron:wght@800;900&display=swap" rel="stylesheet">
+{% endblock %}
 
 {% block body %}
-<form method="post">
-    {% if error %}
-        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-    {% endif %}
+  <div class="min-h-screen w-full bg-[#151B28] relative flex items-center">
+    <div class="absolute inset-0 -z-10 bg-center bg-cover"></div>
 
-    {% if app.user %}
-        <div class="mb-3">
-            You are logged in as {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Logout</a>
-        </div>
-    {% endif %}
+    <div class="container mx-auto px-6 flex items-center justify-center">
+      <div class="w-full max-w-2xl">
+        <h1 class="text-white text-4xl ont-black tracking-wide mb-10" style="font-family: 'Orbitron', sans-serif;">
+          // CONNEXION AU PROFIL //
+        </h1>
 
-    <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-    <label for="inputEmail">Email</label>
-    <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control" autocomplete="email" required autofocus>
-    <label for="inputPassword">Password</label>
-    <input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" required>
-    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+        <form method="post" class="space-y-6">
+          {% if error %}
+            <div class="text-red-400 bg-red-950/40 border border-red-700 rounded-md px-4 py-3 text-sm">
+              {{ error.messageKey|trans(error.messageData, 'security') }}
+            </div>
+          {% endif %}
 
-    <button class="btn btn-lg btn-primary" type="submit">
-        Sign in
-    </button>
-</form>
+          {% if app.user %}
+            <div class="text-white/80 text-sm mb-3">
+              Connecté en tant que {{ app.user.userIdentifier }},
+              <a href="{{ path('app_logout') }}" class="text-[#2AFEFC] hover:underline">Déconnexion</a>
+            </div>
+          {% endif %}
+
+          <div class="rounded-[10px] border border-[#2D404D] bg-white/5 backdrop-blur-sm">
+            <label for="inputEmail" class="block text-white text-xl px-6 pt-4" style="font-family: 'Kumar One', serif;">
+              E-MAIL DE CONTACT
+            </label>
+            <div class="px-6 pb-4">
+              <input
+                type="email"
+                value="{{ last_username }}"
+                name="email"
+                id="inputEmail"
+                autocomplete="email"
+                required
+                autofocus
+                class="w-full bg-transparent text-white placeholder-white/70 font-semibold border-0 focus:outline-none focus:ring-0"
+                placeholder="Entrez votre e-mail"
+                style="font-family: 'Inter', sans-serif;"
+              />
+              <div class="h-px w-full bg-[#29FDFD] mt-3"></div>
+            </div>
+          </div>
+
+          <div class="rounded-[10px] border border-[#2D404D] bg-white/5 backdrop-blur-sm">
+            <label for="inputPassword" class="block text-white text-xl px-6 pt-4" style="font-family: 'Kumar One', serif;">
+              CODE D’ACCÈS (8+ CARACTÈRES)
+            </label>
+            <div class="px-6 pb-4">
+              <input
+                type="password"
+                name="password"
+                id="inputPassword"
+                autocomplete="current-password"
+                required
+                class="w-full bg-transparent text-white placeholder-white/70 font-semibold border-0 focus:outline-none focus:ring-0"
+                placeholder="**********************"
+                style="font-family: 'Inter', sans-serif;"
+              />
+              <div class="h-px w-full bg-[#29FDFD] mt-3"></div>
+            </div>
+          </div>
+
+          <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}" />
+
+          <button type="submit" class="w-full rounded-md py-4 text-2xl font-black tracking-wide bg-[#151B28] text-[#2AFEFC] border-2 border-[#2AFEFC] hover:bg-[#0f1420] transition" style="font-family: 'Orbitron', sans-serif;">
+            ⌜ SE CONNECTER ⌟
+          </button>
+
+          <p class="text-white/80 text-center text-base" style="font-family: 'Inter', sans-serif;">
+            S'inscrire ?
+            <a href="{{ path('app_register') }}" class="text-[#2AFEFC] hover:underline">⌜ Inscription ⌟</a>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
 {% endblock %}
