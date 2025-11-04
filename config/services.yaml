@@ -4,6 +4,9 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    piston.api.url: "%env(PISTON_API_URL)%"
+    piston.api.user: "%env(PISTON_API_USER)%"
+    piston.api.password: "%env(PISTON_API_PASSWORD)%"
 
 services:
     # default configuration for services in *this* file
@@ -19,6 +22,12 @@ services:
     App\Service\JudgeService:
         resource: "../src/Controller"
         tags: ["controller.service_arguments"]
+
+    App\Service\PistonService:
+        arguments:
+            $pistonApiUrl: "%piston.api.url%"
+            $pistonApiUser: "%piston.api.user%"
+            $pistonApiPassword: "%piston.api.password%"
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
