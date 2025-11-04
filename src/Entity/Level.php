@@ -30,6 +30,10 @@ class Level
     #[ORM\JoinColumn(nullable: false)]
     private ?Enonce $enonce = null;
 
+    #[ORM\ManyToOne(inversedBy: 'levels')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?LevelType $type = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -91,6 +95,18 @@ class Level
     public function setEnonce(?Enonce $enonce): static
     {
         $this->enonce = $enonce;
+
+        return $this;
+    }
+
+    public function getType(): ?LevelType
+    {
+        return $this->type;
+    }
+
+    public function setType(?LevelType $type): static
+    {
+        $this->type = $type;
 
         return $this;
     }
