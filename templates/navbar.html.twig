@@ -1,0 +1,26 @@
+<nav class="bg-[#0a0f18] text-white border-b border-[#29FDFD]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 items-center justify-between">
+            <div class="flex items-center gap-6">
+                <a href="{{ path('app_home') }}" class="flex items-center gap-2 text-xl font-bold tracking-wide">
+                    <img src="{{ asset('images/favicon.png') }}" alt="Codyssey" class="h-16 w-16">
+                    <span>Codyssey</span>
+                </a>
+
+                <ul class="hidden md:flex items-center gap-6">
+                    <li><a href="{{ path('app_lesson_index') }}" class="hover:text-[#29FDFD]">Cours</a></li>
+                    <li><a href="{{ path('app_language_index') }}" class="hover:text-[#29FDFD]">Jeux</a></li>
+                </ul>
+            </div>
+
+            <div class="flex items-center gap-4">
+                {% if app.user %}
+                    <a href="{{ path('app_user_security') }}" class="hover:text-[#29FDFD]">Mon compte</a>
+                    <a href="{{ path('app_logout') }}" class="hover:text-[#29FDFD]">Déconnexion</a>
+                {% else %}
+                    <a href="{{ path('app_login') }}" class="hover:text-[#29FDFD]">Connexion</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
