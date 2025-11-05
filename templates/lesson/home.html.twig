@@ -1,0 +1,87 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Choix du langage{% endblock %}
+
+{% block body %}
+<div class="min-h-screen bg-gray-950 flex flex-col items-center justify-center px-8 py-16 text-white">
+    <h1 class="text-5xl font-extrabold mb-16 text-center text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 drop-shadow-[0_0_25px_rgba(168,85,247,0.8)]">
+        Choisissez votre univers de code
+    </h1>
+
+    <div class="grid md:grid-cols-3 gap-12 max-w-7xl w-full">
+
+        {# 🟦 PHP CARD #}
+        <a href="{{ path('app_lesson_show_by_language', {'language': 'php', 'lessonNumber': 1}) }}"
+           class="relative bg-gray-900 rounded-2xl p-8 border border-gray-800 shadow-2xl transform hover:-translate-y-2 hover:shadow-[0_0_25px_rgba(56,189,248,0.6)] transition-all duration-300 group overflow-hidden">
+           
+            <div class="absolute inset-0 bg-gradient-to-br from-sky-400 to-blue-500 opacity-0 group-hover:opacity-10 blur-2xl transition-all duration-500"></div>
+
+            <div class="relative z-10 flex flex-col h-full">
+                <h2 class="text-6xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-500 drop-shadow-[0_0_15px_rgba(56,189,248,0.7)]">
+                    PHP
+                </h2>
+                <p class="text-gray-300 flex-grow mb-8 text-lg font-light leading-relaxed">
+                    Simple et puissant, Python est idéal pour débuter. Il permet de créer des sites, des applis et d’analyser des données facilement. Parfait pour apprendre à coder sans se compliquer la vie.
+                </p>
+                <div class="pt-6 border-t border-gray-800 group-hover:border-sky-400 transition-all duration-300">
+                    <button class="w-full py-4 px-6 text-xl font-bold rounded-xl
+                                   bg-gradient-to-r from-sky-400 to-blue-500 text-white
+                                   hover:from-blue-500 hover:to-sky-400
+                                   transition-all duration-300 shadow-lg">
+                        Débuter la Mission 1 →
+                    </button>
+                </div>
+            </div>
+        </a>
+
+        {# 🟢 PYTHON CARD #}
+        <a href="{{ path('app_lesson_show_by_language', {'language': 'python', 'lessonNumber': 1}) }}"
+           class="relative bg-gray-900 rounded-2xl p-8 border border-gray-800 shadow-2xl transform hover:-translate-y-2 hover:shadow-[0_0_25px_rgba(52,211,153,0.6)] transition-all duration-300 group overflow-hidden">
+
+            <div class="absolute inset-0 bg-gradient-to-br from-emerald-400 to-lime-500 opacity-0 group-hover:opacity-10 blur-2xl transition-all duration-500"></div>
+
+            <div class="relative z-10 flex flex-col h-full">
+                <h2 class="text-6xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-lime-500 drop-shadow-[0_0_15px_rgba(52,211,153,0.7)]">
+                    Python
+                </h2>
+                <p class="text-gray-300 flex-grow mb-8 text-lg font-light leading-relaxed">
+                    PHP est le langage du web dynamique. Il fait fonctionner la majorité des sites et permet de créer des pages interactives connectées à des bases de données. Un incontournable du développement web.
+                </p>
+                <div class="pt-6 border-t border-gray-800 group-hover:border-emerald-400 transition-all duration-300">
+                    <button class="w-full py-4 px-6 text-xl font-bold rounded-xl
+                                   bg-gradient-to-r from-emerald-400 to-lime-500 text-white
+                                   hover:from-lime-500 hover:to-emerald-400
+                                   transition-all duration-300 shadow-lg">
+                        Débuter la Mission 1 →
+                    </button>
+                </div>
+            </div>
+        </a>
+
+        {# 🟠 JAVASCRIPT CARD #}
+        <a href="{{ path('app_lesson_show_by_language', {'language': 'javascript', 'lessonNumber': 1}) }}"
+           class="relative bg-gray-900 rounded-2xl p-8 border border-gray-800 shadow-2xl transform hover:-translate-y-2 hover:shadow-[0_0_25px_rgba(251,146,60,0.6)] transition-all duration-300 group overflow-hidden">
+
+            <div class="absolute inset-0 bg-gradient-to-br from-orange-400 to-amber-500 opacity-0 group-hover:opacity-10 blur-2xl transition-all duration-500"></div>
+
+            <div class="relative z-10 flex flex-col h-full">
+                <h2 class="text-6xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500 drop-shadow-[0_0_15px_rgba(251,146,60,0.7)]">
+                    JavaScript
+                </h2>
+                <p class="text-gray-300 flex-grow mb-8 text-lg font-light leading-relaxed">
+                    Activez les circuits de l'interactivité pour le Front-end et Full-Stack. Le cœur battant du web moderne.
+                </p>
+                <div class="pt-6 border-t border-gray-800 group-hover:border-orange-400 transition-all duration-300">
+                    <button class="w-full py-4 px-6 text-xl font-bold rounded-xl
+                                   bg-gradient-to-r from-orange-400 to-amber-500 text-white
+                                   hover:from-amber-500 hover:to-orange-400
+                                   transition-all duration-300 shadow-lg">
+                        Débuter la Mission 1 →
+                    </button>
+                </div>
+            </div>
+        </a>
+
+    </div>
+</div>
+{% endblock %}

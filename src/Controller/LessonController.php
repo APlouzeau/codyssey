@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Lesson;
 use App\Form\LessonType;
+use App\Repository\LanguageRepository;
 use App\Repository\LessonRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,6 +15,19 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/lesson')]
 final class LessonController extends AbstractController
 {
+
+    public function __construct(
+        private readonly LanguageRepository $languageRepository,
+    )
+    {
+    }
+
+    #[Route('/home', name: 'app_lesson_home', methods: ['GET'])]
+    public function home(): Response
+    {
+        return $this->render('lesson/home.html.twig');
+    }
+
     #[Route(name: 'app_lesson_index', methods: ['GET'])]
     public function index(LessonRepository $lessonRepository): Response
     {
