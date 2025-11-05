@@ -12,8 +12,9 @@ help:
 	@echo "  make assets-build  - Compile les assets pour la prod"
 	@echo "  make assets-watch  - Compile les assets en mode watch"
 
-dev:
+dev: install-deps assets-build
 	@echo "🚀 Démarrage du serveur de dev..."
+	@echo "💡 Si besoin : 'make assets-watch' dans un autre terminal"
 	symfony server:start
 
 stop:
