@@ -1,20 +1,60 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello HomeController!{% endblock %}
+{% block title %}Accueil
+{% endblock %}
+
+{% block stylesheets %}
+	{{ parent() }}
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Kumar+One&family=Orbitron:wght@800;900&display=swap" rel="stylesheet">
+	<style>
+		.card-link {
+			display: block;
+			text-decoration: none;
+			background-color: rgba(15, 22, 36, 0.9);
+			padding: 2rem;
+			border-radius: 12px;
+			border: 2px solid #29FDFD;
+			box-shadow: 0 0 40px #29FDFD;
+			color: #fff;
+			cursor: pointer;
+			transition: transform 0.3s ease, box-shadow 0.3s ease;
+		}
+		.card-link:hover {
+			box-shadow: 0 0 60px #29FDFD;
+			transform: scale(1.02);
+		}
+	</style>
+{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+	<div class="min-h-screen w-full bg-[#0a0f18] relative flex items-center justify-center overflow-hidden font-[Inter]">
+		<svg class="absolute inset-0 -z-10 w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 100 100" preserveaspectratio="xMidYMid slice">
+			<defs>
+				<pattern id="hex-home" width="10" height="10" patternunits="userSpaceOnUse" patterntransform="scale(2)">
+					<path d="M2.5 1.443L5 0l2.5 1.443v2.885L5 5.77 2.5 4.328z" fill="none" stroke="#29FDFD" stroke-width="0.2"/>
+				</pattern>
+			</defs>
+			<rect width="100%" height="100%" fill="url(#hex-home)"/>
+		</svg>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+		<div class="container mx-auto px-6 flex items-center justify-center">
+			<div class="cards-row" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; width: 100%; max-width: 1000px;">
+				<a href="{{ path('app_lesson_index') }}" class="card-link">
+					<h2 class="text-[#29FDFD] text-2xl mb-3 text-center" style="font-family: 'Kumar One', serif;">Cours</h2>
+					<p class="text-white/80 text-center" style="font-family: 'Inter', sans-serif;">
+						Apprends pas à pas avec des leçons interactives.
+					</p>
+				</a>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/root/dev/symfony/metalgear/src/Controller/HomeController.php</code></li>
-        <li>Your template at <code>/root/dev/symfony/metalgear/templates/home/index.html.twig</code></li>
-    </ul>
-</div>
+				<a href="{{ path('app_language_index') }}" class="card-link">
+					<h2 class="text-[#29FDFD] text-2xl mb-3 text-center" style="font-family: 'Kumar One', serif;">Jeux</h2>
+					<p class="text-white/80 text-center" style="font-family: 'Inter', sans-serif;">
+						Joue et progresse en résolvant des défis.
+					</p>
+				</a>
+			</div>
+		</div>
+	</div>
 {% endblock %}
