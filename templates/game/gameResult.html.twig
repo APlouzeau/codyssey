@@ -10,8 +10,11 @@
 
 <div class="example-wrapper">
 
+<p>Your prompt: {{ prompt }}</p>
     <p>Your expected result: {{ expected }}</p>
     <p>Your result: {{ result }}</p>
+    <p>success ? {{ success ? '✅' : '❌' }}</p>
+    <p>api: {{ stderr }}</p>
 
 </div>
 {% endblock %}

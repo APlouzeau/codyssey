@@ -9,9 +9,13 @@
 </style>
 
 <div class="example-wrapper">
+    <h1>Soumettre votre code</h1>
 
-    <p>Your experience: {{ experience }}</p>
-    <ul>
-    </ul>
+    {{ form_start(gameForm) }}
+        {{ form_row(gameForm.language) }}
+        {{ form_row(gameForm.code) }}
+        
+        <button type="submit" class="btn btn-primary">🚀 Exécuter le code</button>
+    {{ form_end(gameForm) }}
 </div>
 {% endblock %}
