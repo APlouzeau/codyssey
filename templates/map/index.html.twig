@@ -113,9 +113,10 @@
         <div class="avatar-icon"></div>
 
         <div class="menu-icons">
-            <button class="btn-home" title="Accueil"></button>
-            <button class="btn-skin" title="Changer skin"></button>
-            <button class="btn-courses" title="Cours"></button>
+
+            <a href="{{path('app_home')}}"><button class="btn-home" title="Accueil"></button></a>
+            <a href="{{path('app_lesson_index')}}"><button class="btn-courses" title="Cours"></button></a>
+            <button class="btn-inventory" title="Changer inventory"></button>
         </div>
     </div>
 
@@ -251,7 +252,7 @@
             const currentIndex = rowNodes.indexOf(currentNode);
             const targetIndex = rowNodes.indexOf(node);
 
-            // Vérifie la distance
+            // Vérifie la distance pour pas skip
             if (Math.abs(targetIndex - currentIndex) !== 1) {
                 console.log("Tu ne peux te déplacer que d'une node à la fois");
                 return;
@@ -265,9 +266,16 @@
 
     function movePlayerTo(target) {
         const rect = target.getBoundingClientRect();
+        const mapRect = document.querySelector('.map-container').getBoundingClientRect();
+        const playerSize = player.offsetWidth;
+        const nodeSize = target.offsetWidth;
+
+        const left = rect.left - mapRect.left + (nodeSize / 2) - (playerSize / 2);
+        const top = rect.top - mapRect.top + (nodeSize / 2) - (playerSize / 2);
+
         player.style.transition = "0.5s ease";
-        player.style.left = rect.left + "px";
-        player.style.top = rect.top + "px";
+        player.style.left = left + "px";
+        player.style.top = top + "px";
     }
 </script>
 
