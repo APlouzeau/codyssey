@@ -78,4 +78,33 @@ final class LessonController extends AbstractController
 
         return $this->redirectToRoute('app_lesson_index', [], Response::HTTP_SEE_OTHER);
     }
+
+    /**
+     * Affiche une leçon spécifique pour un langage
+     * Route: /lesson/{language}/{lessonNumber}
+     */
+    #[Route('/{language}/{lessonNumber}', name: 'app_lesson_show_by_language', methods: ['GET'])]
+    public function showLessonByLanguage(string $language, int $lessonNumber): Response
+    {
+        // Validation du langage
+        $allowedLanguages = ['php', 'python', 'javascript'];
+        $language = strtolower($language);
+
+        if (!in_array($language, $allowedLanguages)) {
+            throw $this->createNotFoundException('Ce langage n\'existe pas.');
+        }
+
+        // Validation du numéro de leçon (1, 2 ou 3)
+        if ($lessonNumber < 1 || $lessonNumber > 3) {
+            throw $this->createNotFoundException('Cette leçon n\'existe pas.');
+        }
+
+        // Sélectionne le template en fonction du langage
+        $template = sprintf('lesson/%s/lesson%d.html.twig', $language, $lessonNumber);
+
+        return $this->render($template, [
+            'language' => $language,
+            'lessonNumber' => $lessonNumber,
+        ]);
+    }
 }

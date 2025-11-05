@@ -1,0 +1,434 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}PHP - Leçon 1{% endblock %}
+
+{% block body %}
+<div class="lesson-container">
+    {# Navigation entre les leçons #}
+    <nav class="lesson-nav">
+        <a href="/" class="nav-back">
+            ← Retour aux cours
+        </a>
+        <div class="lesson-tabs">
+            <a href="{{ path('app_lesson_show_by_language', {'language': 'php', 'lessonNumber': 1}) }}"
+               class="lesson-tab active">
+                Leçon 1
+            </a>
+            <a href="{{ path('app_lesson_show_by_language', {'language': 'php', 'lessonNumber': 2}) }}"
+               class="lesson-tab">
+                Leçon 2
+            </a>
+            <a href="{{ path('app_lesson_show_by_language', {'language': 'php', 'lessonNumber': 3}) }}"
+               class="lesson-tab">
+                Leçon 3
+            </a>
+        </div>
+    </nav>
+
+    {# Contenu principal de la leçon #}
+    <main class="lesson-content">
+        <div class="lesson-header">
+            <h1 class="language-title">PHP</h1>
+        </div>
+
+        <section class="lesson-section">
+            <h2 class="section-title">📜 Leçon 1 : Afficher du Texte (La fonction echo)</h2>
+
+            <div class="theory-block">
+                <p>En programmation, votre script s'exécute de manière invisible. Pour communiquer avec l'utilisateur, lui montrer un message, un résultat ou un titre, vous devez lui ordonner "d'afficher" ce texte.</p>
+            </div>
+
+            <h3 class="subsection-title">L'instruction echo</h3>
+            <div class="theory-block">
+                <p>En PHP, l'instruction la plus simple pour cela est <code class="inline-code">echo</code>.</p>
+                <p>Elle prend ce que vous lui donnez et l'imprime à l'écran.</p>
+            </div>
+
+            <h3 class="subsection-title">Comment l'utiliser ?</h3>
+            <div class="theory-block">
+                <p>Si vous voulez afficher du texte (ce qu'on appelle une <strong>chaîne de caractères</strong> ou <em>"string"</em>), vous devez toujours l'entourer de guillemets (<code class="inline-code">"</code>).</p>
+                <p>L'instruction complète se termine par un <strong>point-virgule</strong> (<code class="inline-code">;</code>), qui agit comme un point final pour dire au programme que votre ordre est terminé.</p>
+            </div>
+
+            <h4 class="example-title">Syntaxe :</h4>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">PHP</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                </div>
+                <pre><code class="language-php"><span class="keyword">echo</span> <span class="string">"Ceci est un message qui sera affiché."</span>;</code></pre>
+            </div>
+
+            <div class="warning-block">
+                <strong>⚠️ Attention :</strong> Si vous oubliez les guillemets, le programme essaiera de lire votre texte comme un ordre et générera une erreur.
+            </div>
+        </section>
+
+        {# Navigation bas de page #}
+        <nav class="lesson-footer-nav">
+            <span class="nav-btn disabled"></span>
+            <a href="{{ path('app_lesson_show_by_language', {'language': 'php', 'lessonNumber': 2}) }}" class="nav-btn next">
+                Leçon suivante →
+            </a>
+        </nav>
+    </main>
+</div>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        line-height: 1.6;
+        color: #e0e0e0;
+        background: #0a0e27;
+        min-height: 100vh;
+    }
+
+    .lesson-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .lesson-nav {
+        background: #1a1f3a;
+        border: 2px solid #00d9ff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .nav-back {
+        color: #00d9ff;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .nav-back:hover {
+        color: #00ffff;
+        text-shadow: 0 0 10px rgba(0, 217, 255, 0.8);
+    }
+
+    .lesson-tabs {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .lesson-tab {
+        padding: 0.5rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #00d9ff;
+        background: transparent;
+        border: 1px solid #00d9ff40;
+        transition: all 0.3s;
+        font-weight: 500;
+    }
+
+    .lesson-tab:hover {
+        background: #00d9ff20;
+        border-color: #00d9ff;
+        box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
+    }
+
+    .lesson-tab.active {
+        background: #00d9ff;
+        color: #0a0e27;
+        border-color: #00d9ff;
+        box-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+        font-weight: 600;
+    }
+
+    .lesson-content {
+        background: #1a1f3a;
+        border: 2px solid #00d9ff;
+        border-radius: 12px;
+        padding: 3rem;
+        box-shadow: 0 0 30px rgba(0, 217, 255, 0.2);
+    }
+
+    .lesson-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 2px solid #00d9ff40;
+    }
+
+    .language-title {
+        font-size: 2.5rem;
+        color: #00d9ff;
+        text-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+        font-weight: 700;
+    }
+
+    .lesson-section {
+        margin-bottom: 3rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        color: #00d9ff;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #00d9ff;
+        text-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+    }
+
+    .subsection-title {
+        font-size: 1.5rem;
+        color: #00d9ff;
+        margin: 2rem 0 1rem 0;
+    }
+
+    .example-title {
+        font-size: 1.1rem;
+        color: #00d9ff;
+        margin: 1.5rem 0 0.75rem 0;
+        font-weight: 600;
+    }
+
+    .theory-block {
+        background: #0f1425;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #00d9ff;
+        border: 1px solid #00d9ff30;
+    }
+
+    .theory-block p {
+        margin-bottom: 1rem;
+    }
+
+    .theory-block p:last-child {
+        margin-bottom: 0;
+    }
+
+    .theory-block ul {
+        margin-left: 1.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .theory-block li {
+        margin-bottom: 0.5rem;
+    }
+
+    .inline-code {
+        background: #2d2d2d;
+        color: #f8f8f2;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-family: 'Courier New', Consolas, Monaco, monospace;
+        font-size: 0.9em;
+    }
+
+    .code-block {
+        margin: 1.5rem 0;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .code-header {
+        background: #2d2d2d;
+        padding: 0.75rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #444;
+    }
+
+    .code-lang {
+        color: #61dafb;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .copy-btn {
+        background: #444;
+        color: #fff;
+        border: none;
+        padding: 0.4rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: background 0.2s;
+    }
+
+    .copy-btn:hover {
+        background: #555;
+    }
+
+    .code-block pre {
+        background: #1e1e1e;
+        margin: 0;
+        padding: 1.5rem;
+        overflow-x: auto;
+    }
+
+    .code-block code {
+        font-family: 'Fira Code', 'Courier New', Consolas, Monaco, monospace;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #d4d4d4;
+    }
+
+    .keyword {
+        color: #c586c0;
+        font-weight: 600;
+    }
+
+    .function {
+        color: #dcdcaa;
+    }
+
+    .variable {
+        color: #9cdcfe;
+    }
+
+    .string {
+        color: #ce9178;
+    }
+
+    .number {
+        color: #b5cea8;
+    }
+
+    .comment {
+        color: #6a9955;
+        font-style: italic;
+    }
+
+    .operator {
+        color: #d4d4d4;
+    }
+
+    .warning-block {
+        background: #2a1f0d;
+        border-left: 4px solid #ffc107;
+        padding: 1rem 1.5rem;
+        border-radius: 6px;
+        margin: 1.5rem 0;
+    }
+
+    .info-block {
+        background: #0d1f2a;
+        border-left: 4px solid #17a2b8;
+        padding: 1rem 1.5rem;
+        border-radius: 6px;
+        margin: 1.5rem 0;
+    }
+
+    .lesson-footer-nav {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 2px solid #f0f0f0;
+    }
+
+    .nav-btn {
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .nav-btn.prev {
+        background: #e0e0e0;
+        color: #333;
+    }
+
+    .nav-btn.prev:hover {
+        background: #d0d0d0;
+        transform: translateX(-4px);
+    }
+
+    .nav-btn.next, .nav-btn.complete {
+        background: #00d9ff;
+        color: #0a0e27;
+        font-weight: 600;
+        box-shadow: 0 0 20px rgba(0, 217, 255, 0.4);
+    }
+
+    .nav-btn.next:hover, .nav-btn.complete:hover {
+        transform: translateX(4px);
+        box-shadow: 0 0 30px rgba(0, 217, 255, 0.6);
+    }
+
+    .nav-btn.disabled {
+        visibility: hidden;
+    }
+
+    @media (max-width: 768px) {
+        .lesson-container {
+            padding: 1rem;
+        }
+
+        .lesson-content {
+            padding: 1.5rem;
+        }
+
+        .lesson-nav {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .lesson-tabs {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+        }
+
+        .code-block code {
+            font-size: 0.85rem;
+        }
+
+        .lesson-footer-nav {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .nav-btn.prev:hover, .nav-btn.next:hover, .nav-btn.complete:hover {
+            transform: none;
+        }
+    }
+</style>
+
+
+<script>
+function copyCode(button) {
+    const codeBlock = button.closest('.code-block').querySelector('code');
+    const text = codeBlock.innerText;
+
+    navigator.clipboard.writeText(text).then(() => {
+        const originalText = button.textContent;
+        button.textContent = 'Copié !';
+        button.style.background = '#28a745';
+
+        setTimeout(() => {
+            button.textContent = originalText;
+            button.style.background = '#444';
+        }, 2000);
+    });
+}
+</script>
+{% endblock %}
