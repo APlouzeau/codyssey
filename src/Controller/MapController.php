@@ -26,7 +26,7 @@ final class MapController extends AbstractController
     {
         $user = $this->getUser();
         $levelTerminated = $this->userLevelRepository->findLevelsWithScore($user);
-        dd($levelTerminated);
+        //dd($levelTerminated);
         return $this->render('map/index.html.twig', [
             'controller_name' => 'MapController',
             'level_available' => $levelTerminated,

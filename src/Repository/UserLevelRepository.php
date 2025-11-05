@@ -72,12 +72,19 @@ class UserLevelRepository extends ServiceEntityRepository
     {
         $userId = $user->getId();
         return $this->createQueryBuilder('ul')
-            ->leftJoin('ul.level', 'l')
+            ->innerJoin('ul.level', 'l')
+            ->innerJoin('l.language', 'lang')
+
             ->addSelect('l')
+            ->addSelect('lang')
+
             ->where('ul.user = :userId')
-            ->andWhere('ul.score > 0')
+            ->andWhere('ul.completed = true')
             ->setParameter('userId', $userId)
-            ->orderBy('ul.completedAt', 'DESC')
+
+            ->orderBy('lang.name', 'ASC')
+            ->addOrderBy('l.number', 'ASC')
+
             ->getQuery()
             ->getResult();
     }

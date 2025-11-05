@@ -107,7 +107,11 @@
 </style>
 
 <div class="map-container">
-
+    <ul>
+        {% for level in level_available %}
+            <li>{{ level.level.language.id }} - {{ level.level.number }} : {{ level.score }} pts</li>
+        {% endfor %}
+    </ul>
     <!-- MENU FIXE (avatar + icônes) -->
     <div class="map-header">
         <div class="avatar-icon"></div>
@@ -279,4 +283,4 @@
     }
 </script>
 
-{% endblock %}
+{% endblock body %}
