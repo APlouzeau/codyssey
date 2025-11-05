@@ -1,27 +1,29 @@
 <!doctype html>
 <html lang="fr">
-    <head>
-        <meta charset="utf-8" />
-        <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0"
-        />
-        <title>{% block title %}Bienvenue{% endblock %}</title>
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<title>
+			{% block title %}Bienvenue
+			{% endblock %}
+		</title>
 
-        {# Feuilles de style #}
-        {% block stylesheets %}
-            {{ encore_entry_link_tags('app') }}
-        {% endblock %}
+		{# C'est l'endroit correct pour les feuilles de style globales #}
+		{% block stylesheets %}
+			{{ encore_entry_link_tags('app') }}
+		{% endblock %}
+	</head>
+	<body>
+		{{ include('navbar.html.twig') }}
 
-        {# JavaScript chargé dans le head pour Turbo #}
-        {% block javascripts %}
-            {{ encore_entry_script_tags('app') }}
-        {% endblock %}
-    </head>
-    <body>
-        
-        {# Contenu de la page spécifique #}
-        {% block body %}{% endblock %}
+		{# Contenu de la page spécifique #}
+		{% block body %}{% endblock %}
 
-    </body>
+		{{ include('footer.html.twig') }}
+
+		{# C'est l'endroit idéal pour le JS qui manipule le DOM (comme votre script d'œil) #}
+		{% block javascripts %}
+			{{ encore_entry_script_tags('app') }}
+		{% endblock %}
+	</body>
 </html>
