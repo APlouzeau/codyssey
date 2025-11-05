@@ -46,6 +46,15 @@ final class UserController extends AbstractController
                 $hasErrors = true;
             }
 
+            if ($user->getEmail() !== $originalEmail) {
+                $existing = $entityManager->getRepository(User::class)->findOneBy(['email' => $user->getEmail()]);
+                if ($existing && $existing->getId() !== $user->getId()) {
+                    $form->get('email')->addError(new FormError('Cet e-mail est déjà utilisé.'));
+                    $this->addFlash('error', 'Cet e-mail est déjà utilisé.');
+                    return $this->redirectToRoute('app_user_security');
+                }
+            }
+
             $newPassword = $form->get('newPassword')->get('first')->getData();
             if (!empty($newPassword) && strlen($newPassword) < 8) {
                 $form->get('newPassword')->addError(new FormError('Votre mot de passe doit contenir au moins 8 caractères.'));

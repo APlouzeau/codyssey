@@ -81,6 +81,12 @@
 					</div>
 				{% endfor %}
 
+				{% for message in app.flashes('error') %}
+					<div class="text-[#ff3b3b] border border-[#ff3b3b] rounded-md px-4 py-3 text-sm mb-4 text-center font-semibold">
+						{{ message }}
+					</div>
+				{% endfor %}
+
 				{{ form_start(form, {'attr': {'class': 'space-y-10'}}) }}
 				<div class="flex flex-col lg:flex-row items-start justify-between mt-10 gap-8">
 					<div class="form-section">
@@ -92,7 +98,7 @@
                                 attr: { class: 'cyber-input', placeholder: 'Entrez votre nouvel e-mail' }
                             }) }}
 						</div>
-
+						<br>
 						<div class="field-container">
 							{{ form_row(form.currentPassword, {
                                 label_attr: { class: 'block text-[#29FDFD] text-sm mb-1', style: "font-family: 'Kumar One', serif;" },
@@ -112,7 +118,7 @@
                                 attr: { class: 'cyber-input', placeholder: 'Nouveau mot de passe' }
                             }) }}
 						</div>
-
+						<br>
 						<div class="field-container">
 							{{ form_row(form.newPassword.second, {
                                 label_attr: { class: 'block text-[#29FDFD] text-sm mb-1', style: "font-family: 'Kumar One', serif;" },
