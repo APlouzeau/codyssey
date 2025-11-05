@@ -1,0 +1,157 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {# Inclusion des polices #}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Kumar+One&family=Orbitron:wght@800;900&display=swap" rel="stylesheet">
+    
+    {# Styles Néon réutilisés de Register #}
+    <style>
+        /* Conteneur principal: Bordure et ombre néon */
+        .neon-border {
+            border: 2px solid #29FDFD; 
+            border-radius: 12px;
+            box-shadow: 0 0 40px #29FDFD; /* Effet néon */
+        }
+        /* Style spécifique pour le champ de saisie (input) */
+        .cyber-input {
+            width: 100%;
+            background-color: transparent;
+            color: white;
+            padding-left: 0.25rem; /* pl-1 */
+            padding-right: 0.25rem; /* pr-1 */
+            padding-top: 0.5rem; /* py-2 */
+            padding-bottom: 0.5rem; /* py-2 */
+            border: none;
+            outline: none;
+            --tw-ring-shadow: none;
+            box-shadow: none;
+        }
+        .cyber-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        /* Style pour le bouton */
+        .neon-button {
+            background-color: #29FDFD;
+            color: #0a0f18; /* Texte sombre sur fond clair */
+            border: 2px solid #29FDFD;
+            transition: all 0.3s ease;
+        }
+        .neon-button:hover {
+            /* Effet de survol : ombre néon et légere échelle */
+            box-shadow: 0 0 60px #29FDFD;
+            transform: scale(1.02);
+        }
+        /* Conteneur de champ (lignes de séparation) */
+        .field-container {
+            border-bottom: 2px solid #29FDFD;
+            padding-bottom: 0.25rem; /* pb-1 */
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="min-h-screen w-full bg-[#0a0f18] relative flex items-center justify-center overflow-hidden font-[Inter]">
+        
+        {# SVG de fond réutilisé #}
+        <svg class="absolute inset-0 -z-10 w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+            <defs>
+                <pattern id="hex" width="10" height="10" patternUnits="userSpaceOnUse"
+                         patternTransform="scale(2) rotate(0)">
+                    <path d="M2.5 1.443L5 0l2.5 1.443v2.885L5 5.77 2.5 4.328z" fill="none" stroke="#29FDFD" stroke-width="0.2"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#hex)" />
+        </svg>
+
+        <div class="container mx-auto px-6 flex items-center justify-center">
+            {# Conteneur principal : bordure néon du register #}
+            <div class="w-full max-w-lg bg-[#0f1624]/90 backdrop-blur-md p-10 relative z-10 neon-border"> 
+                
+                {# Titre // CONNEXION AU PROFIL // #}
+                <div class="text-[#29FDFD] text-lg font-extrabold tracking-widest text-center mb-10 pb-2 border-b-2 border-[#29FDFD]/50" style="font-family: 'Orbitron', sans-serif;">
+                    // ACCÈS AU SYSTÈME //
+                </div>
+
+                <form method="post" class="space-y-6">
+                    {# Gestion des erreurs #}
+                    {% if error %}
+                        <div class="text-red-400 bg-red-950/40 border border-red-700 rounded-md px-4 py-3 text-sm font-semibold">
+                            {{ error.messageKey|trans(error.messageData, 'security') }}
+                        </div>
+                    {% endif %}
+
+                    {% if app.user %}
+                        <div class="text-white/80 text-sm mb-3 text-center">
+                            Connecté en tant que **{{ app.user.userIdentifier }}**,
+                            <a href="{{ path('app_logout') }}" class="text-[#29FDFD] hover:text-white font-bold transition">Déconnexion</a>
+                        </div>
+                    {% endif %}
+
+                    {# E-mail #}
+                    <div>
+                        <label for="inputEmail" class="block text-[#29FDFD] text-sm mb-2" style="font-family: 'Kumar One', serif;">
+                            E-MAIL DE CONTACT
+                        </label>
+                        <div class="flex items-center bg-transparent px-2 field-container">
+                            {# Icône @ personnalisée #}
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-[#29FDFD] mr-3" viewBox="0 0 20 20">
+                                <path fill="currentColor" d="M14.608 12.172c0 .84.239 1.175.864 1.175c1.393 0 2.28-1.775 2.28-4.727c0-4.512-3.288-6.672-7.393-6.672c-4.223 0-8.064 2.832-8.064 8.184c0 5.112 3.36 7.896 8.52 7.896c1.752 0 2.928-.192 4.727-.792l.386 1.607c-1.776.577-3.674.744-5.137.744c-6.768 0-10.393-3.72-10.393-9.456c0-5.784 4.201-9.72 9.985-9.72c6.024 0 9.215 3.6 9.215 8.016c0 3.744-1.175 6.6-4.871 6.6c-1.681 0-2.784-.672-2.928-2.161c-.432 1.656-1.584 2.161-3.145 2.161c-2.088 0-3.84-1.609-3.84-4.848c0-3.264 1.537-5.28 4.297-5.28c1.464 0 2.376.576 2.782 1.488l.697-1.272h2.016v7.057zm-2.951-3.168c0-1.319-.985-1.872-1.801-1.872c-.888 0-1.871.719-1.871 2.832c0 1.68.744 2.616 1.871 2.616c.792 0 1.801-.504 1.801-1.896z"/>
+                            </svg>
+                            <input
+                                type="email"
+                                value="{{ last_username }}"
+                                name="email"
+                                id="inputEmail"
+                                autocomplete="email"
+                                required
+                                autofocus
+                                class="cyber-input"
+                                placeholder="Entrez votre e-mail"
+                            />
+                        </div>
+                    </div>
+
+                    {# Code d’accès (Mot de passe) #}
+                    <div>
+                        <label for="inputPassword" class="block text-[#29FDFD] text-sm mb-2" style="font-family: 'Kumar One', serif;">
+                            CODE D’ACCÈS
+                        </label>
+                        <div class="flex items-center bg-transparent px-2 field-container relative">
+                            {# Cadenas à gauche #}
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-[#29FDFD] mr-3" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M12 17q.425 0 .713-.288T13 16t-.288-.713T12 15t-.713.288T11 16t.288.713T12 17m-6 3q-.825 0-1.413-.587T4 18v-6q0-.825.588-1.412T6 10h1V8q0-2.075 1.463-3.538T12 3t3.538 1.463T17 8v2h1q.825 0 1.413.588T20 12v6q0 .825-.587 1.413T18 20zm3-10h6V8q0-1.25-.875-2.125T12 5t-2.125.875T9 8z"/>
+                            </svg>
+                            <input
+                                type="password"
+                                name="password"
+                                id="inputPassword"
+                                autocomplete="current-password"
+                                required
+                                class="cyber-input"
+                                placeholder="Entrez votre code d’accès"
+                            />
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}" />
+
+                    {# Bouton SE CONNECTER #}
+                    <button type="submit" class="w-full py-4 mt-10 text-2xl font-black tracking-wider rounded-md neon-button" style="font-family: 'Orbitron', sans-serif;">
+                        &lt; ACCÉDER AU SYSTÈME &gt;
+                    </button>
+
+                    {# Lien Inscription #}
+                    <p class="text-white/80 text-center text-sm mt-8" style="font-family: 'Inter', sans-serif;">
+                        Nouveau dans la grille ? 
+                        <a href="{{ path('app_register') }}" class="text-[#29FDFD] hover:text-white transition duration-300 font-bold">⌜ Initialisation du profil ⌟</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

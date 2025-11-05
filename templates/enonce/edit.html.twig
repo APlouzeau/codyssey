@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Enonce{% endblock %}
+
+{% block body %}
+    <h1>Edit Enonce</h1>
+
+    {{ include('enonce/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_enonce_index') }}">back to list</a>
+
+    {{ include('enonce/_delete_form.html.twig') }}
+{% endblock %}
