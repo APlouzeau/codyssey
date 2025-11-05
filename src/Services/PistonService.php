@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Services;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,22 +17,32 @@ class PistonService
     ) {}
 
     #[Route('/api/execute-code', methods: ['POST'])]
-    public function executeCode(Request $request): array
+    public function controlCodeWithPiston(array $codeRequest): array
     {
-        $data = json_decode($request->getContent(), true);
-
         $response = $this->httpClient->request('POST', $this->pistonApiUrl, [
             'auth_basic' => [$this->pistonApiUser, $this->pistonApiPassword],
-            'json' => [
-                'language' => $data['language'],
-                'version' => '*',
-                'files' => [
-                    ['content' => $data['code']]
-                ]
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
             ],
-            'verify_peer' => false, // À retirer après 21h56 quand le SSL sera OK
+            'json' => $codeRequest,
+            'verify_peer' => false, // À retirer quand le SSL sera OK
         ]);
 
-        return  $response->toArray();
+        // Récupérer la réponse sous forme de tableau
+        return $response->toArray();
+    }
+
+    public function createCodeRequest($code, $language): array
+    {
+        $request = [
+            'language' => $language,
+            'version' => '*',
+            'files' => [
+                ['content' => $code]
+            ]
+        ];
+
+        return $request;
     }
 }

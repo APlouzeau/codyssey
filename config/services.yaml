@@ -19,11 +19,11 @@ services:
     App\:
         resource: "../src/"
 
-    App\Service\JudgeService:
-        resource: "../src/Controller"
-        tags: ["controller.service_arguments"]
+    #  App\Service\PistonService:
+    #     resource: "../src/Controller"
+    #     tags: ["controller.service_arguments"]
 
-    App\Service\PistonService:
+    App\Services\PistonService:
         arguments:
             $pistonApiUrl: "%piston.api.url%"
             $pistonApiUser: "%piston.api.user%"

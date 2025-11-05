@@ -8,21 +8,20 @@
         />
         <title>{% block title %}Bienvenue{% endblock %}</title>
 
-        {# C'est l'endroit correct pour les feuilles de style globales #}
+        {# Feuilles de style #}
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
+        {% endblock %}
+
+        {# JavaScript chargé dans le head pour Turbo #}
+        {% block javascripts %}
+            {{ encore_entry_script_tags('app') }}
         {% endblock %}
     </head>
     <body>
         
         {# Contenu de la page spécifique #}
         {% block body %}{% endblock %}
-
-        {# --- NOUVEAU BLOC POUR LE JAVASCRIPT À LA FIN DU BODY --- #}
-        {# C'est l'endroit idéal pour le JS qui manipule le DOM (comme votre script d'œil) #}
-        {% block javascripts %}
-            {{ encore_entry_script_tags('app') }}
-        {% endblock %}
 
     </body>
 </html>

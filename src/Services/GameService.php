@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Services;
 
 use App\Repository\LevelRepository;
 use App\Repository\EnonceRepository;
@@ -18,12 +18,6 @@ class GameService
     {
         $level = $this->enonceRepository->getExperienceByEnonceId(1);
         return "Experience gained: $level!";
-    }
-
-    public function callApiCode($data): string
-    {
-        // Simulate API call
-        return "API response for data: " . json_encode($data);
     }
 
     public function compareResults($expected, $actual): bool
