@@ -1,4 +1,90 @@
 <nav class="bg-[#0a0f18] text-white border-b border-[#29FDFD]">
+    <style>
+        :root {
+            --accent: #29FDFD;
+            --bg: #0a0f18;
+            --bg2: #0b1220;
+        }
+
+        /* Visibilité desktop/mobile */
+        .desktop-only { display: none; }
+        .mobile-only { display: inline-flex; }
+
+        @media (min-width: 768px) {
+            .desktop-only { display: flex; }
+            .mobile-only { display: none; }
+        }
+
+        /* Drawer et overlay */
+        #mobile-menu {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: min(80vw, 340px);
+            background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+            border-left: 1px solid var(--accent);
+            color: #fff;
+            transform: translateX(100%);
+            transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 50;
+            box-shadow: -8px 0 20px rgba(41, 253, 253, 0.15);
+        }
+        #mobile-menu.open { transform: translateX(0); }
+
+        #mobile-menu-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(2px);
+            z-index: 40;
+            display: none;
+        }
+        #mobile-menu-overlay.open { display: block; }
+
+        /* Header du drawer */
+        .drawer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            padding: 0 16px;
+            border-bottom: 1px solid var(--accent);
+        }
+        .drawer-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        /* Liens du drawer */
+        .menu-list {
+            list-style: none;
+            padding: 16px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .menu-item {
+            display: block;
+            padding: 12px 14px;
+            border-radius: 8px;
+            transition: all 160ms ease;
+        }
+        .menu-item:hover {
+            color: var(--accent);
+            background: rgba(41, 253, 253, 0.08);
+            box-shadow: inset 0 0 0 1px rgba(41, 253, 253, 0.25);
+        }
+        .menu-section {
+            margin: 10px 0 0;
+            padding-top: 10px;
+            border-top: 1px solid rgba(41, 253, 253, 0.3);
+        }
+    </style>
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex h-16 items-center justify-between">
             <div class="flex items-center gap-6">
@@ -7,20 +93,100 @@
                     <span>Codyssey</span>
                 </a>
 
-                <ul class="hidden md:flex items-center gap-6">
+                <ul class="desktop-only items-center gap-6">
                     <li><a href="{{ path('app_lesson_index') }}" class="hover:text-[#29FDFD]">Cours</a></li>
                     <li><a href="{{ path('app_language_index') }}" class="hover:text-[#29FDFD]">Jeux</a></li>
                 </ul>
             </div>
 
             <div class="flex items-center gap-4">
-                {% if app.user %}
-                    <a href="{{ path('app_user_security') }}" class="hover:text-[#29FDFD]">Mon compte</a>
-                    <a href="{{ path('app_logout') }}" class="hover:text-[#29FDFD]">Déconnexion</a>
-                {% else %}
-                    <a href="{{ path('app_login') }}" class="hover:text-[#29FDFD]">Connexion</a>
-                {% endif %}
+                <div class="desktop-only items-center gap-4">
+                    {% if app.user %}
+                        <a href="{{ path('app_user_security') }}" class="hover:text-[#29FDFD]">Mon compte</a>
+                        <a href="{{ path('app_logout') }}" class="hover:text-[#29FDFD]">Déconnexion</a>
+                    {% else %}
+                        <a href="{{ path('app_login') }}" class="hover:text-[#29FDFD]">Connexion</a>
+                    {% endif %}
+                </div>
+
+                <!-- Bouton burger (mobile uniquement) -->
+                <button id="mobile-menu-button" class="mobile-only p-2 rounded hover:text-[#29FDFD]" aria-label="Ouvrir le menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
+
+    <!-- Overlay -->
+    <div id="mobile-menu-overlay"></div>
+
+    <!-- Menu mobile qui glisse depuis la droite -->
+    <div id="mobile-menu">
+        <div class="drawer-header">
+            <div class="drawer-brand">
+                <img src="{{ asset('images/favicon.png') }}" alt="Codyssey" class="h-16 w-16">
+            </div>
+            <button id="mobile-menu-close" class="p-2 rounded hover:text-[#29FDFD]" aria-label="Fermer le menu">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <ul class="menu-list">
+            <li><a href="{{ path('app_home') }}" class="menu-item">Accueil</a></li>
+            <li><a href="{{ path('app_lesson_index') }}" class="menu-item">Cours</a></li>
+            <li><a href="{{ path('app_language_index') }}" class="menu-item">Jeux</a></li>
+
+            <div class="menu-section"></div>
+
+            {% if app.user %}
+                <li><a href="{{ path('app_user_security') }}" class="menu-item">Mon compte</a></li>
+                <li><a href="{{ path('app_logout') }}" class="menu-item">Déconnexion</a></li>
+            {% else %}
+                <li><a href="{{ path('app_login') }}" class="menu-item">Connexion</a></li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <script>
+        (function () {
+            const btnOpen = document.getElementById('mobile-menu-button');
+            const btnClose = document.getElementById('mobile-menu-close');
+            const drawer = document.getElementById('mobile-menu');
+            const overlay = document.getElementById('mobile-menu-overlay');
+
+            function openMenu() {
+                drawer.classList.add('open');
+                overlay.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeMenu() {
+                drawer.classList.remove('open');
+                overlay.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+
+            btnOpen && btnOpen.addEventListener('click', openMenu);
+            btnClose && btnClose.addEventListener('click', closeMenu);
+            overlay && overlay.addEventListener('click', closeMenu);
+
+            // Fermeture automatique après clic sur un lien du menu
+            drawer.querySelectorAll('a').forEach(a => {
+                a.addEventListener('click', closeMenu);
+            });
+
+            // Fermeture via ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeMenu();
+            });
+        })();
+    </script>
 </nav>
