@@ -2,9 +2,11 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Form\GamePromptFormType;
 use App\Services\GameService;
 use App\Services\PistonService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,7 +16,8 @@ final class GameController extends AbstractController
 {
     public function __construct(
         private readonly GameService $gameService,
-        private readonly PistonService $pistonService
+        private readonly PistonService $pistonService,
+        private readonly EntityManagerInterface $entityManager
     ) {}
 
     /*     #[Route('/game', name: 'app_game')]
@@ -36,6 +39,7 @@ final class GameController extends AbstractController
             try {
                 $data = $form->getData();
 
+                // Debug : voir ce qui est envoyé
                 // Récupérer le nom du langage depuis l'entité en minuscules
                 $languageName = strtolower($data['language']->getName());
 
@@ -45,22 +49,34 @@ final class GameController extends AbstractController
                 );
 
                 $apiResponse = $this->pistonService->controlCodeWithPiston($codeRequest);
-
-                $expectedOutput = $this->gameService->getExpectedOutputForLevel(1); // Récupérer la sortie attendue pour le niveau 1
+                $expectedOutput = $this->gameService->getExpectedOutputForLevel(1);
                 $actualOutput = $apiResponse['run']['stdout'] ?? 'Pas de sortie';
                 $isSuccess = $this->gameService->compareResults($expectedOutput, $actualOutput);
 
-                // Stocker les résultats en session pour les afficher après redirection
-                $request->getSession()->set('game_result', [
-                    'expected' => $expectedOutput,
-                    'prompt' => $data['code'],
-                    'result' => $actualOutput,
-                    'success' => $isSuccess,
-                    'stderr' => $apiResponse['run']['output'] ?? null,
-                ]);
+                if ($isSuccess) {
+                    $request->getSession()->set('game_result', [
+                        'expected' => $expectedOutput,
+                        'prompt' => $data['code'],
+                        'result' => $actualOutput,
+                        'success' => $isSuccess,
+                        'stderr' => $apiResponse['run']['output'] ?? null,
+                    ]);
 
-                // REDIRECTION au lieu de render (pour Turbo)
-                return $this->redirectToRoute('app_game_result');
+                    return $this->redirectToRoute('app_game_victory');
+                }
+
+                if (!$isSuccess) {
+
+                    $request->getSession()->set('game_result', [
+                        'expected' => $expectedOutput,
+                        'prompt' => $data['code'],
+                        'result' => $actualOutput,
+                        'success' => $isSuccess,
+                        'stderr' => $apiResponse['run']['output'] ?? null,
+                    ]);
+
+                    return $this->redirectToRoute('app_game_result');
+                }
             } catch (\Exception $e) {
                 return $this->json([
                     'error' => 'Erreur lors de l\'exécution',
@@ -68,8 +84,13 @@ final class GameController extends AbstractController
                 ], 500);
             }
         }
+        $enonce = $this->gameService->getEnonceForLevel(1);
         return $this->render('game/game.html.twig', [
             'gameForm' => $form->createView(),
+            'title' => $enonce->getTitle(),
+            'enonce' => $enonce->getContent(),
+            'result' => $enonce->getExpectedResults(),
+            'lifes' => $enonce->getLifeNumber(),
         ]);
     }
 
@@ -86,5 +107,31 @@ final class GameController extends AbstractController
         $request->getSession()->remove('game_result');
 
         return $this->render('game/gameResult.html.twig', $result);
+    }
+
+    #[Route('/game/victory', name: 'app_game_victory', methods: ['GET'])]
+    public function gameVictory(Request $request): Response
+    {
+        $result = $request->getSession()->get('game_result');
+
+        if (!$result) {
+            return $this->redirectToRoute('app_game_submit');
+        }
+
+        $experience = $this->gameService->getExpByEnonceId(1);
+        $user = $this->getUser();
+        if ($user instanceof User) {
+            $this->gameService->giveExperienceToUser($user, $experience);
+        }
+
+
+
+        // Supprimer les résultats de la session
+        $request->getSession()->remove('game_result');
+
+        return $this->render('game/gameVictory.html.twig', [
+            'experience' => $experience,
+            'result' => $result
+        ]);
     }
 }

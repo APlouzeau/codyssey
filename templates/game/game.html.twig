@@ -9,8 +9,10 @@
 </style>
 
 <div class="example-wrapper">
-    <h1>Soumettre votre code</h1>
-
+    <h1>{{title}}</h1>
+<p>Consigne : {{enonce}}</p>
+<p>Afficher ce resultat : <span id="result-output">{{result}}</span></p>
+<p>Vous avez {{lifes}} vies restantes.</p>
     {{ form_start(gameForm) }}
         {{ form_row(gameForm.language) }}
         {{ form_row(gameForm.code) }}
