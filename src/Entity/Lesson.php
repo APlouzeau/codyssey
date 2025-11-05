@@ -28,6 +28,10 @@ class Lesson
     #[ORM\OneToMany(targetEntity: LessonCodePart::class, mappedBy: 'lesson')]
     private Collection $lessonCodeParts;
 
+    #[ORM\ManyToOne(inversedBy: 'lessons')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Language $language = null;
+
     public function __construct()
     {
         $this->lessonCodeParts = new ArrayCollection();
@@ -88,6 +92,18 @@ class Lesson
                 $lessonCodePart->setLesson(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getLanguage(): ?Language
+    {
+        return $this->language;
+    }
+
+    public function setLanguage(?Language $language): static
+    {
+        $this->language = $language;
 
         return $this;
     }
