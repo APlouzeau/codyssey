@@ -18,6 +18,7 @@ final class LessonController extends AbstractController
 
     public function __construct(
         private readonly LanguageRepository $languageRepository,
+        private readonly LessonRepository $lessonRepository,
     )
     {
     }
@@ -98,22 +99,57 @@ final class LessonController extends AbstractController
      * Route: /lesson/{language}/{lessonNumber}
      */
     #[Route('/{language}/{lessonNumber}', name: 'app_lesson_show_by_language', methods: ['GET'])]
-    public function showLessonByLanguage(string $language, int $lessonNumber): Response
-    {
+    public function showLessonByLanguage(string $language, int $lessonNumber): Response {
         // Validation du langage
-        $allowedLanguages = ['php', 'python', 'javascript'];
-        $language = strtolower($language);
 
-        if (!in_array($language, $allowedLanguages)) {
+        $languagesBdd = $this->languageRepository->findAll();
+
+
+        // je veux vérifier pour chaque language de ma bdd si la language passer 
+        // en paramètre correspond à un des language de ma bdd
+        // Si ce n'est pas le cas je revoie une erreur
+      
+        $nameLanguagesBdd = [];
+        foreach ($languagesBdd as $languageBdd) {
+            // je souhaite convertir ma liste d'objet language en une liste de string
+            $nameLanguagesBdd[] = strtolower($languageBdd->getName());
+        }
+
+        if (!in_array($language, $nameLanguagesBdd)) {
             throw $this->createNotFoundException('Ce langage n\'existe pas.');
         }
 
-        // Validation du numéro de leçon (1, 2 ou 3)
-        if ($lessonNumber < 1 || $lessonNumber > 3) {
-            throw $this->createNotFoundException('Cette leçon n\'existe pas.');
+        $languageEntity = $this->languageRepository->findOneBy(['name' => $language]);
+
+
+        $lessons = $languageEntity->getLessons();
+
+        // Récupère la leçon depuis la base de données
+        $actualLessons = null;
+
+        foreach ($lessons as $lesson) {
+            if ($lesson->getNumber() === $lessonNumber) {
+                $actualLessons = $lesson;
+                break;
+            }
         }
 
-        // Sélectionne le template en fonction du langage
+        // dd($actualLessons);
+        // dd($actualLessons->getContent());
+
+        // Si la leçon existe en BDD avec du contenu JSON, on utilise le template dynamique
+
+        $lessonJson = json_decode($actualLessons->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        if ($actualLessons && $actualLessons->getContent()) {
+            return $this->render('lesson/dynamic_lesson.html.twig', [
+                'language' => $language,
+                'lessonNumber' => $lessonNumber,
+                'lesson' => $actualLessons,
+                'content' => $lessonJson,
+            ]);
+        }
+
+        // Sinon, on utilise les templates statiques (fallback)
         $template = sprintf('lesson/%s/lesson%d.html.twig', $language, $lessonNumber);
 
         return $this->render($template, [

@@ -1,51 +1,99 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Python - Leçon 2{% endblock %}
+{% block title %}{{ content.title }}{% endblock %}
 
 {% block body %}
 <div class="lesson-container">
     {# Navigation entre les leçons #}
     <nav class="lesson-nav">
-        <a href="/" class="nav-back">
+        <a href="{{ path('app_lesson_home') }}" class="nav-back">
             ← Retour aux cours
         </a>
         <div class="lesson-tabs">
-            <a href="{{ path('app_lesson_show_by_language', {'language': 'python', 'lessonNumber': 1}) }}"
-               class="lesson-tab">
-                Leçon 1
-            </a>
-            <a href="{{ path('app_lesson_show_by_language', {'language': 'python', 'lessonNumber': 2}) }}"
-               class="lesson-tab active">
-                Leçon 2
-            </a>
-            <a href="{{ path('app_lesson_show_by_language', {'language': 'python', 'lessonNumber': 3}) }}"
-               class="lesson-tab">
-                Leçon 3
-            </a>
+            {% for i in 1..3 %}
+                <a href="{{ path('app_lesson_show_by_language', {'language': language, 'lessonNumber': i}) }}"
+                   class="lesson-tab {% if i == lessonNumber %}active{% endif %}">
+                    Leçon {{ i }}
+                </a>
+            {% endfor %}
         </div>
     </nav>
 
     {# Contenu principal de la leçon #}
     <main class="lesson-content">
         <div class="lesson-header">
-            <h1 class="language-title">Python</h1>
+            <h1 class="language-title">{{ content.language|upper }}</h1>
         </div>
 
-        <section class="lesson-section">
-            <h2 class="section-title">Leçon 2 : Python</h2>
-            <div class="theory-block">
-                <p>Contenu de la leçon Python à venir...</p>
-            </div>
-        </section>
+        {% for section in content.sections %}
+            <section class="lesson-section">
+                <h2 class="section-title">{{ section.title }}</h2>
+
+                {% for item in section.content %}
+                    {% if item.type == 'paragraph' %}
+                        <div class="theory-block">
+                            <p>{{ item.text|raw }}</p>
+                        </div>
+
+                    {% elseif item.type == 'subtitle' %}
+                        <h3 class="subsection-title">{{ item.text }}</h3>
+
+                    {% elseif item.type == 'code-title' %}
+                        <h4 class="example-title">{{ item.text }}</h4>
+
+                    {% elseif item.type == 'code' %}
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-lang">{{ item.language|upper }}</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                            </div>
+                            <pre><code class="language-{{ item.language|lower }}">{{ item.code|raw }}</code></pre>
+                        </div>
+
+                    {% elseif item.type == 'warning' %}
+                        <div class="warning-block">
+                            {{ item.text|raw }}
+                        </div>
+
+                    {% elseif item.type == 'info' %}
+                        <div class="info-block">
+                            {{ item.text|raw }}
+                        </div>
+
+                    {% elseif item.type == 'list' %}
+                        <div class="theory-block">
+                            <ul>
+                                {% for listItem in item.items %}
+                                    <li>{{ listItem|raw }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </section>
+        {% endfor %}
 
         {# Navigation bas de page #}
         <nav class="lesson-footer-nav">
-            <a href="{{ path('app_lesson_show_by_language', {'language': 'python', 'lessonNumber': 1}) }}" class="nav-btn prev">
-                ← Leçon précédente
-            </a>
-            <a href="{{ path('app_lesson_show_by_language', {'language': 'python', 'lessonNumber': 3}) }}" class="nav-btn next">
-                Leçon suivante →
-            </a>
+            {% if lessonNumber > 1 %}
+                <a href="{{ path('app_lesson_show_by_language', {'language': language, 'lessonNumber': lessonNumber - 1}) }}" 
+                   class="nav-btn prev">
+                    ← Leçon précédente
+                </a>
+            {% else %}
+                <span class="nav-btn disabled"></span>
+            {% endif %}
+
+            {% if lessonNumber < 3 %}
+                <a href="{{ path('app_lesson_show_by_language', {'language': language, 'lessonNumber': lessonNumber + 1}) }}" 
+                   class="nav-btn next">
+                    Leçon suivante →
+                </a>
+            {% else %}
+                <a href="{{ path('app_lesson_home') }}" class="nav-btn complete">
+                    Terminer le cours →
+                </a>
+            {% endif %}
         </nav>
     </main>
 </div>
@@ -314,7 +362,7 @@
         justify-content: space-between;
         margin-top: 3rem;
         padding-top: 2rem;
-        border-top: 2px solid #f0f0f0;
+        border-top: 2px solid #00d9ff40;
     }
 
     .nav-btn {
@@ -326,13 +374,13 @@
     }
 
     .nav-btn.prev {
-        background: #e0e0e0;
-        color: #333;
+        background: #00d9ff;
+        color: #0a0e27;
     }
 
     .nav-btn.prev:hover {
-        background: #d0d0d0;
         transform: translateX(-4px);
+        box-shadow: 0 0 20px rgba(0, 217, 255, 0.4);
     }
 
     .nav-btn.next, .nav-btn.complete {
@@ -388,7 +436,6 @@
         }
     }
 </style>
-
 
 <script>
 function copyCode(button) {
