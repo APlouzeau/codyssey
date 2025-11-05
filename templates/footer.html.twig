@@ -1,0 +1,31 @@
+<footer class="bg-[#0a0f18] text-white border-t border-[#29FDFD]">
+    <style>
+        :root {
+            --accent: #29FDFD;
+        }
+        .footer-link {
+            display: inline-block;
+            padding: 6px 8px;
+            border-radius: 6px;
+            transition: all 160ms ease;
+        }
+        .footer-link:hover {
+            color: var(--accent);
+            background: rgba(41, 253, 253, 0.08);
+            box-shadow: inset 0 0 0 1px rgba(41, 253, 253, 0.25);
+        }
+    </style>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <img src="{{ asset('images/favicon.png') }}" alt="Codyssey" class="h-16 w-16">
+                <span class="font-semibold">Codyssey</span>
+            </div>
+
+            <div class="text-sm text-gray-300">
+                © {{ "now"|date("Y") }} Codyssey — Tous droits réservés
+            </div>
+        </div>
+    </div>
+</footer>
