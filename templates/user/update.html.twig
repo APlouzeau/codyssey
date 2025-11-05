@@ -1,0 +1,142 @@
+{% extends 'base.html.twig' %}
+{% block title %}Sécurité du compte
+{% endblock %}
+
+{% block stylesheets %}
+	{{ parent() }}
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Kumar+One&family=Orbitron:wght@800;900&display=swap" rel="stylesheet">
+
+	<style>
+		/* Styles Néon */
+		.neon-border {
+			border: 2px solid #29FDFD;
+			border-radius: 12px;
+			box-shadow: 0 0 40px #29FDFD;
+		}
+		.cyber-input {
+			width: 100%;
+			background-color: transparent;
+			color: white;
+			padding: 0.5rem 0.25rem;
+			border: none;
+			outline: none;
+			box-shadow: none;
+		}
+		.cyber-input::placeholder {
+			color: rgba(255, 255, 255, 0.5);
+		}
+		.neon-button {
+			background-color: #29FDFD;
+			color: #0a0f18;
+			border: 2px solid #29FDFD;
+			transition: all 0.3s ease;
+		}
+		.neon-button:hover {
+			box-shadow: 0 0 60px #29FDFD;
+			transform: scale(1.02);
+		}
+		.field-container {
+			border-bottom: 2px solid #29FDFD;
+			padding-bottom: 0.25rem;
+		}
+		.form-section {
+			flex: 1;
+			background-color: rgba(15, 22, 36, 0.9);
+			padding: 2rem;
+			border-radius: 12px;
+		}
+		.divider {
+			width: 2px;
+			background-color: #29FDFD;
+			opacity: 0.4;
+			margin: 0 1.5rem;
+		}
+	</style>
+{% endblock %}
+
+{% block body %}
+	<div
+		class="min-h-screen w-full bg-[#0a0f18] relative flex items-center justify-center overflow-hidden font-[Inter]">
+		{# Fond SVG identique à la page Connexion #}
+		<svg class="absolute inset-0 -z-10 w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 100 100" preserveaspectratio="xMidYMid slice">
+			<defs>
+				<pattern id="hex" width="10" height="10" patternunits="userSpaceOnUse" patterntransform="scale(2)">
+					<path d="M2.5 1.443L5 0l2.5 1.443v2.885L5 5.77 2.5 4.328z" fill="none" stroke="#29FDFD" stroke-width="0.2"/>
+				</pattern>
+			</defs>
+			<rect width="100%" height="100%" fill="url(#hex)"/>
+		</svg>
+
+		<div class="container mx-auto px-6 flex items-center justify-center">
+			<div class="w-full max-w-5xl bg-[#0f1624]/90 backdrop-blur-md p-10 relative z-10 neon-border">
+				<div class="text-[#29FDFD] text-lg font-extrabold tracking-widest text-center mb-10 pb-2 border-b-2 border-[#29FDFD]/50" style="font-family: 'Orbitron', sans-serif;">
+					// SÉCURITÉ DU COMPTE //
+				</div>
+
+				{% for message in app.flashes('success') %}
+					<div class="text-[#29FDFD] border border-[#29FDFD] rounded-md px-4 py-3 text-sm mb-4 text-center font-semibold">
+						{{ message }}
+					</div>
+				{% endfor %}
+
+				{{ form_start(form, {'attr': {'class': 'space-y-10'}}) }}
+				<div class="flex flex-col lg:flex-row items-start justify-between mt-10 gap-8">
+					<div class="form-section">
+						<h2 class="text-[#29FDFD] text-xl mb-6 text-center" style="font-family: 'Kumar One', serif;">Modifier mon e-mail</h2>
+
+						<div class="field-container">
+							{{ form_row(form.email, {
+                                label_attr: { class: 'block text-[#29FDFD] text-sm mb-1', style: "font-family: 'Kumar One', serif;" },
+                                attr: { class: 'cyber-input', placeholder: 'Entrez votre nouvel e-mail' }
+                            }) }}
+						</div>
+
+						<div class="field-container">
+							{{ form_row(form.currentPassword, {
+                                label_attr: { class: 'block text-[#29FDFD] text-sm mb-1', style: "font-family: 'Kumar One', serif;" },
+                                attr: { class: 'cyber-input', placeholder: 'Mot de passe actuel' }
+                            }) }}
+						</div>
+					</div>
+
+					<div class="hidden lg:block divider"></div>
+
+					<div class="form-section">
+						<h2 class="text-[#29FDFD] text-xl mb-6 text-center" style="font-family: 'Kumar One', serif;">Modifier mon mot de passe</h2>
+
+						<div class="field-container">
+							{{ form_row(form.newPassword.first, {
+                                label_attr: { class: 'block text-[#29FDFD] text-sm mb-1', style: "font-family: 'Kumar One', serif;" },
+                                attr: { class: 'cyber-input', placeholder: 'Nouveau mot de passe' }
+                            }) }}
+						</div>
+
+						<div class="field-container">
+							{{ form_row(form.newPassword.second, {
+                                label_attr: { class: 'block text-[#29FDFD] text-sm mb-1', style: "font-family: 'Kumar One', serif;" },
+                                attr: { class: 'cyber-input', placeholder: 'Confirmez le mot de passe' }
+                            }) }}
+						</div>
+					</div>
+				</div>
+
+				<div class="text-center mt-12">
+					<button type="submit" class="w-full lg:w-1/2 mx-auto py-4 text-2xl font-black tracking-wider rounded-md neon-button" style="font-family: 'Orbitron', sans-serif;">
+						&lt; Valider les modifications &gt;
+					</button>
+				</div>
+
+				{{ form_row(form._token) }}
+				{{ form_end(form, {'render_rest': false}) }}
+
+				<p class="text-white/80 text-center text-sm mt-12" style="font-family: 'Inter', sans-serif;">
+					<a href="{{ path('app_home') }}" class="text-[#29FDFD] hover:text-white transition duration-300 font-bold">
+						⌜ Retour à l’accueil ⌟
+					</a>
+				</p>
+			</div>
+		</div>
+	</div>
+{% endblock %}

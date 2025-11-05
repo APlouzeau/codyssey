@@ -19,9 +19,7 @@ class ChangeUserFormType extends AbstractType
         $builder
             ->add('email', EmailType::class, [
                 'label' => 'NOUVEL E-MAIL',
-                'constraints' => [
-                    new NotBlank(message: 'Veuillez renseigner un e-mail'),
-                ],
+                'required' => false,
                 'attr' => [
                     'autocomplete' => 'email',
                 ],
@@ -39,6 +37,7 @@ class ChangeUserFormType extends AbstractType
             ->add('newPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'mapped' => false,
+                'required' => false,
                 'invalid_message' => 'Les mots de passe ne correspondent pas.',
                 'first_options' => [
                     'label' => 'NOUVEAU MOT DE PASSE',
@@ -48,10 +47,6 @@ class ChangeUserFormType extends AbstractType
                     'label' => 'CONFIRMATION DU NOUVEAU MOT DE PASSE',
                     'attr' => ['autocomplete' => 'new-password'],
                 ],
-                'constraints' => [
-                    new NotBlank(message: 'Veuillez renseigner un mot de passe'),
-                    new Length(min: 8, minMessage: 'Votre mot de passe doit contenir au moins {{ limit }} caractères'),
-                ],
             ]);
     }
 
@@ -60,6 +55,7 @@ class ChangeUserFormType extends AbstractType
         $resolver->setDefaults([
             'data_class' => User::class,
             'csrf_protection' => true,
+            'csrf_token_id' => 'change_user_form',
         ]);
     }
 }
