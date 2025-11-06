@@ -1,5 +1,8 @@
 # 🚀 Projet Symfony 7.3
 
+[![Deploy to Production](https://github.com/APlouzeau/codyssey/actions/workflows/deploy.yml/badge.svg)](https://github.com/APlouzeau/codyssey/actions/workflows/deploy.yml)
+[![Test & Lint](https://github.com/APlouzeau/codyssey/actions/workflows/test.yml/badge.svg)](https://github.com/APlouzeau/codyssey/actions/workflows/test.yml)
+
 Bienvenue dans le projet Symfony basé sur la version stable 7.3.
 
 Ce guide contient les instructions nécessaires pour configurer et lancer l'application en environnement de développement local.
@@ -97,3 +100,35 @@ Autres Commandes Utiles
     ```bash
     php bin/console cache:clear
     ```
+
+## 🤖 Déploiement Automatique (CI/CD)
+
+Ce projet utilise GitHub Actions pour déployer automatiquement en production.
+
+### Configuration Initiale
+
+1. Exécute le script de setup :
+   ```bash
+   .github/setup-ci.sh
+   ```
+
+2. Configure les 4 secrets dans GitHub :
+   - `SSH_PRIVATE_KEY` : Clé SSH pour se connecter au VPS
+   - `VPS_HOST` : Adresse IP ou hostname du VPS
+   - `VPS_USER` : Nom d'utilisateur SSH
+   - `VPS_PATH` : Chemin du projet sur le VPS
+
+📖 **Documentation complète** : [.github/GITHUB_ACTIONS_SETUP.md](.github/GITHUB_ACTIONS_SETUP.md)
+
+### Déploiement
+
+Le déploiement se fait **automatiquement** quand tu push sur :
+- `main` : Déploiement en production
+- `pre-prod` : Déploiement en pré-production
+
+Tu peux aussi déclencher manuellement un déploiement dans l'onglet **Actions** de GitHub.
+
+### Workflows
+
+- **🚀 Deploy to Production** : Build et déploie sur le VPS
+- **🧪 Test & Lint** : Vérifie le code sur les PRs et branches dev
