@@ -2,8 +2,14 @@
 framework:
     secret: '%env(APP_SECRET)%'
 
+    # Trust proxies (Traefik on Docker network)
+    trusted_proxies: '127.0.0.1,172.18.0.0/16'
+    trusted_headers: ['x-forwarded-for', 'x-forwarded-proto', 'x-forwarded-port']
+
     # Note that the session will be started ONLY if you read or write from it.
-    session: true
+    session:
+        cookie_secure: auto
+        cookie_samesite: lax
 
     #esi: true
     #fragments: true

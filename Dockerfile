@@ -59,6 +59,7 @@ RUN if [ -f pnpm-lock.yaml ]; then \
 # Copie des fichiers nécessaires pour le build
 COPY webpack.config.js postcss.config.mjs* ./
 COPY assets/ ./assets/
+COPY templates/ ./templates/
 
 # Build des assets pour production
 RUN if [ -f pnpm-lock.yaml ]; then \
