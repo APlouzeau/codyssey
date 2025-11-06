@@ -44,7 +44,7 @@ class ChangeUserFormType extends AbstractType
                     'attr' => ['autocomplete' => 'new-password'],
                 ],
                 'second_options' => [
-                    'label' => 'CONFIRMATION DU NOUVEAU MOT DE PASSE',
+                    'label' => 'CONFIRMATION DU MOT DE PASSE',
                     'attr' => ['autocomplete' => 'new-password'],
                 ],
             ]);

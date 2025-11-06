@@ -42,8 +42,14 @@ final class GameController extends AbstractController
         $level = $this->gameService->getEnonceForLanguageAndNumber($language, $number);
         $enonce = $level->getEnonce();
 
+        $tips = $enonce->getTips();
+
         return $this->render('game/game.html.twig', [
             'gameForm' => $form->createView(),
+            'level' => $level,
+            'tips' => $tips,
+            'levelNumber' => $number,
+            'language' => $language,
             'title' => $enonce->getTitle(),
             'enonce' => $enonce->getContent(),
             'result' => $enonce->getExpectedResults(),
@@ -80,8 +86,6 @@ final class GameController extends AbstractController
         if ($user instanceof User) {
             $this->gameService->giveExperienceToUser($user, $experience);
         }
-
-
 
         // Supprimer les résultats de la session
         $request->getSession()->remove('game_result');

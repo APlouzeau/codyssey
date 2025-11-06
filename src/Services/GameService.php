@@ -39,15 +39,35 @@ class GameService
         return trim($expected) === trim($actual);
     }
 
+    // public function getExpectedOutputForLevel(int $levelId): string
+    // {
+    //     $level = $this->enonceRepository->find($levelId);
+
+    //     if (!$level) {
+    //         throw new \Exception("Level not found");
+    //     }
+
+    //     return $level->getExpectedResults();
+    // }
+
     public function getExpectedOutputForLevel(int $levelId): string
     {
-        $level = $this->enonceRepository->find($levelId);
-
+        // CORRECTION : Utiliser LevelRepository pour trouver le Level
+        $level = $this->levelRepository->find($levelId); 
+        
         if (!$level) {
-            throw new \Exception("Level not found");
+            throw new \Exception("Level (ID: {$levelId}) not found");
         }
 
-        return $level->getExpectedResults();
+        // Le Level doit avoir une relation vers l'Enonce
+        $enonce = $level->getEnonce(); // Assurez-vous que cette méthode existe sur l'entité Level
+
+        if (!$enonce) {
+            throw new \Exception("Enonce not linked to Level (ID: {$levelId})");
+        }
+
+        // Retourner le résultat attendu de l'Enonce
+        return $enonce->getExpectedResults();
     }
 
     public function getEnonceForLevel(int $levelId): Enonce
