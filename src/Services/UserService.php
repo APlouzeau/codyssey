@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Entity\Skin;
 use App\Entity\User;
+use App\Entity\UserLevel;
 use App\Repository\EnonceRepository;
 use App\Repository\LevelRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,7 +28,7 @@ class UserService
 
     /**
      * Calcule le niveau d'un joueur en fonction de son XP
-     * 
+     *
      * @param User $user L'utilisateur dont on veut calculer le niveau
      * @return int Le niveau actuel du joueur
      */
@@ -56,7 +57,7 @@ class UserService
 
     /**
      * Calcule l'XP nécessaire pour atteindre un niveau donné
-     * 
+     *
      * @param int $targetLevel Le niveau cible
      * @return int L'XP totale nécessaire pour atteindre ce niveau
      */
@@ -79,7 +80,7 @@ class UserService
 
     /**
      * Calcule l'XP restante avant le prochain niveau
-     * 
+     *
      * @param User $user L'utilisateur
      * @return array ['current_level' => int, 'xp_for_next_level' => int, 'xp_progress' => int, 'xp_remaining' => int]
      */
@@ -103,7 +104,7 @@ class UserService
         ];
     }
 
-    public function getUnlockedSkins(User $user): array 
+    public function getUnlockedSkins(User $user): array
     {
         $unlockedSkins = [];
         $userLevels = $user->getUserLevels();
@@ -112,7 +113,7 @@ class UserService
             // 1. Chaîne de relations pour atteindre la collection de Skins
             // Cela force le Lazy Loading de la collection de Skins.
             $skinsCollection = $userLevel->getLevel()->getAvatar()->getSkins();
-            
+
             // 2. Parcourir la collection de skins pour ajouter chaque SKIN au tableau.
             // C'est ce qui manque dans votre code initial.
             foreach ($skinsCollection as $skin) {
@@ -125,7 +126,7 @@ class UserService
                 }
             }
         }
-        
+
         // Vous pouvez retirer tous les dd() une fois que cela fonctionne
         // dd($unlockedSkins, "skins débloqués finaux"); 
 
@@ -143,5 +144,21 @@ class UserService
             }
         }
         return false;
-}
+    }
+
+
+    public function initializeStartingLevels(User $user): void
+    {
+        $startingLevels = $this->levelRepository->findBy(['number' => 1]);
+
+        foreach ($startingLevels as $level) {
+            $userLevel = new UserLevel();
+            $userLevel->setUser($user);
+            $userLevel->setLevel($level);
+            $userLevel->setScore(0);
+            $userLevel->setCompleted(false);
+
+            $this->entityManager->persist($userLevel);
+        }
+    }
 }

@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\GamePromptFormType;
+use App\Repository\LevelRepository;
+use App\Repository\UserLevelRepository;
 use App\Services\GameService;
 use App\Services\PistonService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -17,7 +19,9 @@ final class GameController extends AbstractController
     public function __construct(
         private readonly GameService $gameService,
         private readonly PistonService $pistonService,
-        private readonly EntityManagerInterface $entityManager
+        private readonly EntityManagerInterface $entityManager,
+        private readonly LevelRepository $levelRepository,
+        private readonly UserLevelRepository $userLevelRepository
     ) {}
 
     /*     #[Route('/game', name: 'app_game')]
@@ -29,7 +33,7 @@ final class GameController extends AbstractController
         ]);
     } */
 
-    #[Route('/game/{language}/{number}', requirements: ['language' => '\w+', 'number' => '\d+'], name: 'app_game_submit', methods: ['GET', 'POST'])]
+    #[Route('/game/{language}/{number}', requirements: ['language' => '\w+', 'number' => '\d+'], name: 'app_game_submit', methods: ['GET'])]
     public function submitCode(Request $request, string $language, int $number): Response
     {
         $form = $this->createForm(GamePromptFormType::class);
@@ -38,60 +42,14 @@ final class GameController extends AbstractController
         $level = $this->gameService->getEnonceForLanguageAndNumber($language, $number);
         $enonce = $level->getEnonce();
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            try {
-                $data = $form->getData();
-                // Debug : voir ce qui est envoyé
-                // Récupérer le nom du langage depuis l'entité en minuscules
-                $languageName = $data['language']->getName();
-
-                $codeRequest = $this->pistonService->createCodeRequest(
-                    $data['code'],
-                    $languageName
-                );
-
-                $apiResponse = $this->pistonService->controlCodeWithPiston($codeRequest);
-                $expectedOutput = $this->gameService->getExpectedOutputForLevel($level->getId());
-                $actualOutput = $apiResponse['run']['stdout'] ?? 'Pas de sortie';
-                $isSuccess = $this->gameService->compareResults($expectedOutput, $actualOutput);
-
-                if ($isSuccess) {
-                    $request->getSession()->set('game_result', [
-                        'expected' => $expectedOutput,
-                        'prompt' => $data['code'],
-                        'result' => $actualOutput,
-                        'success' => $isSuccess,
-                        'stderr' => $apiResponse['run']['output'] ?? null,
-                    ]);
-
-                    return $this->redirectToRoute('app_game_victory');
-                }
-
-                if (!$isSuccess) {
-
-                    $request->getSession()->set('game_result', [
-                        'expected' => $expectedOutput,
-                        'prompt' => $data['code'],
-                        'result' => $actualOutput,
-                        'success' => $isSuccess,
-                        'stderr' => $apiResponse['run']['output'] ?? null,
-                    ]);
-
-                    return $this->redirectToRoute('app_game_result');
-                }
-            } catch (\Exception $e) {
-                return $this->json([
-                    'error' => 'Erreur lors de l\'exécution',
-                    'message' => $e->getMessage()
-                ], 500);
-            }
-        }
-        // on récupère les niveau qui correspondent au language et au numéro et ensuite
-        // on dois prendre un level aleatoire en faisant levels->getEnonces()
-
+        $tips = $enonce->getTips();
 
         return $this->render('game/game.html.twig', [
             'gameForm' => $form->createView(),
+            'level' => $level,
+            'tips' => $tips,
+            'levelNumber' => $number,
+            'language' => $language,
             'title' => $enonce->getTitle(),
             'enonce' => $enonce->getContent(),
             'result' => $enonce->getExpectedResults(),
@@ -129,8 +87,6 @@ final class GameController extends AbstractController
             $this->gameService->giveExperienceToUser($user, $experience);
         }
 
-
-
         // Supprimer les résultats de la session
         $request->getSession()->remove('game_result');
 
@@ -138,5 +94,78 @@ final class GameController extends AbstractController
             'experience' => $experience,
             'result' => $result
         ]);
+    }
+
+    /**
+     * API endpoint pour React : Exécute le code du joueur et retourne le résultat en JSON
+     */
+    #[Route('/api/game/execute', name: 'api_game_execute', methods: ['POST'])]
+    public function fetchGamePromptExecute(Request $request): Response
+    {
+        try {
+            $data = json_decode($request->getContent(), true);
+
+            // Validation des données
+            if (!isset($data['language'], $data['code'], $data['level_id'], $data['current_lifes'])) {
+                return $this->json([
+                    'success' => false,
+                    'error' => 'Paramètres manquants (language, code, level_id, current_lifes requis)'
+                ], 400);
+            }
+
+            $languageName = $data['language'];
+            $code = $data['code'];
+            $currentLifes = (int) $data['current_lifes'];
+            $levelId = (int) $data['level_id'];
+
+            // Vérifier que le level existe
+            $level = $this->levelRepository->find($levelId);
+            if (!$level) {
+                return $this->json([
+                    'success' => false,
+                    'error' => 'Level introuvable'
+                ], 404);
+            }
+
+            // Exécution du code via Piston
+            $codeRequest = $this->pistonService->createCodeRequest($code, $languageName);
+            $apiResponse = $this->pistonService->controlCodeWithPiston($codeRequest);
+
+            // Comparaison des résultats
+            $expectedOutput = $this->gameService->getExpectedOutputForLevel($levelId);
+            $actualOutput = $apiResponse['run']['stdout'] ?? 'Pas de sortie';
+            $isSuccess = $this->gameService->compareResults($expectedOutput, $actualOutput);
+
+            // Calcul des nouvelles vies
+            $newLifes = $isSuccess ? $currentLifes : $this->gameService->promptIsFalse($currentLifes);
+
+            // Attribution des récompenses si succès
+            if ($isSuccess) {
+                $user = $this->getUser();
+                if ($user instanceof User) {
+                    $experience = $this->gameService->getExpByEnonceId($levelId);
+                    $this->gameService->giveExperienceToUser($user, $experience);
+                    $score = $this->gameService->calculateScore($currentLifes);
+                    $this->userLevelRepository->setUserLevelCompleted($user, $level, $score);
+                }
+            }
+
+            // Retour JSON
+            return $this->json([
+                'isSuccess' => $isSuccess,
+                'expectedOutput' => $expectedOutput,
+                'actualOutput' => $actualOutput,
+                'code' => $code,
+                'stderr' => $apiResponse['run']['stderr'] ?? null,
+                'executionTime' => $apiResponse['run']['cpu_time'] ?? null,
+                'newLifes' => $newLifes
+            ]);
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'error' => 'Erreur lors de l\'exécution',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 }
