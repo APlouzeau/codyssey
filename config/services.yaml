@@ -19,10 +19,6 @@ services:
     App\:
         resource: "../src/"
 
-    #  App\Service\PistonService:
-    #     resource: "../src/Controller"
-    #     tags: ["controller.service_arguments"]
-
     App\Services\PistonService:
         arguments:
             $pistonApiUrl: "%piston.api.url%"
