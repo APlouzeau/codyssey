@@ -50,13 +50,9 @@ final class MapController extends AbstractController
             }
         }
 
-        // construction des Avatars
-        // $skinPath = $this->skinsDirectory . '/' . $user->getSkin() . '.png';
         $skins = $this->userService->getUnlockedSkins($user);
 
-        // pour chaque skin tu récupère le path et en fonction de l'avatar tu l'ajoutes dans un tableau
-        // associatif avec le path de l'image
-        // resultat attendu c'est Mage PHP(name) => images/skins/mage_php.png
+
         $skinsWithPaths = [];
         foreach ($skins as $skin) {
             $skinsWithPaths[$skin->getFileName()] = $this->skinsDirectory . '/' . $skin->getFileName();

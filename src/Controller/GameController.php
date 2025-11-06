@@ -67,7 +67,7 @@ final class GameController extends AbstractController
     //         'lifes' => $enonce->getLifeNumber(),
     //     ]);
     // }
-    
+
     #[Route('/game/{language}/{number}', requirements: ['language' => '\w+', 'number' => '\d+'], name: 'app_game_submit', methods: ['GET'])]
     public function submitCode(Request $request, string $language, int $number): Response
     {
@@ -166,6 +166,7 @@ final class GameController extends AbstractController
             $currentLifes = (int) $data['current_lifes'];
             $levelId = (int) $data['level_id'];
 
+
             // Vérifier que le level existe
             $level = $this->levelRepository->find($levelId);
             if (!$level) {
@@ -174,6 +175,8 @@ final class GameController extends AbstractController
                     'error' => 'Level introuvable'
                 ], 404);
             }
+
+            $enonceId = $level->getEnonce()->getId();
 
             // Exécution du code via Piston
             $codeRequest = $this->pistonService->createCodeRequest($code, $languageName);
@@ -191,7 +194,7 @@ final class GameController extends AbstractController
             if ($isSuccess) {
                 $user = $this->getUser();
                 if ($user instanceof User) {
-                    $experience = $this->gameService->getExpByEnonceId($levelId);
+                    $experience = $this->gameService->getExpByEnonceId($enonceId);
                     $this->gameService->giveExperienceToUser($user, $experience);
                     $score = $this->gameService->calculateScore($currentLifes);
                     $this->userLevelRepository->setUserLevelCompleted($user, $level, $score);
@@ -206,7 +209,9 @@ final class GameController extends AbstractController
                 'code' => $code,
                 'stderr' => $apiResponse['run']['stderr'] ?? null,
                 'executionTime' => $apiResponse['run']['cpu_time'] ?? null,
-                'newLifes' => $newLifes
+                'newLifes' => $newLifes,
+                'enonceId' => $enonceId,
+                'experienceGained' => $isSuccess ? $experience : 0
             ]);
         } catch (\Exception $e) {
             return $this->json([

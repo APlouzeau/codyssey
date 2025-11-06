@@ -38,7 +38,11 @@ class RegistrationController extends AbstractController
 
             $entityManager->persist($user);
 
+            // Initialise les UserLevel de niveau 1 pour le nouvel utilisateur
             $userService->initializeStartingLevels($user);
+
+            // Initialise les skins par défaut pour le nouvel utilisateur
+            $userService->initializeDefaultSkins($user);
 
             $entityManager->flush();
 
