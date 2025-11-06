@@ -7,6 +7,7 @@ use App\Repository\UserLevelRepository;
 use App\Services\GameService;
 use App\Services\MapService;
 use App\Services\PistonService;
+use App\Services\UserService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,36 +22,35 @@ final class MapController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly MapService $mapService,
         private readonly UserLevelRepository $userLevelRepository,
-        private readonly LevelRepository $levelRepository
+        private readonly LevelRepository $levelRepository,
+        private readonly UserService $userService
     ) {}
     #[Route('/map', name: 'app_map')]
     public function index(): Response
     {
         $user = $this->getUser();
-
+        $userLevel = $this->userService->getUserLevel($user);
         $levelsTerminated = $this->userLevelRepository->findLevelsWithScore($user);
         $nextLevels = [];
+        $xpNeeded = $this->userService->getProgressToNextLevel($user); // ← Ajouté pour récupérer l'XP nécessaire
+        $firstsLevels = $this->levelRepository->getFirstsLevels();
 
-        foreach ($levelsTerminated as $userLevel) {
-            $currentLevel = $userLevel->getLevel();
+        foreach ($levelsTerminated as $levelProgress) { // ← Renommé !
+            $currentLevel = $levelProgress->getLevel();
 
             $nextLevel = $this->levelRepository->getNextLevelForUser($currentLevel);
-            //dd($nextLevel);
 
             if ($nextLevel instanceof \App\Entity\Level) {
                 $nextLevels[] = $nextLevel;
             }
         }
 
-        /*         dd([
-            'levels_terminated' => $levelsTerminated,
-            'next_levels' => $nextLevels
-        ]); */
-
         return $this->render('map/index.html.twig', [
-            'controller_name' => 'MapController',
             'levels_terminated' => $levelsTerminated,
             'next_levels' => $nextLevels,
+            'user_level' => $userLevel,
+            'xp_needed' => $xpNeeded,
+            'firsts_level' => $firstsLevels
         ]);
     }
 }
