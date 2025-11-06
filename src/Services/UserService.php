@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Entity\Skin;
 use App\Entity\User;
 use App\Repository\EnonceRepository;
 use App\Repository\LevelRepository;
@@ -101,4 +102,46 @@ class UserService
             'progress_percentage' => round(($xpProgress / $xpNeededForNext) * 100)
         ];
     }
+
+    public function getUnlockedSkins(User $user): array 
+    {
+        $unlockedSkins = [];
+        $userLevels = $user->getUserLevels();
+
+        foreach ($userLevels as $userLevel) {
+            // 1. Chaîne de relations pour atteindre la collection de Skins
+            // Cela force le Lazy Loading de la collection de Skins.
+            $skinsCollection = $userLevel->getLevel()->getAvatar()->getSkins();
+            
+            // 2. Parcourir la collection de skins pour ajouter chaque SKIN au tableau.
+            // C'est ce qui manque dans votre code initial.
+            foreach ($skinsCollection as $skin) {
+                // S'assurer que chaque élément est bien une instance de l'entité Skin
+                if ($skin instanceof Skin) {
+                    // S'assurer de ne pas avoir de doublons (comparaison par objet)
+                    if (!$this->isSkinAlreadyAdded($skin, $unlockedSkins) && $skin->isUnlockedSkin() && $skin->isCurrent()) {
+                        $unlockedSkins[] = $skin;
+                    }
+                }
+            }
+        }
+        
+        // Vous pouvez retirer tous les dd() une fois que cela fonctionne
+        // dd($unlockedSkins, "skins débloqués finaux"); 
+
+        return $unlockedSkins;
+    }
+
+    /**
+     * Aide pour vérifier si un objet Skin est déjà dans le tableau.
+     */
+    private function isSkinAlreadyAdded(Skin $newSkin, array $currentSkins): bool
+    {
+        foreach ($currentSkins as $existingSkin) {
+            if ($existingSkin->getId() === $newSkin->getId()) {
+                return true;
+            }
+        }
+        return false;
+}
 }

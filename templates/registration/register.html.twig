@@ -72,11 +72,18 @@
             border-bottom: 2px solid #FF6347; 
             box-shadow: 0 2px 5px rgba(255, 99, 71, 0.7); /* Petit effet de surbrillance rouge sous le champ */
         }
+
+        .page-bg {
+			background-image: url('{{ asset('images/bg.jpg') }}');
+			background-size: cover;
+			background-position: center;
+			background-repeat: no-repeat;
+		}
     </style>
 {% endblock %}
 
 {% block body %}
-    <div class="min-h-screen w-full bg-[#0a0f18] relative flex items-center justify-center overflow-hidden font-[Inter]">
+    <div class="min-h-screen w-full bg-[#0a0f18] relative flex items-center justify-center overflow-hidden font-[Inter] page-bg">
         
         {# SVG de fond #}
         <svg class="absolute inset-0 -z-10 w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
