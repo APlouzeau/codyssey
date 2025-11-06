@@ -47,12 +47,11 @@ class PistonService
             'javascript' => ['language' => 'js', 'version' => '18.15.0'], // Vraie version installée !
             'php' => ['language' => 'php', 'version' => '8.2.3'],
         ];
-
         // Récupérer la config ou utiliser le langage tel quel
         $config = $languageConfig[strtolower($language)] ?? ['language' => $language, 'version' => '*'];
-
+        //dd($config);
         // Ajouter les balises d'ouverture si nécessaire selon le langage
-        if ($language === 'php' && !str_starts_with(trim($code), '<?php')) {
+        if ($config['language'] === 'php' && !str_starts_with(trim($code), '<?php')) {
             $code = '<?php ' . $code;
         }
 
