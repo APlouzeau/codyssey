@@ -51,11 +51,9 @@ class LevelRepository extends ServiceEntityRepository
     public function getNextLevelForUser(Level $currentLevel): Level|string|null
     {
         $currentLevelNumber = $currentLevel->getNumber() + 1;
-
         if ($currentLevelNumber > 6) {
             return "Aucun niveau suivant disponible.";
         }
-
         return $this->createQueryBuilder('l')
             ->where('l.language = :language')
             ->andWhere('l.number = :number')

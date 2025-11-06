@@ -74,13 +74,12 @@ class UserLevelRepository extends ServiceEntityRepository
     {
         $userId = $user->getId();
         return $this->createQueryBuilder('ul')
-            //->select('')
-
             ->innerJoin('ul.level', 'l')
             ->innerJoin('l.language', 'lang')
 
-            //->addSelect('l')
-            //->addSelect('lang')
+            // Charge les objets Level et Language complets
+            ->addSelect('l')
+            ->addSelect('lang')
 
             ->where('ul.user = :userId')
             ->andWhere('ul.completed = true')

@@ -108,8 +108,11 @@
 
 <div class="map-container">
     <ul>
-        {% for level in level_available %}
-            <li>{{ level.level.language.id }} - {{ level.level.number }} : {{ level.score }} pts</li>
+        {% for level in levels_terminated %}
+            <li>{{ level.level.language.name }} - {{ level.level.number }} : {{ level.score }} pts</li>
+        {% endfor %}
+        {% for level in next_levels %}
+            <li>{{ level.language.name }} - {{ level.number }}</li>
         {% endfor %}
     </ul>
     <!-- MENU FIXE (avatar + icônes) -->
