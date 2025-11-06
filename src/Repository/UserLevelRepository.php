@@ -109,4 +109,26 @@ class UserLevelRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function setUserLevelCompleted(User $user, Level $level, int $score): UserLevel
+    {
+        $entityManager = $this->getEntityManager();
+
+        $userLevel = $this->findUserProgress($user->getId(), $level->getId());
+
+        if (!$userLevel) {
+            $userLevel = new UserLevel();
+            $userLevel->setUser($user);
+            $userLevel->setLevel($level);
+        }
+
+        $userLevel->setScore($score);
+        $userLevel->setCompleted(true);
+        $userLevel->setCompletedAt(new \DateTimeImmutable());
+
+        $entityManager->persist($userLevel);
+        $entityManager->flush();
+
+        return $userLevel;
+    }
 }

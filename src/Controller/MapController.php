@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\UserSkin;
 use App\Repository\LevelRepository;
 use App\Repository\UserLevelRepository;
+use App\Repository\UserSkinRepository;
 use App\Services\GameService;
 use App\Services\MapService;
 use App\Services\PistonService;
@@ -25,6 +27,7 @@ final class MapController extends AbstractController
         private readonly UserLevelRepository $userLevelRepository,
         private readonly LevelRepository $levelRepository,
         private readonly UserService $userService,
+        private readonly UserSkinRepository $userSkinRepository,
         // appelle la variable SKINS_DIRECTORY du fichier .env.local
         #[Autowire(env: 'SKINS_DIRECTORY')] private readonly string $skinsDirectory,
     ) {}
@@ -50,18 +53,17 @@ final class MapController extends AbstractController
             }
         }
 
-        // construction des Avatars
-        // $skinPath = $this->skinsDirectory . '/' . $user->getSkin() . '.png';
-        $skins = $this->userService->getUnlockedSkins($user);
+        $skins = $this->userSkinRepository->findBy([
+            'user' => $user,
+            'unlocked' => true,
+        ]);
 
-        // pour chaque skin tu récupère le path et en fonction de l'avatar tu l'ajoutes dans un tableau
-        // associatif avec le path de l'image
-        // resultat attendu c'est Mage PHP(name) => images/skins/mage_php.png
         $skinsWithPaths = [];
-        foreach ($skins as $skin) {
-            $skinsWithPaths[$skin->getFileName()] = $this->skinsDirectory . '/' . $skin->getFileName();
+        foreach ($skins as $userSkin) {
+            $skin = $userSkin->getSkin();
+            $fileName = $skin->getFileName();
+            $skinsWithPaths[$fileName] = $this->skinsDirectory . '/' . $fileName;
         }
-        dd($skinsWithPaths);
 
         return $this->render('map/index.html.twig', [
             'skins' => $skinsWithPaths,

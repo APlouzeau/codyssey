@@ -4,30 +4,39 @@ namespace App\Services;
 
 use App\Entity\Skin;
 use App\Entity\User;
+use App\Entity\UserLevel;
+use App\Entity\UserSkin;
 use App\Repository\EnonceRepository;
 use App\Repository\LevelRepository;
+use App\Repository\SkinRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 class UserService
 {
     private LevelRepository $levelRepository;
     private EnonceRepository $enonceRepository;
+    private SkinRepository $skinRepository;
     private EntityManagerInterface $entityManager;
 
     // Constantes pour la progression
     private const BASE_XP = 300;        // XP nécessaire pour passer niveau 1 → 2
     private const MULTIPLIER = 1.25;    // Multiplicateur à chaque niveau
 
-    public function __construct(LevelRepository $levelRepository, EnonceRepository $enonceRepository, EntityManagerInterface $entityManager)
-    {
+    public function __construct(
+        LevelRepository $levelRepository,
+        EnonceRepository $enonceRepository,
+        SkinRepository $skinRepository,
+        EntityManagerInterface $entityManager
+    ) {
         $this->levelRepository = $levelRepository;
         $this->enonceRepository = $enonceRepository;
+        $this->skinRepository = $skinRepository;
         $this->entityManager = $entityManager;
     }
 
     /**
      * Calcule le niveau d'un joueur en fonction de son XP
-     * 
+     *
      * @param User $user L'utilisateur dont on veut calculer le niveau
      * @return int Le niveau actuel du joueur
      */
@@ -56,7 +65,7 @@ class UserService
 
     /**
      * Calcule l'XP nécessaire pour atteindre un niveau donné
-     * 
+     *
      * @param int $targetLevel Le niveau cible
      * @return int L'XP totale nécessaire pour atteindre ce niveau
      */
@@ -79,7 +88,7 @@ class UserService
 
     /**
      * Calcule l'XP restante avant le prochain niveau
-     * 
+     *
      * @param User $user L'utilisateur
      * @return array ['current_level' => int, 'xp_for_next_level' => int, 'xp_progress' => int, 'xp_remaining' => int]
      */
@@ -103,7 +112,7 @@ class UserService
         ];
     }
 
-    public function getUnlockedSkins(User $user): array 
+    public function getUnlockedSkins(User $user): array
     {
         $unlockedSkins = [];
         $userLevels = $user->getUserLevels();
@@ -112,22 +121,16 @@ class UserService
             // 1. Chaîne de relations pour atteindre la collection de Skins
             // Cela force le Lazy Loading de la collection de Skins.
             $skinsCollection = $userLevel->getLevel()->getAvatar()->getSkins();
-            
+
             // 2. Parcourir la collection de skins pour ajouter chaque SKIN au tableau.
             // C'est ce qui manque dans votre code initial.
             foreach ($skinsCollection as $skin) {
                 // S'assurer que chaque élément est bien une instance de l'entité Skin
-                if ($skin instanceof Skin) {
-                    // S'assurer de ne pas avoir de doublons (comparaison par objet)
-                    if (!$this->isSkinAlreadyAdded($skin, $unlockedSkins) && $skin->isUnlockedSkin() && $skin->isCurrent()) {
-                        $unlockedSkins[] = $skin;
-                    }
+                if ($skin instanceof Skin && !$this->isSkinAlreadyAdded($skin, $unlockedSkins) && $skin->isUnlockedSkin() && $skin->isCurrent()) {
+                    $unlockedSkins[] = $skin;
                 }
             }
         }
-        
-        // Vous pouvez retirer tous les dd() une fois que cela fonctionne
-        // dd($unlockedSkins, "skins débloqués finaux"); 
 
         return $unlockedSkins;
     }
@@ -143,5 +146,49 @@ class UserService
             }
         }
         return false;
-}
+    }
+
+
+    public function initializeStartingLevels(User $user): void
+    {
+        $startingLevels = $this->levelRepository->findBy(['number' => 1]);
+
+        foreach ($startingLevels as $level) {
+            $userLevel = new UserLevel();
+            $userLevel->setUser($user);
+            $userLevel->setLevel($level);
+            $userLevel->setScore(0);
+            $userLevel->setCompleted(false);
+
+            $this->entityManager->persist($userLevel);
+        }
+    }
+
+    /**
+     * Initialise les skins par défaut pour un nouvel utilisateur
+     * Chaque skin "unlocked_skin = true" dans la table skin sera débloqué pour l'utilisateur
+     *
+     * @param User $user Le nouvel utilisateur
+     */
+    public function initializeDefaultSkins(User $user): void
+    {
+        // Récupère tous les skins
+        $allSkins = $this->skinRepository->findAll();
+
+        foreach ($allSkins as $skin) {
+            $userSkin = new UserSkin();
+            $userSkin->setUser($user);
+            $userSkin->setSkin($skin);
+
+            // Si le skin est marqué comme unlocked globalement, on le débloque pour cet utilisateur
+            $userSkin->setUnlocked($skin->isUnlockedSkin());
+
+            // Si le skin est marqué comme current globalement, on le met en current pour cet utilisateur
+            $userSkin->setIsCurrent($skin->isCurrent());
+
+            $this->entityManager->persist($userSkin);
+        }
+
+        // Pas besoin de flush ici, ça sera fait par le controller qui appelle cette méthode
+    }
 }
