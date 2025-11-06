@@ -1,20 +1,93 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello HomeController!{% endblock %}
+{% block title %}Accueil
+{% endblock %}
+
+{% block stylesheets %}
+	{{ parent() }}
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Kumar+One&family=Orbitron:wght@800;900&display=swap" rel="stylesheet">
+	<style>
+		.card-link {
+			display: block;
+			text-decoration: none;
+			background-color: rgba(15, 22, 36);
+			padding: 2rem;
+			border-radius: 12px;
+			border: 2px solid #29FDFD;
+			box-shadow: 0 0 40px #29FDFD;
+			color: #fff;
+			cursor: pointer;
+			transition: transform 0.3s ease, box-shadow 0.3s ease;
+		}
+		.card-link:hover {
+			box-shadow: 0 0 60px #29FDFD;
+			transform: scale(1.02);
+		}
+		.page-bg {
+			background-image: url('{{ asset('images/bg.jpg') }}');
+			background-size: cover;
+			background-position: center;
+			background-repeat: no-repeat;
+		}
+	</style>
+{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+	<div class="min-h-screen w-full bg-[#0a0f18] relative overflow-hidden font-[Inter] page-bg" style="padding-top: 3rem;">
+		<svg class="absolute inset-0 -z-10 w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 100 100" preserveaspectratio="xMidYMid slice">
+			<defs>
+				<pattern id="hex-home" width="10" height="10" patternunits="userSpaceOnUse" patterntransform="scale(2)">
+					<path d="M2.5 1.443L5 0l2.5 1.443v2.885L5 5.77 2.5 4.328z" fill="none" stroke="#29FDFD" stroke-width="0.2"/>
+				</pattern>
+			</defs>
+			<rect width="100%" height="100%" fill="url(#hex-home)"/>
+		</svg>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+		<div
+			class="container mx-auto px-6 flex justify-center">
+			<div style="width: 100%; max-width: 1000px;">
+				<div style="
+                    margin-bottom: 2rem;
+                    background-color: rgba(15, 22, 36);
+                    border: 2px solid #29FDFD;
+                    box-shadow: 0 0 40px #29FDFD;
+                    border-radius: 12px;
+                    padding: 1.5rem;
+                    cursor: default;
+                ">
+					<h1 class="text-center" style="color: #29FDFD; font-family: 'Kumar One', serif; font-size: 2rem;">
+						Bienvenue sur Codyssey
+					</h1>
+					<h2 class="text-center" style="color: #29FDFD; font-family: 'Kumar One', serif; font-size: 1.25rem; margin-top: -0.5rem; margin-bottom: 0.5rem;">
+						L’aventure ultime pour apprendre à coder !
+					</h2>
+					<p class="text-center" style="color: #ffffff; font-family: 'Inter', sans-serif;">
+						Progresse à ton rythme à travers des cours de PHP, JavaScript et Python, et mets tes connaissances à l’épreuve dans un jeux épiques.
+						                                                    Découvre un univers où chaque ligne de code te rapproche de la maîtrise.
+					</p>
+				</div>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/root/dev/symfony/metalgear/src/Controller/HomeController.php</code></li>
-        <li>Your template at <code>/root/dev/symfony/metalgear/templates/home/index.html.twig</code></li>
-    </ul>
-</div>
+				<div class="cards-row" style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 2rem; width: 100%;">
+					<a href="{{ path('app_lesson_home') }}" class="card-link">
+						<h2 class="text-[#29FDFD] text-2xl mb-3 text-center" style="font-family: 'Kumar One', serif;">Cours</h2>
+						<p class="text-white/80 text-center" style="font-family: 'Inter', sans-serif;">
+							Accédez à divers cours adaptés pour tous les niveaux et apprenez tout en vous amusant !
+						</p>
+					</a>
+
+					<!-- Séparateur vertical -->
+					<div class="cards-separator" style="width: 3px; background-color: #29FDFD; box-shadow: 0 0 20px #29FDFD; border-radius: 1px; align-self: stretch;"></div>
+
+					<a href="{{ path('app_map') }}" class="card-link">
+						<h2 class="text-[#29FDFD] text-2xl mb-3 text-center" style="font-family: 'Kumar One', serif;">Jeux</h2>
+						<p class="text-white/80 text-center" style="font-family: 'Inter', sans-serif;">
+							Explorez diverses lignes temporelles et assurez-vous de leur bon déroulement !
+						</p>
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
 {% endblock %}

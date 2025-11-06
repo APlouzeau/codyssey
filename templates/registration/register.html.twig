@@ -1,0 +1,209 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Initialisation du profil{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Kumar+One&family=Orbitron:wght@800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Styles conservés */
+        .neon-border {
+            border: 2px solid #29FDFD; 
+            border-radius: 12px;
+            box-shadow: 0 0 40px #29FDFD; 
+        }
+        .cyber-input {
+            width: 100%;
+            background-color: transparent;
+            color: white;
+            padding-left: 0.25rem; 
+            padding-right: 0.25rem; 
+            padding-top: 0.5rem; 
+            padding-bottom: 0.5rem; 
+            border: none;
+            outline: none;
+            --tw-ring-shadow: none;
+            box-shadow: none;
+        }
+        .cyber-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .neon-button {
+            background-color: #29FDFD;
+            color: #0a0f18;
+            border: 2px solid #29FDFD;
+            transition: all 0.3s ease;
+        }
+        .neon-button:hover {
+            box-shadow: 0 0 60px #29FDFD;
+            transform: scale(1.02);
+        }
+        .field-container {
+            border-bottom: 2px solid #29FDFD;
+            padding-bottom: 0.25rem; 
+            transition: border-bottom-color 0.3s ease; /* Pour l'effet d'erreur */
+        }
+        
+        /* STYLE AMÉLIORÉ POUR LES MESSAGES D'ERREUR (CSS + classes Tailwind combinées) */
+        .form-error-list {
+            /* Nous allons appliquer le style néon rouge ici */
+            color: #FF6347; /* Rouge Tomate pour l'erreur */
+            font-size: 0.875rem; /* text-sm */
+            margin-top: 0.5rem; 
+            padding-left: 0.75rem;
+            border-left: 2px solid #FF6347; 
+            text-shadow: 0 0 5px rgba(255, 99, 71, 0.5); /* Ombre néon */
+            font-style: italic;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.5px;
+            animation: pulse-error 1.5s infinite alternate; 
+        }
+        
+        @keyframes pulse-error {
+            from { opacity: 0.8; }
+            to { opacity: 1; }
+        }
+        
+        /* Marquer le champ en erreur */
+        .has-error .field-container {
+            border-bottom: 2px solid #FF6347; 
+            box-shadow: 0 2px 5px rgba(255, 99, 71, 0.7); /* Petit effet de surbrillance rouge sous le champ */
+        }
+
+        .page-bg {
+			background-image: url('{{ asset('images/bg.jpg') }}');
+			background-size: cover;
+			background-position: center;
+			background-repeat: no-repeat;
+		}
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="min-h-screen w-full bg-[#0a0f18] relative flex items-center justify-center overflow-hidden font-[Inter] page-bg">
+        
+        {# SVG de fond #}
+        <svg class="absolute inset-0 -z-10 w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <pattern id="hex" width="10" height="10" patternUnits="userSpaceOnUse"
+                     patternTransform="scale(2) rotate(0)">
+              <path d="M2.5 1.443L5 0l2.5 1.443v2.885L5 5.77 2.5 4.328z" fill="none" stroke="#29FDFD" stroke-width="0.2"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#hex)" />
+        </svg>
+
+        <div class="container mx-auto px-6 flex items-center justify-center">
+            <div class="w-full max-w-lg bg-[#0f1624]/90 backdrop-blur-md p-10 relative z-10 neon-border"> 
+                
+                {# Titre #}
+                <div class="text-[#29FDFD] text-lg font-extrabold tracking-widest text-center mb-10 pb-2 border-b-2 border-[#29FDFD]/50" style="font-family: 'Orbitron', sans-serif;">
+                    // INITIALISATION DU PROFIL //
+                </div>
+
+                {# Formulaire #}
+                {{ form_start(registrationForm, {'attr': {'class': 'space-y-6'}}) }}
+
+                {# Pseudonyme #}
+                <div class="{% if registrationForm.pseudo.vars.errors|length > 0 %}has-error{% endif %}">
+                    <label class="block text-[#29FDFD] text-sm mb-2" style="font-family: 'Kumar One', serif;">PSEUDONYME</label>
+                    <div class="flex items-center bg-transparent px-2 field-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-[#29FDFD] mr-3" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M12 12q1.65 0 2.825-1.175T16 8t-1.175-2.825T12 4t-2.825 1.175T8 8t1.175 2.825T12 12m0 2q-2.7 0-5.175 1.275T4 18v2h16v-2q0-1.45-2.475-2.725T12 14"/>
+                        </svg>
+                        {{ form_widget(registrationForm.pseudo, {
+                            'attr': {
+                                'class': 'cyber-input',
+                                'placeholder': 'Entrez votre pseudonyme',
+                                'autocomplete': 'username'
+                            }
+                        }) }}
+                    </div>
+                    {# AFFICHAGE DES ERREURS DU CHAMP PSEUDONYME AVEC STYLE PERSONNALISÉ #}
+                    {% if registrationForm.pseudo.vars.errors|length > 0 %}
+                        <ul class="form-error-list list-none pl-0">
+                            {% for error in registrationForm.pseudo.vars.errors %}
+                                <li>{{ error.message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                {# E-mail #}
+                <div class="{% if registrationForm.email.vars.errors|length > 0 %}has-error{% endif %}">
+                    <label class="block text-[#29FDFD] text-sm mb-2" style="font-family: 'Kumar One', serif;">E-MAIL DE CONTACT</label>
+                    <div class="flex items-center bg-transparent px-2 field-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-[#29FDFD] mr-3" viewBox="0 0 20 20">
+                            <path fill="currentColor" d="M14.608 12.172c0 .84.239 1.175.864 1.175c1.393 0 2.28-1.775 2.28-4.727c0-4.512-3.288-6.672-7.393-6.672c-4.223 0-8.064 2.832-8.064 8.184c0 5.112 3.36 7.896 8.52 7.896c1.752 0 2.928-.192 4.727-.792l.386 1.607c-1.776.577-3.674.744-5.137.744c-6.768 0-10.393-3.72-10.393-9.456c0-5.784 4.201-9.72 9.985-9.72c6.024 0 9.215 3.6 9.215 8.016c0 3.744-1.175 6.6-4.871 6.6c-1.681 0-2.784-.672-2.928-2.161c-.432 1.656-1.584 2.161-3.145 2.161c-2.088 0-3.84-1.609-3.84-4.848c0-3.264 1.537-5.28 4.297-5.28c1.464 0 2.376.576 2.782 1.488l.697-1.272h2.016v7.057zm-2.951-3.168c0-1.319-.985-1.872-1.801-1.872c-.888 0-1.871.719-1.871 2.832c0 1.68.744 2.616 1.871 2.616c.792 0 1.801-.504 1.801-1.896z"/>
+                        </svg>
+                        {{ form_widget(registrationForm.email, {
+                            'attr': {
+                                'class': 'cyber-input',
+                                'placeholder': 'Entrez votre e-mail',
+                                'autocomplete': 'email'
+                            }
+                        }) }}
+                    </div>
+                    {# AFFICHAGE DES ERREURS DU CHAMP E-MAIL #}
+                    {% if registrationForm.email.vars.errors|length > 0 %}
+                        <ul class="form-error-list list-none pl-0">
+                            {% for error in registrationForm.email.vars.errors %}
+                                <li>{{ error.message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                {# Code d’accès (Mot de passe) #}
+                <div class="{% if registrationForm.plainPassword.vars.errors|length > 0 %}has-error{% endif %}">
+                    <label class="block text-[#29FDFD] text-sm mb-2" style="font-family: 'Kumar One', serif;">CODE D’ACCÈS (12+ CARACTÈRES & COMPLEXITÉ)</label> 
+                    <div class="flex items-center bg-transparent px-2 field-container relative">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-[#29FDFD] mr-3" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M12 17q.425 0 .713-.288T13 16t-.288-.713T12 15t-.713.288T11 16t.288.713T12 17m-6 3q-.825 0-1.413-.587T4 18v-6q0-.825.588-1.412T6 10h1V8q0-2.075 1.463-3.538T12 3t3.538 1.463T17 8v2h1q.825 0 1.413.588T20 12v6q0 .825-.587 1.413T18 20zm3-10h6V8q0-1.25-.875-2.125T12 5t-2.125.875T9 8z"/>
+                        </svg>
+                        {{ form_widget(registrationForm.plainPassword, {
+                            'attr': {
+                                'id': 'password',
+                                'type': 'password',
+                                'class': 'cyber-input',
+                                'placeholder': 'Entrez votre code d’accès',
+                                'autocomplete': 'new-password'
+                            }
+                        }) }}
+                        
+                        {# Bouton d'interrupteur Œil/Œil barré (conservation) #}
+                        <button type="button" id="togglePassword" class="absolute right-2 text-[#29FDFD] hover:text-white transition p-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" id="eyeIcon" class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 5q3.3 0 6.175 1.725T22 12q-1.35 3.55-4.225 5.275T12 19t-5.775-1.725T2 12q1.35-3.55 4.225-5.275T12 5m0 11.5q1.45 0 2.475-1.025T15.5 13t-1.025-2.475T12 9.5t-2.475 1.025T8.5 13t1.025 2.475T12 16.5"/>
+                            </svg>
+                        </button>
+                    </div>
+                    {# AFFICHAGE DES ERREURS DU CHAMP PLAINPASSWORD #}
+                    {% if registrationForm.plainPassword.vars.errors|length > 0 %}
+                        <ul class="form-error-list list-none pl-0">
+                            {% for error in registrationForm.plainPassword.vars.errors %}
+                                <li>{{ error.message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                {# Bouton ACTIVER LE COMPTE #}
+                <button type="submit" class="w-full py-4 mt-10 text-2xl font-black tracking-wider rounded-md neon-button" style="font-family: 'Orbitron', sans-serif;">
+                    &lt; ACTIVER LE COMPTE &gt;
+                </button>
+
+                {{ form_end(registrationForm) }}
+
+                {# Lien Connexion #}
+                <p class="text-white/80 text-center text-sm mt-8" style="font-family: 'Inter', sans-serif;">
+                    Compte déjà actif ? 
+                    <a href="{{ path('app_login') }}" class="text-[#29FDFD] hover:text-white transition duration-300 font-bold">⌜ Connexion ⌟</a>
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,542 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Lobby Codyssey{% endblock %}
+
+{% block body %}
+<style>
+    body {
+        background: #e8f7fb;
+        font-family: 'Michroma', sans-serif;
+        overflow: hidden;
+    }
+
+    .map-container {
+        width: 100vw;
+        height: 100vh;
+        position: relative;
+        /*background: url('/path/fond-hexagons.png'); Remplacer par hex dynamique?*/
+        background-size: cover;
+    }
+
+    .map-header {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        display: flex;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .menu-icons button {
+        width: 35px;
+        height: 35px;
+        margin-left: 10px;
+        border: none;
+        border-radius: 8px;
+        background: #fff;
+        cursor: pointer;
+    }
+
+    .player {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: cyan;
+        position: absolute;
+        left: 8%;
+        top: 40%;
+        z-index: 10;
+    }
+    /* Remplacer par sprite */
+
+    .level-grid {
+        position: absolute;
+        top: 20%;
+        left: 15%;
+        width: 70%;
+        display: flex;
+        flex-direction: column;
+        gap: 50px;
+    }
+
+    .level-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .level-node {
+        width: 45px;
+        height: 45px;
+        border-radius: 10px;
+        background: white;
+        border: 2px solid #ccc;
+        z-index: 9;
+    }
+    /* Remplacer par sprite */
+
+    .level[data-type="blue"]   { border-color: #3d8bfd; }
+    .level[data-type="green"]  { border-color: #4cc66e; }
+    .level[data-type="yellow"] { border-color: #ffbe3d; }
+
+    .boss {
+        border-color: red;
+        position: relative;
+    }
+    /* Remplacer par sprite */
+
+    .progress-container {
+        position: absolute;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%); 
+        width: 50%;
+        text-align: center;
+    }
+
+    .progress-bar {
+        height: 18px;
+        background: #c6e9d8;
+        border-radius: 8px;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: #67ff7a;
+        border-radius: 8px;
+    }
+
+    #inventory-popup {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+    }
+
+    .inventory-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: 80%;
+        max-width: 600px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .inventory-sections {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .skins-section, .items-section {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .skins-icons, .items-icons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    #close-inventory {
+        margin-top: 10px;
+        padding: 10px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    #close-inventory:hover {
+        background: #0056b3;
+    }
+
+    #map-paths {
+        z-index: 1;
+    }
+
+    .locked {
+        background: #f0f0f0;
+        border-color: #999;
+        pointer-events: none;
+    }
+</style>
+
+<div class="map-container">
+    <ul>
+        {% for level in levels_terminated %}
+            <li>{{ level.level.language.name }} - {{ level.level.number }} : {{ level.score }} pts</li>
+        {% endfor %}
+        {% for level in next_levels %}
+            <li>{{ level.language.name }} - {{ level.number }}</li>
+        {% endfor %}
+            
+        <p>Level du joueur : {{ user_level }}</p>
+        <p>Pourcentage d'avancement du niveau : {{ xp_needed.progress_percentage }}</p>
+        <p>XP nécessaire pour le niveau suivant : {{ xp_needed.xp_for_next_level }}</p>
+        <p>XP actuelle : {{ xp_needed.current_xp }}</p>
+        <p>XP restante : {{ xp_needed.xp_remaining }}</p>
+    </ul>
+
+    <div class="map-header">
+        <div class="avatar-icon"></div>
+
+        <div class="menu-icons">
+
+            <a href="{{path('app_home')}}"><button class="btn-home" title="Accueil"></button></a>
+            <a href="{{path('app_lesson_home')}}"><button class="btn-courses" title="Cours"></button></a>
+            <button class="btn-inventory" title="Inventaire"></button>
+        </div>
+    </div>
+
+    <div id="player" class="player"></div>
+
+    <div class="level-grid">
+        {% for row in 1..3 %}
+            <div class="level-row">
+
+                <div class="level-node start-node" data-row="{{ row }}"></div>
+
+                {% for col in 1..4 %}
+                    <div class="level-node level"
+                        data-row="{{ row }}"
+                        data-level="{{ row }}-{{ col }}"
+                        data-type="{% if row == 1 %}blue{% elseif row == 2 %}green{% else %}yellow{% endif %}">
+                    </div>
+                {% endfor %}
+
+                {% if row == 2 %}
+                    <div class="level-node boss" data-row="{{ row }}" data-level="boss"></div>
+                {% else %}
+                    <div class="level-node end-node" data-row="{{ row }}"></div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <p style="position:absolute; bottom: 170px; left:50%; transform:translateX(-50%); color:#555; font-size:14px; z-index:10;">
+        <b>Clique</b> pour te déplacer sur les cases.
+    </p>
+    <p style="position:absolute; bottom: 140px; left:50%; transform:translateX(-50%); color:#555; font-size:14px; z-index:10;">
+        Appuie sur <b>Entrée</b> pour lancer le niveau sélectionné
+    </p>
+    <div class="progress-container">
+        <div class="progress-bar" style="position: relative;">
+            <div class="progress-fill" style="width: {{ xp_needed.progress_percentage }}%;"></div>
+            <div style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #333; pointer-events: none;">
+            {{ xp_needed.current_xp }} / {{ xp_needed.xp_for_next_level }} XP
+            </div>
+        </div>
+        <p>Niveau {{ user_level }}</p>
+    </div>
+
+    <svg id="map-paths" style="position:absolute; top:0; left:0; width:100vw; height:100vh; pointer-events:none; z-index:2;"></svg>
+</div>
+
+<!-- Popup Inventaire -->
+<div id="inventory-popup" style="display:none;">
+    <div class="inventory-content">
+        <h2>Inventaire</h2>
+        <div class="inventory-sections">
+            <div class="skins-section">
+                <h3>Skins débloqués</h3>
+                <div class="skins-icons">
+                    <!-- Icônes de skins à afficher dynamiquement -->
+                </div>
+            </div>
+            <div class="items-section">
+                <h3>Objets à collecter</h3>
+                <div class="items-icons">
+                    <!-- Icônes d'objets à afficher dynamiquement -->
+                </div>
+            </div>
+        </div>
+        <button id="close-inventory">Fermer</button>
+    </div>
+</div>
+
+<script>
+    // Correspondance row <-> language
+    // 1=JavaScript, 2=PHP, 3=Python sur la map
+    const maxColPerRow = { 1: 0, 2: 0, 3: 0 };
+    {% for level in next_levels %}
+        {% if level.language.name == 'PHP' %}
+            {% set row = 2 %}
+        {% elseif level.language.name == 'JavaScript' %}
+            {% set row = 1 %}
+        {% elseif level.language.name == 'Python' %}
+            {% set row = 3 %}
+        {% endif %}
+        maxColPerRow[{{ row }}] = Math.max(maxColPerRow[{{ row }}], {{ level.number }});
+    {% endfor %}
+</script>
+
+<script>
+    let currentRow = 2; // joueur commence sur la 2e ligne
+    let currentCol = 0; // nouvelle variable pour la colonne, défaut à nulle
+    let player = document.getElementById("player");
+
+    // Position initiale : start node de la row 2
+    let currentNode = document.querySelector('.level-row:nth-child(2) .start-node');
+    player.dataset.currentNodeType = "start";
+
+    // Place le joueur sur la node de départ
+    movePlayerTo(currentNode);
+
+    // écoute des clics sur les nodes
+    document.querySelectorAll(".level-node").forEach(node => {
+        node.addEventListener("click", () => {
+            const targetRow = parseInt(node.dataset.row);
+
+            // Si le joueur est sur une start node
+            if (currentNode.classList.contains("start-node")) {
+                // Autorise le déplacement vers la start node du dessus ou dessous
+                if (
+                    node.classList.contains("start-node") &&
+                    targetRow === currentRow - 1
+                ) {
+                    movePlayerTo(node);
+                    currentNode = node;
+                    currentRow = targetRow;
+                    return;
+                }
+                if (
+                    node.classList.contains("start-node") &&
+                    targetRow === currentRow + 1
+                ) {
+                    movePlayerTo(node);
+                    currentNode = node;
+                    currentRow = targetRow;
+                    return;
+                }
+            }
+
+            // Si le joueur est sur une end node
+            if (currentNode.classList.contains("end-node")) {
+                // Autorise le déplacement vers le boss du dessus ou dessous
+                if (
+                    node.classList.contains("boss") &&
+                    targetRow === currentRow - 1
+                ) {
+                    movePlayerTo(node);
+                    currentNode = node;
+                    currentRow = targetRow;
+                    return;
+                }
+                if (
+                    node.classList.contains("boss") &&
+                    targetRow === currentRow + 1
+                ) {
+                    movePlayerTo(node);
+                    currentNode = node;
+                    currentRow = targetRow;
+                    return;
+                }
+            }
+
+            if (currentNode.classList.contains("boss")) {
+                // Autorise les déplacement vers l'end-node du dessus ou dessous
+                if (
+                    node.classList.contains("end-node") &&
+                    targetRow === currentRow - 1
+                ) {
+                    movePlayerTo(node);
+                    currentNode = node;
+                    currentRow = targetRow;
+                    return;
+                }
+                if (
+                    node.classList.contains("end-node") &&
+                    targetRow === currentRow + 1
+                ) {
+                    movePlayerTo(node);
+                    currentNode = node;
+                    currentRow = targetRow;
+                    return;
+                }
+            }
+
+            // Bloque si pas même row
+            if (targetRow !== currentRow) {
+                console.log("Tu ne peux te déplacer que sur ta ligne");
+                return;
+            }
+
+            // Récupère toutes les nodes de la rangée courante
+            const rowNodes = Array.from(node.parentElement.querySelectorAll('.level-node'));
+            const currentIndex = rowNodes.indexOf(currentNode);
+            const targetIndex = rowNodes.indexOf(node);
+
+            // Vérifie la distance pour pas skip
+            if (Math.abs(targetIndex - currentIndex) !== 1) {
+                console.log("Tu ne peux te déplacer que d'une node à la fois");
+                return;
+            }
+
+            // Empêche d'aller plus loin que le niveau suivant le dernier complété
+            if (node.classList.contains("level")) {
+                const col = parseInt(node.dataset.level.split('-')[1]);
+                if (col > maxColPerRow[targetRow]) {
+                    console.log("Tu dois d'abord terminer le niveau précédent !");
+                    return;
+                }
+            }
+
+            // Déplacement autorisé
+            movePlayerTo(node);
+            currentNode = node;
+        });
+    });
+
+    function launchLevel(row, col) {
+        const url = `/game/${row}/${col}`;
+        window.location.href = url;
+    }
+
+    // écouteur pour la touche Entrée
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            if (currentNode.classList.contains("level")) {
+                const row = currentNode.dataset.row;
+                let col = null;
+                if (currentNode.dataset.level && currentNode.dataset.level.includes('-')) {
+                    col = currentNode.dataset.level.split('-')[1];
+                }
+
+                let langName = "";
+                if (row === "1") langName = "JavaScript";
+                else if (row === "2") langName = "PHP";
+                else if (row === "3") langName = "Python";
+                
+                launchLevel(langName, col);
+            }
+        }
+    });
+
+    function movePlayerTo(target) {
+        const rect = target.getBoundingClientRect();
+        const mapRect = document.querySelector('.map-container').getBoundingClientRect();
+        const playerSize = player.offsetWidth;
+        const nodeSize = target.offsetWidth;
+
+        const left = rect.left - mapRect.left + (nodeSize / 2) - (playerSize / 2);
+        const top = rect.top - mapRect.top + (nodeSize / 2) - (playerSize / 2);
+
+        player.style.transition = "0.5s ease";
+        player.style.left = left + "px";
+        player.style.top = top + "px";
+
+        // Met à jour la colonne actuelle
+        if (target.dataset.level && target.dataset.level.includes('-')) {
+            currentCol = target.dataset.level.split('-')[1];
+        } else {
+            currentCol = null;
+        }
+
+        console.log("Row:", target.dataset.row, "Colonne:", currentCol);
+    }
+
+    // Gestion du popup d'inventaire
+    const inventoryPopup = document.getElementById("inventory-popup");
+    const btnInventory = document.querySelector(".btn-inventory");
+    const closeInventory = document.getElementById("close-inventory");
+
+    btnInventory.addEventListener("click", () => {
+        inventoryPopup.style.display = "block";
+    });
+
+    closeInventory.addEventListener("click", () => {
+        inventoryPopup.style.display = "none";
+    });
+
+    // Ferme si on clique en dehors
+    window.addEventListener("click", (e) => {
+        if (e.target === inventoryPopup) {
+            inventoryPopup.style.display = "none";
+        }
+    });
+
+    function drawPaths() {
+        const svg = document.getElementById("map-paths");
+        svg.innerHTML = ""; // reset
+
+        // Relie les nodes horizontalement par row
+        document.querySelectorAll('.level-row').forEach(row => {
+            const nodes = Array.from(row.querySelectorAll('.level-node'));
+            for (let i = 0; i < nodes.length - 1; i++) {
+                drawLineBetween(nodes[i], nodes[i+1], "#b0b0b0");
+            }
+        });
+
+        // Relie les start nodes verticalement
+        const startNodes = Array.from(document.querySelectorAll('.start-node'));
+        for (let i = 0; i < startNodes.length - 1; i++) {
+            drawLineBetween(startNodes[i], startNodes[i+1], "#b0b0b0");
+        }
+
+        // Relie les end nodes et boss verticalement
+        // On récupère les end nodes et boss dans l'ordre d'affichage
+        const endBossNodes = [];
+        document.querySelectorAll('.level-row').forEach(row => {
+            const boss = row.querySelector('.boss');
+            const end = row.querySelector('.end-node');
+            if (boss) endBossNodes.push(boss);
+            else if (end) endBossNodes.push(end);
+        });
+        for (let i = 0; i < endBossNodes.length - 1; i++) {
+            drawLineBetween(endBossNodes[i], endBossNodes[i+1], "#b0b0b0");
+        }
+    }
+
+    //  dessiner une ligne entre deux nodes
+    function drawLineBetween(nodeA, nodeB, color="#b0b0b0") {
+        const svg = document.getElementById("map-paths");
+        const rectA = nodeA.getBoundingClientRect();
+        const rectB = nodeB.getBoundingClientRect();
+        const mapRect = document.querySelector('.map-container').getBoundingClientRect();
+
+        // Centrage
+        const x1 = rectA.left - mapRect.left + rectA.width/2;
+        const y1 = rectA.top - mapRect.top + rectA.height/2;
+        const x2 = rectB.left - mapRect.left + rectB.width/2;
+        const y2 = rectB.top - mapRect.top + rectB.height/2;
+
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", x1);
+        line.setAttribute("y1", y1);
+        line.setAttribute("x2", x2);
+        line.setAttribute("y2", y2);
+        line.setAttribute("stroke", color);
+        line.setAttribute("stroke-width", 2);
+        line.setAttribute("stroke-linecap", "round");
+        svg.appendChild(line);
+    }
+
+    // Redessine au chargement et resize
+    window.addEventListener("DOMContentLoaded", drawPaths);
+    window.addEventListener("resize", drawPaths);
+
+    // Grise les nodes verrouillées
+    window.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".level-node.level").forEach(node => {
+            const row = parseInt(node.dataset.row);
+            const col = parseInt(node.dataset.level.split('-')[1]);
+            if (col > maxColPerRow[row]) {
+                node.classList.add("locked");
+            }
+        });
+    });
+</script>
+
+{% endblock body %}

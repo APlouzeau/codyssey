@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Avatar - {{ avatar.name }}{% endblock %}
+
+{% block body %}
+	<div class="min-h-screen bg-[#0a0f18] text-white">
+		<div class="container mx-auto px-6 py-8">
+			<div class="overflow-auto rounded-lg">
+				<table class="w-full border-collapse">
+					<tbody>
+						<tr class="even:bg-[rgba(41,253,253,0.06)] hover:bg-[rgba(41,253,253,0.05)]">
+							<th class="text-left px-4 py-3 border border-[#29FDFD] text-[#29FDFD] bg-[rgba(41,253,253,0.08)] whitespace-nowrap w-56">Id</th>
+							<td class="px-4 py-3 border border-[#29FDFD] align-top">{{ avatar.id }}</td>
+						</tr>
+						<tr class="even:bg-[rgba(41,253,253,0.06)] hover:bg-[rgba(41,253,253,0.05)]">
+							<th class="text-left px-4 py-3 border border-[#29FDFD] text-[#29FDFD] bg-[rgba(41,253,253,0.08)] whitespace-nowrap w-56">Nom</th>
+							<td class="px-4 py-3 border border-[#29FDFD] align-top">{{ avatar.name }}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="flex gap-2 flex-wrap justify-center mt-4">
+				<a class="inline-block px-3 py-2 rounded-md border-2 border-[#29FDFD] text-white no-underline shadow-[0_0_24px_rgba(41,253,253,0.3)] transition-all hover:text-[#29FDFD] hover:bg-[rgba(41,253,253,0.08)] hover:shadow-[0_0_40px_rgba(41,253,253,0.6)]" href="{{ path('app_avatar_index') }}">Retour</a>
+				<a class="inline-block px-3 py-2 rounded-md border-2 border-[#29FDFD] text-white no-underline shadow-[0_0_24px_rgba(41,253,253,0.3)] transition-all hover:text-[#29FDFD] hover:bg-[rgba(41,253,253,0.08)] hover:shadow-[0_0_40px_rgba(41,253,253,0.6)]" href="{{ path('app_avatar_edit', {'id': avatar.id}) }}">Modifier</a>
+				<a class="inline-block px-3 py-2 rounded-md border-2 border-[#FF0000] text-white no-underline shadow-[0_0_24px_rgba(255,0,0,0.3)] transition-all hover:text-[#FF0000] hover:bg-[rgba(255,0,0,0.08)] hover:shadow-[0_0_40px_rgba(255,0,0,0.6)]">
+					{{ include('avatar/_delete_form.html.twig') }}
+				</a>
+			</div>
+		</div>
+	</div>
+{% endblock %}
