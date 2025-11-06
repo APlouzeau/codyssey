@@ -175,7 +175,7 @@
 
 <div class="map-container">
     <ul>
-        <p>next_levels :</p>
+         {#<p>next_levels :</p>
         {% for level in levels_terminated %}
             <li>{{ level.level.language.name }} - {{ level.level.number }} : {{ level.score }} pts</li>
         {% endfor %}
@@ -183,19 +183,12 @@
             <li>{{ level.language.name }} - {{ level.number }}</li>
         {% endfor %}
             
-        {# <p>Level du joueur : {{ user_level }}</p>
+        <p>Level du joueur : {{ user_level }}</p>
         <p>Pourcentage d'avancement du niveau : {{ xp_needed.progress_percentage }}</p>
         <p>XP nécessaire pour le niveau suivant : {{ xp_needed.xp_for_next_level }}</p>
         <p>XP actuelle : {{ xp_needed.current_xp }}</p>
-        <p>XP restante : {{ xp_needed.xp_remaining }}</p> #}
-
-        <p>firsts_level :</p>
-        <ul>
-            {% for level in firsts_level %}
-                <li>{{ level.language.name }} - {{ level.number }}</li>
-            {% endfor %}
-        </ul>
-        <p>XP restante : {{ xp_needed.xp_remaining }}</p>
+        <p>XP restante : {{ xp_needed.xp_remaining }}</p> 
+        <p>XP restante : {{ xp_needed.xp_remaining }}</p>#}
     </ul>
 
     <div class="map-header">
