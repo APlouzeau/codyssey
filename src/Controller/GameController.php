@@ -35,6 +35,9 @@ final class GameController extends AbstractController
         $form = $this->createForm(GamePromptFormType::class);
         $form->handleRequest($request);
 
+        $level = $this->gameService->getEnonceForLanguageAndNumber($language, $number);
+        $enonce = $level->getEnonce();
+
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $data = $form->getData();
@@ -49,7 +52,7 @@ final class GameController extends AbstractController
                 );
 
                 $apiResponse = $this->pistonService->controlCodeWithPiston($codeRequest);
-                $expectedOutput = $this->gameService->getExpectedOutputForLevel(1);
+                $expectedOutput = $this->gameService->getExpectedOutputForLevel($level->getId());
                 $actualOutput = $apiResponse['run']['stdout'] ?? 'Pas de sortie';
                 $isSuccess = $this->gameService->compareResults($expectedOutput, $actualOutput);
 
@@ -86,8 +89,7 @@ final class GameController extends AbstractController
         }
         // on récupère les niveau qui correspondent au language et au numéro et ensuite
         // on dois prendre un level aleatoire en faisant levels->getEnonces()
-        $level = $this->gameService->getEnonceForLanguageAndNumber($language, $number);
-        $enonce = $level->getEnonce();
+
 
         return $this->render('game/game.html.twig', [
             'gameForm' => $form->createView(),
