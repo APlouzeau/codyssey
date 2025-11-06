@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Tips;
 use App\Entity\User;
 use App\Form\GamePromptFormType;
 use App\Repository\LevelRepository;
@@ -33,6 +34,40 @@ final class GameController extends AbstractController
         ]);
     } */
 
+    // public function submitCode(Request $request, string $language, int $number): Response
+    // {
+    //     $form = $this->createForm(GamePromptFormType::class);
+    //     $form->handleRequest($request);
+
+    //     $level = $this->gameService->getEnonceForLanguageAndNumber($language, $number);
+    //     $enonce = $level->getEnonce();
+
+    //     $tips = $enonce->getTips()->toArray();
+
+    //     // dd($tips[0]->getName());
+    //     $tip = $tips[0]->getName();
+    //     // dd($tip);
+
+    //     $tips = $tipsCollection->map(function (Tips $tip) {
+    //          return [
+    //              'id' => $tip->getId(),
+    //              'name' => $tip->getName(), // <-- Cible l'attribut contenant le contenu
+    //              ];
+    //      })->toArray();
+
+    //     return $this->render('game/game.html.twig', [
+    //         'gameForm' => $form->createView(),
+    //         'level' => $level,
+    //         'tips' => $tip,
+    //         'levelNumber' => $number,
+    //         'language' => $language,
+    //         'title' => $enonce->getTitle(),
+    //         'enonce' => $enonce->getContent(),
+    //         'result' => $enonce->getExpectedResults(),
+    //         'lifes' => $enonce->getLifeNumber(),
+    //     ]);
+    // }
+    
     #[Route('/game/{language}/{number}', requirements: ['language' => '\w+', 'number' => '\d+'], name: 'app_game_submit', methods: ['GET'])]
     public function submitCode(Request $request, string $language, int $number): Response
     {
@@ -41,15 +76,28 @@ final class GameController extends AbstractController
 
         $level = $this->gameService->getEnonceForLanguageAndNumber($language, $number);
         $enonce = $level->getEnonce();
+        $xpGain = $enonce->getXpGain();
 
-        $tips = $enonce->getTips();
+
+        $tipsCollection = $enonce->getTips();
+
+        // Solution propre : Mapper la collection Doctrine vers un tableau PHP simple
+        $tips = $tipsCollection->map(function (Tips $tip) {
+            return [
+                'id' => $tip->getId(),
+                'name' => $tip->getName(), // <-- On récupère le contenu de l'indice (clé 'name')
+            ];
+        })->toArray(); // Conversion en tableau PHP natif
+
+
 
         return $this->render('game/game.html.twig', [
             'gameForm' => $form->createView(),
             'level' => $level,
-            'tips' => $tips,
+            'tips' => $tips, // Tableau PHP simple
             'levelNumber' => $number,
             'language' => $language,
+            'xpGain' => $xpGain,
             'title' => $enonce->getTitle(),
             'enonce' => $enonce->getContent(),
             'result' => $enonce->getExpectedResults(),

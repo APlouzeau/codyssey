@@ -15,22 +15,21 @@ const IMAGE_BASE_PATH = '/assets/images/';
 const THEMES = {
     php: {
         name: 'php',
-        background: `${IMAGE_BASE_PATH}Capture_decran_2025-11-06_a_13.50.18.jpg`, 
-        character: `${IMAGE_BASE_PATH}Magi-Photoroom.jpg`, 
+        background: `${IMAGE_BASE_PATH}Capture_decran_2025-11-06_a_13.50.18.jpg`,
+        character: `${IMAGE_BASE_PATH}Magi-Photoroom.jpg`,
         extensions: [php()],
         languageName: 'php',
-        codemirrorTheme: eclipse, 
+        codemirrorTheme: eclipse,
         enonceStyle: 'bg-yellow-50/90 text-gray-900 border-4 border-amber-900/70 shadow-[0_0_20px_rgba(160,82,45,0.7)] p-4 lg:p-6 rounded-lg font-serif italic text-base scrollbar-thumb-amber-700 scrollbar-track-yellow-100 scrollbar-thin',
         codeContainerStyle: 'bg-gray-100/90 border-4 border-amber-900/70 shadow-2xl rounded-lg',
         uiTextColor: 'text-amber-900',
         buttonStyle: 'bg-amber-800 hover:bg-amber-900 text-yellow-100 font-extrabold shadow-md shadow-amber-900/50',
         victoryImage: `${IMAGE_BASE_PATH}Magigi-Photoroom.jpg`,
-        tipCostColor: 'text-red-600',
     },
     javascript: {
         name: 'javascript',
-        background: `${IMAGE_BASE_PATH}Capture_decran_2025-11-06_a_13.51.11.jpg`, 
-        character: `${IMAGE_BASE_PATH}Gemini_Generated_Image_vyb1qgvyb1qgvyb1_09.40.48-Photoroom.jpg`, 
+        background: `${IMAGE_BASE_PATH}Capture_decran_2025-11-06_a_13.51.11.jpg`,
+        character: `${IMAGE_BASE_PATH}Gemini_Generated_Image_vyb1qgvyb1qgvyb1_09.40.48-Photoroom.jpg`,
         extensions: [javascript({ jsx: true })],
         languageName: 'javascript',
         codemirrorTheme: dracula,
@@ -39,12 +38,11 @@ const THEMES = {
         uiTextColor: 'text-cyan-400',
         buttonStyle: 'bg-cyan-600/70 hover:bg-cyan-500/80 border border-cyan-400 text-white shadow-[0_0_15px_rgba(0,255,255,0.7)]',
         victoryImage: `${IMAGE_BASE_PATH}victoire.png`,
-        tipCostColor: 'text-red-400',
     },
     python: {
         name: 'python',
-        background: `${IMAGE_BASE_PATH}1a6a54d6-80e0-4c19-9a21-3f060b1213e0.jpg`, 
-        character: `${IMAGE_BASE_PATH}Firefly_Gemini_Flash_1-Photoroom.jpg`, 
+        background: `${IMAGE_BASE_PATH}1a6a54d6-80e0-4c19-9a21-3f060b1213e0.jpg`,
+        character: `${IMAGE_BASE_PATH}Firefly_Gemini_Flash_1-Photoroom.jpg`,
         extensions: [python()],
         languageName: 'python',
         codemirrorTheme: dracula,
@@ -53,7 +51,6 @@ const THEMES = {
         uiTextColor: 'text-lime-400',
         buttonStyle: 'bg-lime-700 hover:bg-lime-800 text-white shadow-[0_0_10px_rgba(100,205,50,0.5)]',
         victoryImage: `${IMAGE_BASE_PATH}Firefly_Gemini_Flash_1-Photoroom.jpg`,
-        tipCostColor: 'text-red-400',
     },
 };
 
@@ -61,44 +58,53 @@ const THEMES = {
 const parseJsonProp = (prop) => {
     if (typeof prop === 'string') {
         try {
-            // Tente de parser, mais sécurise les props qui pourraient être null/empty
             const parsed = JSON.parse(prop);
-            return parsed === null || parsed === undefined ? [] : parsed;
+            return Array.isArray(parsed) || prop.includes('tips') ? parsed || [] : parsed;
         } catch (e) {
-            return []; // Retourne un tableau vide en cas d'erreur de parsing
+            return prop.includes('tips') ? [] : prop; 
         }
     }
-    // Si ce n'est pas une chaîne ou si c'est null/undefined, assure un tableau si on s'attend à une collection
-    return Array.isArray(prop) ? prop : [];
+    return prop;
 };
 
 // --- 2. COMPOSANT PRINCIPAL ---
 
-const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber, tips }) => {
+// AJOUT DE LA PROP XPGAIN
+const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber, tips, xpGain }) => {
     
+    // États de base
     const [code, setCode] = useState('');
     const [currentLifes, setCurrentLifes] = useState(lifes);
     const [isGameOver, setIsGameOver] = useState(false);
     const [isVictory, setIsVictory] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submissionResult, setSubmissionResult] = useState(null); 
-    const [showTipModal, setShowTipModal] = useState(false); 
-    const [tipStatusMessage, setTipStatusMessage] = useState(''); 
-    const [tipContent, setTipContent] = useState(null); 
-    const [hasUsedFreeTip, setHasUsedFreeTip] = useState(false); 
+    
+    // États pour la logique des indices
+    const [showHintModal, setShowHintModal] = useState(false); 
+    const [hintStatusMessage, setHintStatusMessage] = useState(''); 
+    const [isHintUnlocked, setIsHintUnlocked] = useState(false); 
+    const [currentXpGain, setCurrentXpGain] = useState(xpGain); // État pour suivre l'XP actuel
 
+    
+    // Parsing et constantes
     const parsedEnonce = useMemo(() => parseJsonProp(enonce), [enonce]);
     const normalizedLanguage = language.toLowerCase();
-    
     const theme = THEMES[normalizedLanguage] || THEMES.javascript;
     const nextLevelPath = `/game/${normalizedLanguage}/${parseInt(levelNumber, 10) + 1}`; 
     
-    // CORRECTION: Assurer que c'est un tableau, même si la sérialisation Doctrine échoue
     const parsedTips = useMemo(() => parseJsonProp(tips), [tips]); 
-    const firstTip = parsedTips.length > 0 ? parsedTips[0].content : "Aucune astuce n'est disponible pour ce niveau.";
+    const actualHintContent = parsedTips.length > 0 && parsedTips[0].name
+        ? parsedTips[0].name 
+        : "Pas d'astuce disponible."; 
     
-    const TIP_COST = 1;
+    // RÈGLES DE L'INDICE
+    const PURCHASE_LIFES_THRESHOLD = 5; // Achat si Vies <= 5
+    const FREE_LIFES_THRESHOLD = 3;     // Gratuit si Vies <= 3
+    const XP_COST_PERCENTAGE = 0.50;    // Coût en XP
+    const XP_COST = Math.floor(xpGain * XP_COST_PERCENTAGE); // Coût réel en XP
 
+    // Synchronisation des vies
     useEffect(() => {
         if (currentLifes <= 0 && !isVictory && !isGameOver) {
             setIsGameOver(true);
@@ -107,77 +113,83 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
 
     useEffect(() => {
         setCurrentLifes(lifes);
-    }, [lifes]);
+        setCurrentXpGain(xpGain);
+    }, [lifes, xpGain]);
 
-    // Fonction pour gérer la logique de l'indice
-    const handleTipClick = () => {
-        
-        // Si l'indice a déjà été acheté/donné, on l'affiche/ferme directement
-        if (tipContent) {
-            setShowTipModal(prev => !prev);
-            return;
-        }
-
-        // Si l'indice est inexistant, on avertit.
-        if (parsedTips.length === 0) {
-            setTipStatusMessage("Il n'y a malheureusement aucune astuce liée à cet énoncé.");
-            setShowTipModal(true);
+    // --- Logique de l'Indice : Achat et Affichage ---
+    
+    const unlockHint = (isFree) => {
+        if (actualHintContent === "Pas d'astuce disponible.") {
+            setHintStatusMessage("Désolé, aucune astuce n'a été trouvée pour ce niveau.");
             return;
         }
         
-        // Logique de l'indice gratuit (3 vies restantes ou moins)
-        if (currentLifes <= 3 && !hasUsedFreeTip) {
-            setTipStatusMessage("Indice GRATUIT débloqué car il vous reste 3 vies ou moins !");
-            setShowTipModal(true);
+        // Si déjà débloqué, on ne fait rien
+        if (isHintUnlocked) return;
+
+        if (isFree) {
+            setIsHintUnlocked(true);
+            setHintStatusMessage("Indice GRATUIT débloqué ! Il est maintenant affiché sous la mission.");
             return;
         }
-
-        // Logique de l'achat d'indice (moins de la moitié des vies)
-        if (currentLifes <= maxLifes / 2) {
-            // Laissez l'utilisateur acheter l'indice via le modal
-            setTipStatusMessage(`Vous pouvez acheter l'indice pour ${TIP_COST} vie.`);
-            setShowTipModal(true);
+        
+        // Achat (coût en XP)
+        if (currentLifes <= PURCHASE_LIFES_THRESHOLD) {
+            // Déduction de l'XP
+            setCurrentXpGain(currentXpGain - XP_COST); 
+            setIsHintUnlocked(true);
+            setHintStatusMessage(`Indice acheté ! ${XP_COST} XP déduits de la récompense finale.`);
         } else {
-            // Bloquer l'achat (plus de la moitié des vies restantes)
-            setTipStatusMessage(`Vous devez descendre en dessous de ${maxLifes / 2} vies (${Math.floor(maxLifes / 2) + 1} ou moins) pour acheter un indice.`);
-            setShowTipModal(true); 
+            setHintStatusMessage("Achat impossible : Vous devez avoir 5 vies ou moins pour acheter l'indice.");
+        }
+    }
+
+    const handleHintButtonClick = () => {
+        
+        if (isHintUnlocked) {
+            setHintStatusMessage("L'indice est déjà débloqué pour ce niveau. Voulez-vous le revoir ?");
+            setShowHintModal(true);
+            return;
+        }
+
+        if (actualHintContent === "Pas d'astuce disponible.") {
+            setHintStatusMessage("Désolé, aucune astuce n'a été trouvée pour ce niveau. Vous ne pouvez pas en débloquer.");
+            setShowHintModal(true);
+            return;
+        }
+        
+        // Logique de déblocage GRATUIT (Vies <= 3)
+        if (currentLifes <= FREE_LIFES_THRESHOLD) {
+            setHintStatusMessage(`Félicitations ! Il vous reste ${currentLifes} vies. L'indice est GRATUIT !`);
+            setShowHintModal(true);
+            return;
+        }
+        
+        // Logique d'ACHAT (Vies <= 5)
+        if (currentLifes <= PURCHASE_LIFES_THRESHOLD) {
+            setHintStatusMessage(`Vous pouvez acheter l'indice pour ${XP_COST} XP (50% de la récompense).`);
+            setShowHintModal(true);
+        } else {
+            // Bloqué (Trop de vies restantes > 5)
+            setHintStatusMessage(`Veuillez attendre de descendre à ${PURCHASE_LIFES_THRESHOLD} vies ou moins pour acheter un indice.`);
+            setShowHintModal(true);
         }
     };
     
-    // Fonction d'achat effective
-    const buyTip = () => {
-        if (tipContent) {
-            setShowTipModal(false);
+    const handleModalAction = () => {
+        if (isHintUnlocked) {
+            setShowHintModal(false); 
             return;
         }
 
-        // L'indice gratuit est débloqué
-        const isFree = currentLifes <= 3 && !hasUsedFreeTip;
-        
-        if (isFree) {
-            setTipContent(firstTip);
-            setHasUsedFreeTip(true); 
-            setTipStatusMessage("Indice GRATUIT activé !");
-            return;
+        if (currentLifes <= FREE_LIFES_THRESHOLD) {
+            unlockHint(true); // Gratuit
+        } else if (currentLifes <= PURCHASE_LIFES_THRESHOLD) {
+            unlockHint(false); // Achat
         }
-        
-        // L'indice est payant
-        if (currentLifes <= maxLifes / 2 && currentLifes > TIP_COST) {
-            // Achat confirmé
-            // NOTE: Vous devrez mettre à jour les vies dans la BDD dans un vrai jeu. 
-            // Ici, nous ne faisons que la mise à jour côté client pour l'affichage immédiat.
-            setCurrentLifes(currentLifes - TIP_COST);
-            setTipContent(firstTip);
-            setTipStatusMessage("Indice acheté ! Bonne chance. La vie a été déduite.");
-        } else if (currentLifes <= TIP_COST) {
-             setTipStatusMessage("Achat impossible : vous n'avez pas assez de vies !");
-        } else if (currentLifes > maxLifes / 2) {
-             setTipStatusMessage("Achat impossible : vous devez descendre en dessous de la moitié des vies.");
-        }
-        // Le modal reste ouvert pour afficher le résultat de l'achat/blocage
     };
-
-    // --- Logique de Soumission (Inchngée) ---
+    
+    // --- Logique de Soumission (Mise à jour pour l'XP) ---
     const handleSubmit = useCallback(async () => {
         if (isSubmitting || isGameOver || isVictory) return;
 
@@ -193,6 +205,8 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
                     code: code,
                     level_id: levelId, 
                     current_lifes: currentLifes,
+                    // OPTIONNEL: Si l'API doit connaitre l'XP ajustée:
+                    // adjusted_xp_gain: isHintUnlocked ? currentXpGain : xpGain, 
                 }),
             });
 
@@ -204,7 +218,8 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
             }
             
             if (result.isSuccess) {
-                setIsVictory(true);
+                // Si l'API ne déduit pas l'XP elle-même, on doit s'assurer que currentXpGain est bien le bon
+                setIsVictory(true); 
             }
             
         } catch (error) {
@@ -213,9 +228,9 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
         } finally {
             setIsSubmitting(false);
         }
-    }, [code, theme.languageName, levelId, currentLifes, isSubmitting, isGameOver, isVictory]);
+    }, [code, theme.languageName, levelId, currentLifes, isSubmitting, isGameOver, isVictory, currentXpGain, xpGain]);
 
-    // --- Rendu des Vies (Inchngée) ---
+    // --- Rendu des Vies (SEPARATION VISUELLE) ---
     const renderLifes = () => (
         <div className="flex items-center space-x-1 p-1 rounded-full bg-red-900/50 shadow-xl border border-red-700">
             {[...Array(maxLifes)].map((_, index) => (
@@ -233,49 +248,46 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
             </span>
         </div>
     );
-
-    // --- Composant Modal d'Indice ---
-    const TipModal = () => {
-        // Logique d'affichage des boutons
-        const hasTips = parsedTips.length > 0;
-        const isFree = hasTips && currentLifes <= 3 && !tipContent;
-        const canBuy = hasTips && currentLifes <= maxLifes / 2 && currentLifes > TIP_COST && !tipContent;
+    
+    // --- Composant Modal d'Indice (Pop-up d'Achat/Prévention) ---
+    const HintModal = () => {
+        const hasTips = actualHintContent !== "Pas d'astuce disponible.";
+        const isFree = hasTips && currentLifes <= FREE_LIFES_THRESHOLD && !isHintUnlocked;
+        const canBuy = hasTips && currentLifes <= PURCHASE_LIFES_THRESHOLD && currentLifes > FREE_LIFES_THRESHOLD && !isHintUnlocked;
         
+        const showHintInModal = isHintUnlocked || !hasTips;
+
         return (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-                <div className={`p-6 rounded-xl shadow-2xl w-full max-w-sm ${theme.codeContainerStyle} border ${theme.uiTextColor} transition-all duration-300`}>
-                    <h2 className={`text-2xl font-bold mb-4 border-b pb-2 ${theme.uiTextColor}`}>
-                        {tipContent ? 'Indice Débloqué !' : '💡 Gestion de l\'Indice'}
+                <div className={`p-6 rounded-xl shadow-2xl w-full max-w-sm bg-gray-900/90 border-4 border-yellow-500 transition-all duration-300 text-white`}>
+                    <h2 className={`text-2xl font-bold mb-4 border-b pb-2 text-yellow-400`}>
+                        {isHintUnlocked ? '💡 Indice Débloqué' : '🤔 Obtenir un Indice ?'}
                     </h2>
 
-                    {/* Contenu ou Message d'état */}
-                    <p className="text-white mb-4 text-sm font-mono">
-                        {tipContent || tipStatusMessage || "Voulez-vous acheter un indice ?"}
+                    <p className="mb-4 text-sm font-mono text-gray-300">
+                        {hintStatusMessage}
                     </p>
 
-                    {/* Affichage de l'indice déjà débloqué */}
-                    {tipContent && (
-                        <div className="bg-white/10 p-3 rounded text-sm italic text-yellow-300 mb-4 whitespace-pre-wrap">
-                            {tipContent}
+                    {showHintInModal && (
+                        <div className="bg-yellow-900/50 p-3 rounded text-sm italic text-yellow-300 mb-4 whitespace-pre-wrap">
+                            {actualHintContent}
                         </div>
                     )}
                     
-                    {/* Boutons d'action */}
                     <div className="flex justify-end space-x-3 mt-4">
                         <button 
-                            onClick={() => setShowTipModal(false)}
+                            onClick={() => setShowHintModal(false)}
                             className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition duration-200"
                         >
                             Fermer
                         </button>
                         
-                        {/* Bouton d'achat/gratuit si disponible */}
-                        {(canBuy || isFree) && !tipContent && (
+                        {(canBuy || isFree) && !isHintUnlocked && (
                             <button
-                                onClick={buyTip}
-                                className={`font-bold py-2 px-4 rounded transition duration-200 ${isFree ? 'bg-green-700 hover:bg-green-800 text-white shadow-lg' : theme.buttonStyle}`}
+                                onClick={handleModalAction}
+                                className={`font-bold py-2 px-4 rounded transition duration-200 ${isFree ? 'bg-green-700 hover:bg-green-800' : theme.buttonStyle}`}
                             >
-                                {isFree ? "Recevoir GRATUITEMENT" : `Acheter (1 Vie)`}
+                                {isFree ? "Recevoir GRATUITEMENT" : `Acheter (${XP_COST} XP)`}
                             </button>
                         )}
                     </div>
@@ -284,8 +296,73 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
         );
     };
 
+    // --- Composant d'Écran d'État (Victory / Game Over) ---
+    const ScreenWrapper = ({ children, title, buttonText, buttonAction, imageSrc, isError = false }) => (
+        <div 
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center p-4 bg-cover bg-center bg-fixed"
+            style={{ backgroundImage: `url(${theme.background})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat' }}
+        >
+             <div className="absolute inset-0 bg-black/70"></div> 
+            <div className={`relative p-8 lg:p-10 rounded-xl shadow-2xl w-full max-w-lg transition-all duration-300 transform scale-100 ${isError ? 'bg-red-900/90 border-4 border-red-500' : 'bg-green-900/90 border-4 border-green-500'} text-white text-center`}>
+                <h1 className={`text-4xl lg:text-6xl font-extrabold mb-4 lg:mb-6 ${isError ? 'text-red-400 animate-pulse' : 'text-green-400'}`}>{title}</h1>
+                
+                {imageSrc && (
+                    <img 
+                        src={imageSrc} 
+                        alt={title} 
+                        className="w-32 lg:w-48 mx-auto mb-6 object-contain transform transition-transform duration-500 hover:scale-105"
+                    />
+                )}
 
-    // --- Rendu principal ---
+                {children}
+
+                <button 
+                    onClick={buttonAction} 
+                    className={`mt-8 font-bold py-3 px-8 rounded-full transition duration-300 transform hover:scale-105 shadow-2xl ${isError ? 'bg-red-700 hover:bg-red-800' : 'bg-green-700 hover:bg-green-800'} text-lg`}
+                >
+                    {buttonText}
+                </button>
+            </div>
+        </div>
+    );
+
+    // DÉCLENCHEURS DES POPUPS PLEIN ÉCRAN
+    if (isGameOver) {
+        return (
+            <ScreenWrapper 
+                title="GAME OVER" 
+                buttonText="Recommencer le Niveau" 
+                buttonAction={() => window.location.reload()}
+                imageSrc={`${IMAGE_BASE_PATH}Gemini_Generated_Image_engwtnengwtnengw-Photoroom.jpg`} 
+                isError={true}
+            >
+                <p className="text-xl lg:text-2xl font-semibold">Le virus a contaminé le noyau.</p>
+                <p className="text-lg mt-2">Veuillez relancer la séquence de purge.</p>
+            </ScreenWrapper>
+        );
+    }
+
+    if (isVictory) {
+        const victoryImage = theme.victoryImage;
+
+        return (
+            <ScreenWrapper 
+                title="VICTOIRE !" 
+                buttonText="Niveau Suivant" 
+                buttonAction={() => window.location.href = nextLevelPath} 
+                imageSrc={victoryImage}
+                isError={false}
+            >
+                <p className="text-xl lg:text-2xl font-semibold mb-2">Code purgé avec succès !</p>
+                <p className="text-lg text-yellow-300">XP Obtenue: <span className='font-bold'>{currentXpGain}</span> (Initial: {xpGain})</p>
+                <p className="text-lg text-yellow-300">Vies restantes: <span className='font-bold'>{currentLifes}</span></p>
+                
+            </ScreenWrapper>
+        );
+    }
+
+
+    // --- Rendu principal de l'interface de jeu ---
 
     return (
         <div 
@@ -298,28 +375,43 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
                 {/* Colonne Gauche : Énoncé, Caractère, Vies */}
                 <div className="w-full lg:w-1/3 flex flex-col space-y-4 max-h-1/2 lg:max-h-full">
                     
-                    {/* Header : Vies, Langage, Astuce */}
+                    {/* Header : Vies, Langage, Indice (SÉPARÉ) */}
                     <div className="flex justify-between items-center p-3 rounded-lg bg-black/60 shadow-xl border-b-2 border-gray-700">
                         <h1 className={`text-2xl lg:text-3xl font-extrabold ${theme.uiTextColor}`}>{language.toUpperCase()}</h1>
-                        <div className="flex items-center space-x-3">
-                            {renderLifes()}
-                            {/* Bouton Ampoule (Déclenche la nouvelle logique) */}
-                            <button
-                                onClick={handleTipClick}
-                                className={`text-2xl p-2 rounded-full transition duration-300 hover:scale-110 ${tipContent ? 'bg-yellow-600 animate-pulse' : 'bg-gray-700/80'} shadow-lg`}
-                                title="Obtenir un indice"
-                            >
-                                💡
-                            </button>
-                        </div>
+                        
+                        {/* 1. Affichage des Vies */}
+                        {renderLifes()}
+                        
+                        {/* 2. Bouton Indice (unique) */}
+                        <button
+                            onClick={handleHintButtonClick}
+                            className={`text-2xl p-2 rounded-full transition duration-300 hover:scale-110 ${isHintUnlocked ? 'bg-yellow-600 animate-pulse' : 'bg-gray-700/80'} shadow-lg`}
+                            title="Obtenir l'indice (Coût: 50% XP)"
+                        >
+                            💡
+                        </button>
                     </div>
 
-                    {/* Énoncé */}
+                    {/* Énoncé et Cadre d'Astuce */}
                     <div className={`flex-grow overflow-y-auto ${theme.enonceStyle} shadow-2xl transition-all duration-300`}>
                         <h2 className={`text-2xl font-extrabold mb-2 border-b-2 pb-1 border-current`}>
                             <span className="mr-2">📝</span> Mission (Niveau {levelNumber}) :
                         </h2>
                         <pre className="whitespace-pre-wrap text-sm lg:text-base leading-relaxed break-words">{parsedEnonce}</pre>
+                        
+                        {/* Cadre d'Astuce */}
+                        {isHintUnlocked && actualHintContent !== "Pas d'astuce disponible." && (
+                            <div className={`mt-4 p-3 rounded-lg border-2 border-dashed border-yellow-700 bg-yellow-100/30 text-gray-900`}>
+                                <h3 className="font-bold mb-1 flex items-center text-yellow-800"><span className="mr-2">💡</span> ASTUCE DÉBLOQUÉE :</h3>
+                                <p className="text-sm italic whitespace-pre-wrap">{actualHintContent}</p>
+                            </div>
+                        )}
+                        {!isHintUnlocked && (
+                             <div className={`mt-4 p-3 rounded-lg border-2 border-dashed border-gray-500/50 text-gray-700/70`}>
+                                <h3 className="font-bold mb-1 flex items-center"><span className="mr-2">💡</span> ASTUCE :</h3>
+                                <p className="text-sm italic">Cliquer sur l'ampoule ci-dessus pour débloquer l'indice.</p>
+                            </div>
+                        )}
                     </div>
                     
                     {/* Personnage */}
@@ -339,7 +431,7 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
                     </h2>
                     
                     {/* Éditeur CodeMirror */}
-                    <div className={`flex-1 overflow-hidden rounded-lg ${theme.codeContainerStyle}`}>
+                    <div className="flex-1 overflow-hidden rounded-lg">
                         <CodeMirror
                             value={code}
                             height="100%"
@@ -361,7 +453,7 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
                         {isSubmitting ? '🕹️ Exécution...' : '✅ Valider le Code'}
                     </button>
 
-                    {/* Console de Résultat (RÉINTÉGRÉE) */}
+                    {/* Console de Résultat */}
                     {submissionResult && (
                         <div className={`p-4 rounded-xl shadow-inner transition-colors duration-500 text-sm font-mono ${submissionResult.isSuccess ? 'bg-green-900/80 border-2 border-green-500' : 'bg-red-900/80 border-2 border-red-500'}`}>
                             <h3 className={`font-bold mb-2 text-lg ${submissionResult.isSuccess ? 'text-green-300' : 'text-red-300'} flex items-center`}>
@@ -379,8 +471,8 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
                 </div>
             </div>
             
-            {/* Rendu du Modal d'Indice (s'affiche au clic sur l'ampoule) */}
-            {showTipModal && <TipModal />}
+            {showHintModal && <HintModal />}
+            
         </div>
     );
 };
