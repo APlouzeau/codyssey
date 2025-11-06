@@ -71,6 +71,7 @@
         border-radius: 10px;
         background: white;
         border: 2px solid #ccc;
+        z-index: 9;
     }
     /* Remplacer par sprite */
 
@@ -86,7 +87,7 @@
 
     .progress-container {
         position: absolute;
-        bottom: 20px;
+        bottom: 80px;
         left: 50%;
         transform: translateX(-50%); 
         width: 50%;
@@ -160,6 +161,10 @@
     #close-inventory:hover {
         background: #0056b3;
     }
+
+    #map-paths {
+        z-index: 1;
+    }
 </style>
 
 <div class="map-container">
@@ -209,12 +214,14 @@
     </div>
 
 
-    <footer class="progress-container">
+    <div class="progress-container">
         <div class="progress-bar">
             <div class="progress-fill" style="width: 1%;"></div> {# Mettre width correspondante à la valeur d'exp #}
         </div>
         <p>Niveau </p> {# currentLevel #}
-    </footer>
+    </div>
+
+    <svg id="map-paths" style="position:absolute; top:0; left:0; width:100vw; height:100vh; pointer-events:none; z-index:2;"></svg>
 </div>
 
 <!-- Popup Inventaire -->
@@ -348,7 +355,7 @@
     });
 
     function launchLevel(row, col) {
-        const url = `/game?lang=${row}&niv=${col}`;
+        const url = `/game/${row}/${col}`;
         window.location.href = url;
     }
 
@@ -414,6 +421,66 @@
             inventoryPopup.style.display = "none";
         }
     });
+
+    function drawPaths() {
+        const svg = document.getElementById("map-paths");
+        svg.innerHTML = ""; // reset
+
+        // Relie les nodes horizontalement par row
+        document.querySelectorAll('.level-row').forEach(row => {
+            const nodes = Array.from(row.querySelectorAll('.level-node'));
+            for (let i = 0; i < nodes.length - 1; i++) {
+                drawLineBetween(nodes[i], nodes[i+1], "#b0b0b0");
+            }
+        });
+
+        // Relie les start nodes verticalement
+        const startNodes = Array.from(document.querySelectorAll('.start-node'));
+        for (let i = 0; i < startNodes.length - 1; i++) {
+            drawLineBetween(startNodes[i], startNodes[i+1], "#b0b0b0");
+        }
+
+        // Relie les end nodes et boss verticalement
+        // On récupère les end nodes et boss dans l'ordre d'affichage
+        const endBossNodes = [];
+        document.querySelectorAll('.level-row').forEach(row => {
+            const boss = row.querySelector('.boss');
+            const end = row.querySelector('.end-node');
+            if (boss) endBossNodes.push(boss);
+            else if (end) endBossNodes.push(end);
+        });
+        for (let i = 0; i < endBossNodes.length - 1; i++) {
+            drawLineBetween(endBossNodes[i], endBossNodes[i+1], "#b0b0b0");
+        }
+    }
+
+    // Fonction utilitaire pour dessiner une ligne entre deux nodes
+    function drawLineBetween(nodeA, nodeB, color="#b0b0b0") {
+        const svg = document.getElementById("map-paths");
+        const rectA = nodeA.getBoundingClientRect();
+        const rectB = nodeB.getBoundingClientRect();
+        const mapRect = document.querySelector('.map-container').getBoundingClientRect();
+
+        // Centre de chaque node
+        const x1 = rectA.left - mapRect.left + rectA.width/2;
+        const y1 = rectA.top - mapRect.top + rectA.height/2;
+        const x2 = rectB.left - mapRect.left + rectB.width/2;
+        const y2 = rectB.top - mapRect.top + rectB.height/2;
+
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", x1);
+        line.setAttribute("y1", y1);
+        line.setAttribute("x2", x2);
+        line.setAttribute("y2", y2);
+        line.setAttribute("stroke", color);
+        line.setAttribute("stroke-width", 2);
+        line.setAttribute("stroke-linecap", "round");
+        svg.appendChild(line);
+    }
+
+    // Redessine les chemins au chargement et au resize
+    window.addEventListener("DOMContentLoaded", drawPaths);
+    window.addEventListener("resize", drawPaths);
 </script>
 
 {% endblock body %}
