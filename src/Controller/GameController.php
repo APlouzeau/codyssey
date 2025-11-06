@@ -44,16 +44,17 @@ final class GameController extends AbstractController
                 // Debug : voir ce qui est envoyé
                 // Récupérer le nom du langage depuis l'entité en minuscules
                 $languageName = $data['language']->getName();
-
                 $codeRequest = $this->pistonService->createCodeRequest(
                     $data['code'],
                     $languageName
                 );
-
+                
                 $apiResponse = $this->pistonService->controlCodeWithPiston($codeRequest);
                 $expectedOutput = $this->gameService->getExpectedOutputForLevel($level->getId());
+                
                 $actualOutput = $apiResponse['run']['stdout'] ?? 'Pas de sortie';
                 $isSuccess = $this->gameService->compareResults($expectedOutput, $actualOutput);
+               
 
                 if ($isSuccess) {
                     $request->getSession()->set('game_result', [

@@ -38,13 +38,21 @@ class GameService
 
     public function getExpectedOutputForLevel(int $levelId): string
     {
-        $level = $this->enonceRepository->find($levelId);
-
+        $level = $this->levelRepository->find($levelId);
         if (!$level) {
             throw new \Exception("Level not found");
         }
 
-        return $level->getExpectedResults();
+        // getEnonce() retourne directement l'objet Enonce, pas un ID
+        $enonce = $level->getEnonce();
+        
+        if (!$enonce) {
+            throw new \Exception("Enonce not found for this level");
+        }
+        
+        // Maintenant tu peux accéder à toutes les propriétés de l'énoncé
+        // Par exemple: $enonce->getTitle(), $enonce->getDescription(), etc.
+        return $enonce->getExpectedResults();
     }
 
     public function getEnonceForLevel(int $levelId): Enonce
