@@ -176,6 +176,10 @@
             <li>{{ level.language.name }} - {{ level.number }}</li>
         {% endfor %}
         <p>Level du joueur : {{ user_level }}</p>
+        <p>Pourcentage d'avancement du niveau : {{ xp_needed.progress_percentage }}</p>
+        <p>XP nécessaire pour le niveau suivant : {{ xp_needed.xp_for_next_level }}</p>
+        <p>XP actuelle : {{ xp_needed.current_xp }}</p>
+        <p>XP restante : {{ xp_needed.xp_remaining }}</p>
     </ul>
 
     <div class="map-header">

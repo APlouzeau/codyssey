@@ -32,7 +32,7 @@ final class MapController extends AbstractController
         $userLevel = $this->userService->getUserLevel($user);
         $levelsTerminated = $this->userLevelRepository->findLevelsWithScore($user);
         $nextLevels = [];
-
+        $xpNeeded = $this->userService->getProgressToNextLevel($user); // ← Ajouté pour récupérer l'XP nécessaire
         foreach ($levelsTerminated as $levelProgress) { // ← Renommé !
             $currentLevel = $levelProgress->getLevel();
 
@@ -52,7 +52,8 @@ final class MapController extends AbstractController
         return $this->render('map/index.html.twig', [
             'levels_terminated' => $levelsTerminated,
             'next_levels' => $nextLevels,
-            'user_level' => $userLevel
+            'user_level' => $userLevel,
+            'xp_needed' => $xpNeeded
         ]);
     }
 }
