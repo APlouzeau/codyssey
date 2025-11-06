@@ -6,6 +6,8 @@ use App\Entity\User;
 use App\Form\UserType;
 use App\Form\ChangeUserFormType;
 use App\Repository\UserRepository;
+use App\Repository\UserSkinRepository;
+use App\Repository\AvatarRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,27 +30,96 @@ final class UserController extends AbstractController
 
     #[Route('/security', name: 'app_user_security')]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function security(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
-    {
+    public function security(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        UserPasswordHasherInterface $passwordHasher,
+        UserSkinRepository $userSkinRepository,
+        AvatarRepository $avatarRepository
+    ): Response {
         /** @var User $user */
         $user = $this->getUser();
         $originalEmail = $user->getEmail();
-    
-        $form = $this->createForm(ChangeUserFormType::class, $user);
+
+        // Récupérer les skins débloqués pour chaque avatar (JS, PHP, Python)
+        $avatarJs = $avatarRepository->findOneBy(['name' => 'JavaScript']);
+        $avatarPhp = $avatarRepository->findOneBy(['name' => 'PHP']);
+        $avatarPy = $avatarRepository->findOneBy(['name' => 'Python']);
+
+        $unlockedSkinsJs = [];
+        $unlockedSkinsPhp = [];
+        $unlockedSkinsPy = [];
+
+        // Récupérer les skins débloqués pour JavaScript
+        if ($avatarJs) {
+            $userSkins = $userSkinRepository->findBy([
+                'user' => $user,
+                'unlocked' => true,
+            ]);
+            foreach ($userSkins as $userSkin) {
+                $skin = $userSkin->getSkin();
+                if ($skin->getAvatar() === $avatarJs) {
+                    $fileName = $skin->getFileName();
+                    // Format: 'Label affiché' => 'valeur'
+                    $unlockedSkinsJs[ucfirst(str_replace('.png', '', $fileName))] = $fileName;
+                }
+            }
+        }
+
+        // Récupérer les skins débloqués pour PHP
+        if ($avatarPhp) {
+            $userSkins = $userSkinRepository->findBy([
+                'user' => $user,
+                'unlocked' => true,
+            ]);
+            foreach ($userSkins as $userSkin) {
+                $skin = $userSkin->getSkin();
+                if ($skin->getAvatar() === $avatarPhp) {
+                    $fileName = $skin->getFileName();
+                    $unlockedSkinsPhp[ucfirst(str_replace('.png', '', $fileName))] = $fileName;
+                }
+            }
+        }
+
+        // Récupérer les skins débloqués pour Python
+        if ($avatarPy) {
+            $userSkins = $userSkinRepository->findBy([
+                'user' => $user,
+                'unlocked' => true,
+            ]);
+            foreach ($userSkins as $userSkin) {
+                $skin = $userSkin->getSkin();
+                if ($skin->getAvatar() === $avatarPy) {
+                    $fileName = $skin->getFileName();
+                    $unlockedSkinsPy[ucfirst(str_replace('.png', '', $fileName))] = $fileName;
+                }
+            }
+        }
+
+        // Créer le formulaire avec les skins débloqués
+        $form = $this->createForm(ChangeUserFormType::class, $user, [
+            'unlocked_skins_js' => $unlockedSkinsJs,
+            'unlocked_skins_php' => $unlockedSkinsPhp,
+            'unlocked_skins_py' => $unlockedSkinsPy,
+        ]);
         $form->handleRequest($request);
-    
+
         // Précharger les avatars sélectionnés (GET)
         if (!$form->isSubmitted()) {
-            $skinRepo = $entityManager->getRepository(\App\Entity\Skin::class);
-            $currentSkins = $skinRepo->findBy(['is_current' => true]);
-    
+            // Récupérer les skins actuellement sélectionnés par l'utilisateur
+            $currentSkinsJs = $userSkinRepository->findBy([
+                'user' => $user,
+                'isCurrent' => true,
+            ]);
+
             $defaults = [
-                'js' => 'skinv1JS.png',
-                'php' => 'skinv1PHP.png',
-                'py'  => 'skinv1PY.png',
+                'js' => null,
+                'php' => null,
+                'py' => null,
             ];
-    
-            foreach ($currentSkins as $skin) {
+
+            foreach ($currentSkinsJs as $userSkin) {
+                $skin = $userSkin->getSkin();
                 $fn = $skin->getFileName() ?? '';
                 if (str_contains($fn, 'JS')) {
                     $defaults['js'] = $fn;
@@ -58,63 +129,93 @@ final class UserController extends AbstractController
                     $defaults['py'] = $fn;
                 }
             }
-    
-            $form->get('avatar_js')->setData($defaults['js']);
-            $form->get('avatar_php')->setData($defaults['php']);
-            $form->get('avatar_py')->setData($defaults['py']);
+
+            if ($defaults['js']) {
+                $form->get('avatar_js')->setData($defaults['js']);
+            }
+            if ($defaults['php']) {
+                $form->get('avatar_php')->setData($defaults['php']);
+            }
+            if ($defaults['py']) {
+                $form->get('avatar_py')->setData($defaults['py']);
+            }
         }
-    
+
         if ($form->isSubmitted()) {
             $hasErrors = false;
-    
+
             $currentPassword = $form->get('currentPassword')->getData();
             if (!$passwordHasher->isPasswordValid($user, $currentPassword)) {
                 $form->get('currentPassword')->addError(new FormError('Mot de passe actuel invalide.'));
                 $hasErrors = true;
             }
-    
+
             $newPassword = $form->get('newPassword')->get('first')->getData();
             if (!empty($newPassword) && strlen($newPassword) < 8) {
                 $form->get('newPassword')->addError(new FormError('Votre mot de passe doit contenir au moins 8 caractères.'));
                 $hasErrors = true;
             }
-    
+
             $emailChanged = $user->getEmail() !== $originalEmail;
             $passwordChanged = !empty($newPassword);
-    
+
             if (!$hasErrors && $form->isValid()) {
                 if ($passwordChanged) {
                     $user->setPassword($passwordHasher->hashPassword($user, $newPassword));
                 }
-    
-                // Persist selected skins from form (JS/PHP/PY)
+
+                // Mettre à jour les skins sélectionnés
                 $selectedJs = $form->get('avatar_js')->getData();
                 $selectedPhp = $form->get('avatar_php')->getData();
                 $selectedPy = $form->get('avatar_py')->getData();
                 $skinChanged = false;
-    
+
                 $skinRepo = $entityManager->getRepository(\App\Entity\Skin::class);
-                foreach ([$selectedJs, $selectedPhp, $selectedPy] as $fileName) {
-                    if ($fileName) {
+
+                foreach (
+                    [
+                        ['fileName' => $selectedJs, 'avatar' => $avatarJs],
+                        ['fileName' => $selectedPhp, 'avatar' => $avatarPhp],
+                        ['fileName' => $selectedPy, 'avatar' => $avatarPy],
+                    ] as $selection
+                ) {
+                    if ($selection['fileName'] && $selection['avatar']) {
                         /** @var \App\Entity\Skin|null $skin */
-                        $skin = $skinRepo->findOneBy(['file_name' => $fileName]);
+                        $skin = $skinRepo->findOneBy(['file_name' => $selection['fileName']]);
                         if ($skin) {
-                            $avatar = $skin->getAvatar();
-                            $siblings = $skinRepo->findBy(['avatar' => $avatar]);
-                            foreach ($siblings as $s) {
-                                $s->setIsCurrent(false);
+                            // Désélectionner tous les skins de cet avatar pour cet utilisateur
+                            $userSkinsForAvatar = $userSkinRepository->createQueryBuilder('us')
+                                ->join('us.skin', 's')
+                                ->where('us.user = :user')
+                                ->andWhere('s.avatar = :avatar')
+                                ->setParameter('user', $user)
+                                ->setParameter('avatar', $selection['avatar'])
+                                ->getQuery()
+                                ->getResult();
+
+                            foreach ($userSkinsForAvatar as $us) {
+                                $us->setIsCurrent(false);
                             }
-                            $skin->setIsCurrent(true);
-                            $skinChanged = true;
+
+                            // Sélectionner le skin choisi
+                            $userSkin = $userSkinRepository->findOneBy([
+                                'user' => $user,
+                                'skin' => $skin,
+                            ]);
+
+                            if ($userSkin) {
+                                $userSkin->setIsCurrent(true);
+                                $skinChanged = true;
+                            }
                         }
                     }
                 }
-    
+
                 $hasUpdates = $emailChanged || $passwordChanged || $skinChanged;
-    
+
                 if ($hasUpdates) {
                     $entityManager->flush();
-    
+
                     if ($emailChanged && $passwordChanged && $skinChanged) {
                         $this->addFlash('success', 'Votre e-mail, mot de passe et avatars ont été mis à jour.');
                     } elseif ($emailChanged && $passwordChanged) {
@@ -130,7 +231,7 @@ final class UserController extends AbstractController
                     } elseif ($skinChanged) {
                         $this->addFlash('success', 'Vos avatars ont été mis à jour.');
                     }
-    
+
                     return $this->redirectToRoute('app_user_security');
                 } else {
                     $this->addFlash('success', 'Aucune modification détectée.');
@@ -192,7 +293,7 @@ final class UserController extends AbstractController
     #[Route('/admin/{id}', name: 'app_user_delete', methods: ['POST'])]
     public function delete(Request $request, User $user, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($user);
             $entityManager->flush();
         }

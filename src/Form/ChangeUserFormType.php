@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\User;
+use App\Entity\UserSkin;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -17,6 +18,11 @@ class ChangeUserFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        // Récupération des skins débloqués depuis les options
+        $unlockedSkinsJs = $options['unlocked_skins_js'] ?? [];
+        $unlockedSkinsPhp = $options['unlocked_skins_php'] ?? [];
+        $unlockedSkinsPy = $options['unlocked_skins_py'] ?? [];
+
         $builder
             ->add('email', EmailType::class, [
                 'label' => 'NOUVEL E-MAIL',
@@ -55,10 +61,7 @@ class ChangeUserFormType extends AbstractType
                 'required' => false,
                 'expanded' => true,
                 'multiple' => false,
-                'choices' => [
-                    'Skin v1' => 'skinv1JS.png',
-                    'Skin v2' => 'skinv2JS.png',
-                ],
+                'choices' => $unlockedSkinsJs,
             ])
             ->add('avatar_php', ChoiceType::class, [
                 'label' => 'AVATAR PHP',
@@ -66,10 +69,7 @@ class ChangeUserFormType extends AbstractType
                 'required' => false,
                 'expanded' => true,
                 'multiple' => false,
-                'choices' => [
-                    'Skin v1' => 'skinv1PHP.png',
-                    'Skin v2' => 'skinv2PHP.png',
-                ],
+                'choices' => $unlockedSkinsPhp,
             ])
             ->add('avatar_py', ChoiceType::class, [
                 'label' => 'AVATAR PYTHON',
@@ -77,10 +77,7 @@ class ChangeUserFormType extends AbstractType
                 'required' => false,
                 'expanded' => true,
                 'multiple' => false,
-                'choices' => [
-                    'Skin v1' => 'skinv1PY.png',
-                    'Skin v2' => 'skinv2PY.png',
-                ],
+                'choices' => $unlockedSkinsPy,
             ]);
     }
 
@@ -90,6 +87,9 @@ class ChangeUserFormType extends AbstractType
             'data_class' => User::class,
             'csrf_protection' => true,
             'csrf_token_id' => 'change_user_form',
+            'unlocked_skins_js' => [],
+            'unlocked_skins_php' => [],
+            'unlocked_skins_py' => [],
         ]);
     }
 }
