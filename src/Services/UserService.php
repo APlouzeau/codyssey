@@ -96,9 +96,9 @@ class UserService
         return [
             'current_level' => $currentLevel,
             'xp_for_next_level' => $xpNeededForNext,
-            'xp_progress' => $xpProgress,
+            'current_xp' => $xpProgress,
             'xp_remaining' => $xpRemaining,
-            'progress_percentage' => ($xpProgress / $xpNeededForNext) * 100
+            'progress_percentage' => round(($xpProgress / $xpNeededForNext) * 100)
         ];
     }
 }
