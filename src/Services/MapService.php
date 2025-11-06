@@ -24,4 +24,17 @@ class MapService
         $this->enonceRepository = $enonceRepository;
         $this->entityManager = $entityManager;
     }
+
+    public function getAvailableLevels(array $levelTerminated): array
+    {
+        $availableLevels = [];
+
+        //dd($levelTerminated);
+
+        foreach ($levelTerminated as $level) {
+            $availableLevels[] = $level;
+            //dd($level);
+        }
+        return $availableLevels;
+    }
 }
