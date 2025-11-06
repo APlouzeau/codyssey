@@ -165,7 +165,7 @@ final class GameController extends AbstractController
             $code = $data['code'];
             $currentLifes = (int) $data['current_lifes'];
             $levelId = (int) $data['level_id'];
-
+            $experience = $data['experience'] ?? 0;
 
             // Vérifier que le level existe
             $level = $this->levelRepository->find($levelId);
@@ -194,7 +194,6 @@ final class GameController extends AbstractController
             if ($isSuccess) {
                 $user = $this->getUser();
                 if ($user instanceof User) {
-                    $experience = $this->gameService->getExpByEnonceId($enonceId);
                     $this->gameService->giveExperienceToUser($user, $experience);
                     $score = $this->gameService->calculateScore($currentLifes);
                     $this->userLevelRepository->setUserLevelCompleted($user, $level, $score);
