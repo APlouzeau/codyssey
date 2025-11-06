@@ -93,6 +93,10 @@
                         <tr>
                             <th>Id</th>
                             <th>Numéro</th>
+                            <th>Avatar</th>
+                            <th>Langage</th>
+                            <th>Énoncé</th>
+                            <th>Type</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -101,6 +105,10 @@
                         <tr>
                             <td>{{ level.id }}</td>
                             <td>{{ level.number }}</td>
+                            <td>{{ level.avatar.name }}</td>
+                            <td>{{ level.language.name }}</td>
+                            <td>{{ level.enonce.title }}</td>
+                            <td>{{ level.type.name }}</td>
                             <td class="actions">
                                 <a class="btn-link" href="{{ path('app_level_show', {'id': level.id}) }}">Voir</a>
                                 <a class="btn-link" href="{{ path('app_level_edit', {'id': level.id}) }}">Modifier</a>
@@ -108,7 +116,7 @@
                         </tr>
                     {% else %}
                         <tr>
-                            <td colspan="3" class="text-center">Aucune donnée disponible</td>
+                            <td colspan="7" class="text-center">Aucune donnée disponible</td>
                         </tr>
                     {% endfor %}
                     </tbody>
