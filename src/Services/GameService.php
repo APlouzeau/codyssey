@@ -16,6 +16,9 @@ class GameService
     private EnonceRepository $enonceRepository;
     private EntityManagerInterface $entityManager;
     private LanguageRepository $languageRepository;
+    private const MAX_POINTS = 7;
+    private const MID_POINTS = 4;
+    private const MIN_POINTS = 1;
 
     public function __construct(LevelRepository $levelRepository, EnonceRepository $enonceRepository, EntityManagerInterface $entityManager, LanguageRepository $languageRepository)
     {
@@ -103,5 +106,23 @@ class GameService
         // dd($verifLanguage, $verifNumber, $randomLevel);
 
         return $randomLevel;
+    }
+
+    public function promptIsFalse(int $currentLifes): int
+    {
+        if ($currentLifes > 0) {
+            return $currentLifes - 1;
+        }
+        return 0;
+    }
+
+    public function calculateScore(int $currentLifes,): int
+    {
+        return match (true) {
+            $currentLifes > self::MAX_POINTS => 3,
+            $currentLifes > self::MID_POINTS => 2,
+            $currentLifes > 0 => 1,
+            default => 0,
+        };
     }
 }

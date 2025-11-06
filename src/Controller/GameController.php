@@ -102,44 +102,59 @@ final class GameController extends AbstractController
             $data = json_decode($request->getContent(), true);
 
             // Validation des données
-            if (!isset($data['language']) || !isset($data['code']) || !isset($data['level_id']) || !isset($data['score'])) {
+            if (!isset($data['language'], $data['code'], $data['level_id'], $data['current_lifes'])) {
                 return $this->json([
                     'success' => false,
-                    'error' => 'Paramètres manquants (language, code, level_id requis)'
+                    'error' => 'Paramètres manquants (language, code, level_id, current_lifes requis)'
                 ], 400);
             }
 
             $languageName = $data['language'];
-            $score = $data['score'];
-            $levelId = $data['level_id'];
+            $code = $data['code'];
+            $currentLifes = (int) $data['current_lifes'];
+            $levelId = (int) $data['level_id'];
+
+            // Vérifier que le level existe
             $level = $this->levelRepository->find($levelId);
+            if (!$level) {
+                return $this->json([
+                    'success' => false,
+                    'error' => 'Level introuvable'
+                ], 404);
+            }
 
-            $codeRequest = $this->pistonService->createCodeRequest(
-                $data['code'],
-                $languageName
-            );
-
+            // Exécution du code via Piston
+            $codeRequest = $this->pistonService->createCodeRequest($code, $languageName);
             $apiResponse = $this->pistonService->controlCodeWithPiston($codeRequest);
+
+            // Comparaison des résultats
             $expectedOutput = $this->gameService->getExpectedOutputForLevel($levelId);
             $actualOutput = $apiResponse['run']['stdout'] ?? 'Pas de sortie';
             $isSuccess = $this->gameService->compareResults($expectedOutput, $actualOutput);
 
+            // Calcul des nouvelles vies
+            $newLifes = $isSuccess ? $currentLifes : $this->gameService->promptIsFalse($currentLifes);
+
+            // Attribution des récompenses si succès
             if ($isSuccess) {
                 $user = $this->getUser();
                 if ($user instanceof User) {
                     $experience = $this->gameService->getExpByEnonceId($levelId);
                     $this->gameService->giveExperienceToUser($user, $experience);
+                    $score = $this->gameService->calculateScore($currentLifes);
                     $this->userLevelRepository->setUserLevelCompleted($user, $level, $score);
                 }
             }
 
+            // Retour JSON
             return $this->json([
-                'success' => $isSuccess,
-                'expected' => $expectedOutput,
-                'actual' => $actualOutput,
-                'code' => $data['code'],
+                'isSuccess' => $isSuccess,
+                'expectedOutput' => $expectedOutput,
+                'actualOutput' => $actualOutput,
+                'code' => $code,
                 'stderr' => $apiResponse['run']['stderr'] ?? null,
-                'execution_time' => $apiResponse['run']['cpu_time'] ?? null,
+                'executionTime' => $apiResponse['run']['cpu_time'] ?? null,
+                'newLifes' => $newLifes
             ]);
         } catch (\Exception $e) {
             return $this->json([
