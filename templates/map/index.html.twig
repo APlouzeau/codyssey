@@ -1,0 +1,289 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Lobby Codyssey{% endblock %}
+
+{% block body %}
+<style>
+    body {
+        background: #e8f7fb;
+        font-family: 'Michroma', sans-serif;
+        overflow: hidden;
+    }
+
+    .map-container {
+        width: 100vw;
+        height: 100vh;
+        position: relative;
+        background: url('/path/fond-hexagons.png'); /*Remplacer par hex dynamique?*/
+        background-size: cover;
+    }
+
+    .map-header {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        display: flex;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .menu-icons button {
+        width: 35px;
+        height: 35px;
+        margin-left: 10px;
+        border: none;
+        border-radius: 8px;
+        background: #fff;
+        cursor: pointer;
+    }
+
+    .player {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: cyan;
+        position: absolute;
+        left: 8%;
+        top: 40%;
+        z-index: 10;
+    }
+    /* Remplacer par sprite */
+
+    .level-grid {
+        position: absolute;
+        top: 20%;
+        left: 15%;
+        width: 70%;
+        display: flex;
+        flex-direction: column;
+        gap: 50px;
+    }
+
+    .level-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .level-node {
+        width: 45px;
+        height: 45px;
+        border-radius: 10px;
+        background: white;
+        border: 2px solid #ccc;
+    }
+    /* Remplacer par sprite */
+
+    .level[data-type="blue"]   { border-color: #3d8bfd; }
+    .level[data-type="green"]  { border-color: #4cc66e; }
+    .level[data-type="yellow"] { border-color: #ffbe3d; }
+
+    .boss {
+        border-color: red;
+        position: relative;
+    }
+    /* Remplacer par sprite */
+
+    .progress-container {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%); 
+        width: 50%;
+        text-align: center;
+    }
+
+    .progress-bar {
+        height: 18px;
+        background: #c6e9d8;
+        border-radius: 8px;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: #67ff7a;
+        border-radius: 8px;
+    }
+</style>
+
+<div class="map-container">
+    <ul>
+        {% for level in levels_terminated %}
+            <li>{{ level.level.language.name }} - {{ level.level.number }} : {{ level.score }} pts</li>
+        {% endfor %}
+        {% for level in next_levels %}
+            <li>{{ level.language.name }} - {{ level.number }}</li>
+        {% endfor %}
+    </ul>
+    <!-- MENU FIXE (avatar + icônes) -->
+    <div class="map-header">
+        <div class="avatar-icon"></div>
+
+        <div class="menu-icons">
+
+            <a href="{{path('app_home')}}"><button class="btn-home" title="Accueil"></button></a>
+            <a href="{{path('app_lesson_index')}}"><button class="btn-courses" title="Cours"></button></a>
+            <button class="btn-inventory" title="Changer inventory"></button>
+        </div>
+    </div>
+
+    <div id="player" class="player"></div>
+
+    <div class="level-grid">
+        {% for row in 1..3 %}
+            <div class="level-row">
+
+                <div class="level-node start-node" data-row="{{ row }}"></div>
+
+                {% for col in 1..4 %}
+                    <div class="level-node level"
+                        data-row="{{ row }}"
+                        data-level="{{ row }}-{{ col }}"
+                        data-type="{% if row == 1 %}blue{% elseif row == 2 %}green{% else %}yellow{% endif %}">
+                    </div>
+                {% endfor %}
+
+                {% if row == 2 %}
+                    <div class="level-node boss" data-row="{{ row }}" data-level="boss"></div>
+                {% else %}
+                    <div class="level-node end-node" data-row="{{ row }}"></div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+
+    <footer class="progress-container">
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: 1%;"></div> {# Mettre width correspondante à la valeur d'exp #}
+        </div>
+        <p>Niveau </p> {# currentLevel #}
+    </footer>
+</div>
+
+<script>
+    let currentRow = 2; // joueur commence sur la 2e ligne
+    let player = document.getElementById("player");
+
+    // Position initiale : start node de la row 2
+    let currentNode = document.querySelector('.level-row:nth-child(2) .start-node');
+    player.dataset.currentNodeType = "start";
+
+    // Place le joueur sur la node de départ
+    movePlayerTo(currentNode);
+
+    // écoute des clics sur les nodes
+    document.querySelectorAll(".level-node").forEach(node => {
+        node.addEventListener("click", () => {
+            const targetRow = parseInt(node.dataset.row);
+
+            // Si le joueur est sur une start node
+            if (currentNode.classList.contains("start-node")) {
+                // Autorise le déplacement vers la start node du dessus
+                if (
+                    node.classList.contains("start-node") &&
+                    targetRow === currentRow - 1
+                ) {
+                    movePlayerTo(node);
+                    currentNode = node;
+                    currentRow = targetRow;
+                    return;
+                }
+                // Autorise le déplacement vers la start node du dessous
+                if (
+                    node.classList.contains("start-node") &&
+                    targetRow === currentRow + 1
+                ) {
+                    movePlayerTo(node);
+                    currentNode = node;
+                    currentRow = targetRow;
+                    return;
+                }
+            }
+
+            // Si le joueur est sur une end node
+            if (currentNode.classList.contains("end-node")) {
+                // Autorise le déplacement vers le boss du dessus
+                if (
+                    node.classList.contains("boss") &&
+                    targetRow === currentRow - 1
+                ) {
+                    movePlayerTo(node);
+                    currentNode = node;
+                    currentRow = targetRow;
+                    return;
+                }
+                // Autorise le déplacement vers le boss du dessous
+                if (
+                    node.classList.contains("boss") &&
+                    targetRow === currentRow + 1
+                ) {
+                    movePlayerTo(node);
+                    currentNode = node;
+                    currentRow = targetRow;
+                    return;
+                }
+            }
+
+            if (currentNode.classList.contains("boss")) {
+                // Autorise le déplacement vers l'end-node du dessus
+                if (
+                    node.classList.contains("end-node") &&
+                    targetRow === currentRow - 1
+                ) {
+                    movePlayerTo(node);
+                    currentNode = node;
+                    currentRow = targetRow;
+                    return;
+                }
+                // Autorise le déplacement vers l'end-node du dessous
+                if (
+                    node.classList.contains("end-node") &&
+                    targetRow === currentRow + 1
+                ) {
+                    movePlayerTo(node);
+                    currentNode = node;
+                    currentRow = targetRow;
+                    return;
+                }
+            }
+
+            // Bloque si pas même row
+            if (targetRow !== currentRow) {
+                console.log("Tu ne peux te déplacer que sur ta ligne");
+                return;
+            }
+
+            // Récupère toutes les nodes de la rangée courante
+            const rowNodes = Array.from(node.parentElement.querySelectorAll('.level-node'));
+            const currentIndex = rowNodes.indexOf(currentNode);
+            const targetIndex = rowNodes.indexOf(node);
+
+            // Vérifie la distance pour pas skip
+            if (Math.abs(targetIndex - currentIndex) !== 1) {
+                console.log("Tu ne peux te déplacer que d'une node à la fois");
+                return;
+            }
+
+            // Déplacement autorisé
+            movePlayerTo(node);
+            currentNode = node;
+        });
+    });
+
+    function movePlayerTo(target) {
+        const rect = target.getBoundingClientRect();
+        const mapRect = document.querySelector('.map-container').getBoundingClientRect();
+        const playerSize = player.offsetWidth;
+        const nodeSize = target.offsetWidth;
+
+        const left = rect.left - mapRect.left + (nodeSize / 2) - (playerSize / 2);
+        const top = rect.top - mapRect.top + (nodeSize / 2) - (playerSize / 2);
+
+        player.style.transition = "0.5s ease";
+        player.style.left = left + "px";
+        player.style.top = top + "px";
+    }
+</script>
+
+{% endblock body %}

@@ -40,4 +40,16 @@ class EnonceRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    public function getExperienceByEnonceId(int $enonceId): ?int
+    {
+        $enonce = $this->find($enonceId);
+        return $enonce ? $enonce->getXpGain() : null;
+    }
+
+    public function getResultsByEnonceId(int $enonceId): ?string
+    {
+        $enonce = $this->find($enonceId);
+        return $enonce ? $enonce->getExpectedResults() : null;
+    }
 }
