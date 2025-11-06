@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Entity\User;
+use App\Entity\UserLevel;
 use App\Repository\EnonceRepository;
 use App\Repository\LevelRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,7 +27,7 @@ class UserService
 
     /**
      * Calcule le niveau d'un joueur en fonction de son XP
-     * 
+     *
      * @param User $user L'utilisateur dont on veut calculer le niveau
      * @return int Le niveau actuel du joueur
      */
@@ -55,7 +56,7 @@ class UserService
 
     /**
      * Calcule l'XP nécessaire pour atteindre un niveau donné
-     * 
+     *
      * @param int $targetLevel Le niveau cible
      * @return int L'XP totale nécessaire pour atteindre ce niveau
      */
@@ -78,7 +79,7 @@ class UserService
 
     /**
      * Calcule l'XP restante avant le prochain niveau
-     * 
+     *
      * @param User $user L'utilisateur
      * @return array ['current_level' => int, 'xp_for_next_level' => int, 'xp_progress' => int, 'xp_remaining' => int]
      */
@@ -100,5 +101,21 @@ class UserService
             'xp_remaining' => $xpRemaining,
             'progress_percentage' => round(($xpProgress / $xpNeededForNext) * 100)
         ];
+    }
+
+
+    public function initializeStartingLevels(User $user): void
+    {
+        $startingLevels = $this->levelRepository->findBy(['number' => 1]);
+
+        foreach ($startingLevels as $level) {
+            $userLevel = new UserLevel();
+            $userLevel->setUser($user);
+            $userLevel->setLevel($level);
+            $userLevel->setScore(0);
+            $userLevel->setCompleted(false);
+
+            $this->entityManager->persist($userLevel);
+        }
     }
 }
