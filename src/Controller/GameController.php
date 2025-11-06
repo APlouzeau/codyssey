@@ -41,10 +41,9 @@ final class GameController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $data = $form->getData();
-
                 // Debug : voir ce qui est envoyé
                 // Récupérer le nom du langage depuis l'entité en minuscules
-                $languageName = strtolower($data['language']->getName());
+                $languageName = $data['language']->getName();
 
                 $codeRequest = $this->pistonService->createCodeRequest(
                     $data['code'],
