@@ -19,7 +19,7 @@ class Lesson
     #[ORM\Column(length: 255)]
     private ?string $title = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: Types::JSON, nullable: true)]
     private ?string $content = null;
 
     /**
@@ -31,6 +31,9 @@ class Lesson
     #[ORM\ManyToOne(inversedBy: 'lessons')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Language $language = null;
+
+    #[ORM\Column]
+    private ?int $number = null;
 
     public function __construct()
     {
@@ -104,6 +107,18 @@ class Lesson
     public function setLanguage(?Language $language): static
     {
         $this->language = $language;
+
+        return $this;
+    }
+
+    public function getNumber(): ?int
+    {
+        return $this->number;
+    }
+
+    public function setNumber(int $number): static
+    {
+        $this->number = $number;
 
         return $this;
     }
