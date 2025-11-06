@@ -1,0 +1,65 @@
+name: 🧪 Test & Lint
+
+on:
+  pull_request:
+    branches:
+      - main
+      - pre-prod
+  push:
+    branches:
+      - dev
+      - feature/**
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐘 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_pgsql
+          coverage: none
+
+      - name: 📦 Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: 🔍 PHP Syntax Check
+        run: find src -name "*.php" -print0 | xargs -0 -n1 php -l
+
+      - name: 🧪 Run PHPUnit tests
+        run: |
+          if [ -f "bin/phpunit" ]; then
+            php bin/phpunit
+          else
+            echo "⚠️  No tests configured yet"
+          fi
+
+  lint-js:
+    name: Lint JavaScript
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      - name: 📦 Install dependencies
+        run: pnpm install
+
+      - name: 🎨 Check assets build
+        run: pnpm run build
