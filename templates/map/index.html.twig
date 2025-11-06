@@ -14,7 +14,7 @@
         width: 100vw;
         height: 100vh;
         position: relative;
-        background: url('/path/fond-hexagons.png'); /*Remplacer par hex dynamique?*/
+        /*background: url('/path/fond-hexagons.png'); Remplacer par hex dynamique?*/
         background-size: cover;
     }
 
@@ -104,15 +104,71 @@
         background: #67ff7a;
         border-radius: 8px;
     }
+
+    #inventory-popup {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+    }
+
+    .inventory-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: 80%;
+        max-width: 600px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .inventory-sections {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .skins-section, .items-section {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .skins-icons, .items-icons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    #close-inventory {
+        margin-top: 10px;
+        padding: 10px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    #close-inventory:hover {
+        background: #0056b3;
+    }
 </style>
 
 <div class="map-container">
     <ul>
         {% for level in level_available %}
-            <li>{{ level.level.language.id }} - {{ level.level.number }} : {{ level.score }} pts</li>
+            <li>{{ level.level.language.id }} - {{ level.level.language.name }} - {{ level.level.number }} : {{ level.score }} pts</li>
         {% endfor %}
     </ul>
-    <!-- MENU FIXE (avatar + icônes) -->
+
     <div class="map-header">
         <div class="avatar-icon"></div>
 
@@ -120,7 +176,7 @@
 
             <a href="{{path('app_home')}}"><button class="btn-home" title="Accueil"></button></a>
             <a href="{{path('app_lesson_index')}}"><button class="btn-courses" title="Cours"></button></a>
-            <button class="btn-inventory" title="Changer inventory"></button>
+            <button class="btn-inventory" title="Inventaire"></button>
         </div>
     </div>
 
@@ -158,8 +214,31 @@
     </footer>
 </div>
 
+<!-- Popup Inventaire -->
+<div id="inventory-popup" style="display:none;">
+    <div class="inventory-content">
+        <h2>Inventaire</h2>
+        <div class="inventory-sections">
+            <div class="skins-section">
+                <h3>Skins débloqués</h3>
+                <div class="skins-icons">
+                    <!-- Icônes de skins à afficher dynamiquement -->
+                </div>
+            </div>
+            <div class="items-section">
+                <h3>Objets à collecter</h3>
+                <div class="items-icons">
+                    <!-- Icônes d'objets à afficher dynamiquement -->
+                </div>
+            </div>
+        </div>
+        <button id="close-inventory">Fermer</button>
+    </div>
+</div>
+
 <script>
     let currentRow = 2; // joueur commence sur la 2e ligne
+    let currentCol = 0; // nouvelle variable pour la colonne, défaut à nulle
     let player = document.getElementById("player");
 
     // Position initiale : start node de la row 2
@@ -176,7 +255,7 @@
 
             // Si le joueur est sur une start node
             if (currentNode.classList.contains("start-node")) {
-                // Autorise le déplacement vers la start node du dessus
+                // Autorise le déplacement vers la start node du dessus ou dessous
                 if (
                     node.classList.contains("start-node") &&
                     targetRow === currentRow - 1
@@ -186,7 +265,6 @@
                     currentRow = targetRow;
                     return;
                 }
-                // Autorise le déplacement vers la start node du dessous
                 if (
                     node.classList.contains("start-node") &&
                     targetRow === currentRow + 1
@@ -200,7 +278,7 @@
 
             // Si le joueur est sur une end node
             if (currentNode.classList.contains("end-node")) {
-                // Autorise le déplacement vers le boss du dessus
+                // Autorise le déplacement vers le boss du dessus ou dessous
                 if (
                     node.classList.contains("boss") &&
                     targetRow === currentRow - 1
@@ -210,7 +288,6 @@
                     currentRow = targetRow;
                     return;
                 }
-                // Autorise le déplacement vers le boss du dessous
                 if (
                     node.classList.contains("boss") &&
                     targetRow === currentRow + 1
@@ -223,7 +300,7 @@
             }
 
             if (currentNode.classList.contains("boss")) {
-                // Autorise le déplacement vers l'end-node du dessus
+                // Autorise les déplacement vers l'end-node du dessus ou dessous
                 if (
                     node.classList.contains("end-node") &&
                     targetRow === currentRow - 1
@@ -233,7 +310,6 @@
                     currentRow = targetRow;
                     return;
                 }
-                // Autorise le déplacement vers l'end-node du dessous
                 if (
                     node.classList.contains("end-node") &&
                     targetRow === currentRow + 1
@@ -268,6 +344,31 @@
         });
     });
 
+    function launchLevel(row, col) {
+        const url = `/game?lang=${row}&niv=${col}`;
+        window.location.href = url;
+    }
+
+    // écouteur pour la touche Entrée
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            if (currentNode.classList.contains("level")) {
+                const row = currentNode.dataset.row;
+                let col = null;
+                if (currentNode.dataset.level && currentNode.dataset.level.includes('-')) {
+                    col = currentNode.dataset.level.split('-')[1];
+                }
+
+                let langName = "";
+                if (row === "1") langName = "JavaScript";
+                else if (row === "2") langName = "PHP";
+                else if (row === "3") langName = "Python";
+                
+                launchLevel(langName, col);
+            }
+        }
+    });
+
     function movePlayerTo(target) {
         const rect = target.getBoundingClientRect();
         const mapRect = document.querySelector('.map-container').getBoundingClientRect();
@@ -280,7 +381,36 @@
         player.style.transition = "0.5s ease";
         player.style.left = left + "px";
         player.style.top = top + "px";
+
+        // Met à jour la colonne actuelle
+        if (target.dataset.level && target.dataset.level.includes('-')) {
+            currentCol = target.dataset.level.split('-')[1];
+        } else {
+            currentCol = null;
+        }
+
+        console.log("Row:", target.dataset.row, "Colonne:", currentCol);
     }
+
+    // Gestion du popup d'inventaire
+    const inventoryPopup = document.getElementById("inventory-popup");
+    const btnInventory = document.querySelector(".btn-inventory");
+    const closeInventory = document.getElementById("close-inventory");
+
+    btnInventory.addEventListener("click", () => {
+        inventoryPopup.style.display = "block";
+    });
+
+    closeInventory.addEventListener("click", () => {
+        inventoryPopup.style.display = "none";
+    });
+
+    // Ferme le popup si on clique en dehors
+    window.addEventListener("click", (e) => {
+        if (e.target === inventoryPopup) {
+            inventoryPopup.style.display = "none";
+        }
+    });
 </script>
 
 {% endblock body %}
