@@ -31,13 +31,15 @@ final class MapController extends AbstractController
         $user = $this->getUser();
         $userLevel = $this->userService->getUserLevel($user);
         $levelsTerminated = $this->userLevelRepository->findLevelsWithScore($user);
-        $nextLevels = [];
-        $xpNeeded = $this->userService->getProgressToNextLevel($user); // ← Ajouté pour récupérer l'XP nécessaire
-        $firstsLevels = $this->levelRepository->getFirstsLevels();
 
-        foreach ($levelsTerminated as $levelProgress) { // ← Renommé !
+        // Récupère tous les premiers niveaux (pour les niveaux non commencés)
+        $nextLevels = $this->levelRepository->getFirstsLevels();
+
+        $xpNeeded = $this->userService->getProgressToNextLevel($user);
+
+        // Ajoute les niveaux suivants pour chaque niveau terminé
+        foreach ($levelsTerminated as $levelProgress) {
             $currentLevel = $levelProgress->getLevel();
-
             $nextLevel = $this->levelRepository->getNextLevelForUser($currentLevel);
 
             if ($nextLevel instanceof \App\Entity\Level) {
@@ -50,7 +52,6 @@ final class MapController extends AbstractController
             'next_levels' => $nextLevels,
             'user_level' => $userLevel,
             'xp_needed' => $xpNeeded,
-            'firsts_level' => $firstsLevels
         ]);
     }
 }
