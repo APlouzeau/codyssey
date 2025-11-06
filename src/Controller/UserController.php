@@ -33,44 +33,104 @@ final class UserController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         $originalEmail = $user->getEmail();
-
+    
         $form = $this->createForm(ChangeUserFormType::class, $user);
         $form->handleRequest($request);
-
+    
+        // Précharger les avatars sélectionnés (GET)
+        if (!$form->isSubmitted()) {
+            $skinRepo = $entityManager->getRepository(\App\Entity\Skin::class);
+            $currentSkins = $skinRepo->findBy(['is_current' => true]);
+    
+            $defaults = [
+                'js' => 'skinv1JS.png',
+                'php' => 'skinv1PHP.png',
+                'py'  => 'skinv1PY.png',
+            ];
+    
+            foreach ($currentSkins as $skin) {
+                $fn = $skin->getFileName() ?? '';
+                if (str_contains($fn, 'JS')) {
+                    $defaults['js'] = $fn;
+                } elseif (str_contains($fn, 'PHP')) {
+                    $defaults['php'] = $fn;
+                } elseif (str_contains($fn, 'PY')) {
+                    $defaults['py'] = $fn;
+                }
+            }
+    
+            $form->get('avatar_js')->setData($defaults['js']);
+            $form->get('avatar_php')->setData($defaults['php']);
+            $form->get('avatar_py')->setData($defaults['py']);
+        }
+    
         if ($form->isSubmitted()) {
             $hasErrors = false;
-
+    
             $currentPassword = $form->get('currentPassword')->getData();
             if (!$passwordHasher->isPasswordValid($user, $currentPassword)) {
                 $form->get('currentPassword')->addError(new FormError('Mot de passe actuel invalide.'));
                 $hasErrors = true;
             }
-
+    
             $newPassword = $form->get('newPassword')->get('first')->getData();
             if (!empty($newPassword) && strlen($newPassword) < 8) {
                 $form->get('newPassword')->addError(new FormError('Votre mot de passe doit contenir au moins 8 caractères.'));
                 $hasErrors = true;
             }
-
+    
             $emailChanged = $user->getEmail() !== $originalEmail;
             $passwordChanged = !empty($newPassword);
-
+    
             if (!$hasErrors && $form->isValid()) {
                 if ($passwordChanged) {
                     $user->setPassword($passwordHasher->hashPassword($user, $newPassword));
                 }
-
-                if ($emailChanged || $passwordChanged) {
+    
+                // Persist selected skins from form (JS/PHP/PY)
+                $selectedJs = $form->get('avatar_js')->getData();
+                $selectedPhp = $form->get('avatar_php')->getData();
+                $selectedPy = $form->get('avatar_py')->getData();
+                $skinChanged = false;
+    
+                $skinRepo = $entityManager->getRepository(\App\Entity\Skin::class);
+                foreach ([$selectedJs, $selectedPhp, $selectedPy] as $fileName) {
+                    if ($fileName) {
+                        /** @var \App\Entity\Skin|null $skin */
+                        $skin = $skinRepo->findOneBy(['file_name' => $fileName]);
+                        if ($skin) {
+                            $avatar = $skin->getAvatar();
+                            $siblings = $skinRepo->findBy(['avatar' => $avatar]);
+                            foreach ($siblings as $s) {
+                                $s->setIsCurrent(false);
+                            }
+                            $skin->setIsCurrent(true);
+                            $skinChanged = true;
+                        }
+                    }
+                }
+    
+                $hasUpdates = $emailChanged || $passwordChanged || $skinChanged;
+    
+                if ($hasUpdates) {
                     $entityManager->flush();
-
-                    if ($emailChanged && $passwordChanged) {
+    
+                    if ($emailChanged && $passwordChanged && $skinChanged) {
+                        $this->addFlash('success', 'Votre e-mail, mot de passe et avatars ont été mis à jour.');
+                    } elseif ($emailChanged && $passwordChanged) {
                         $this->addFlash('success', 'Votre e-mail et votre mot de passe ont été mis à jour.');
+                    } elseif ($emailChanged && $skinChanged) {
+                        $this->addFlash('success', 'Votre e-mail et vos avatars ont été mis à jour.');
+                    } elseif ($passwordChanged && $skinChanged) {
+                        $this->addFlash('success', 'Votre mot de passe et vos avatars ont été mis à jour.');
                     } elseif ($emailChanged) {
                         $this->addFlash('success', 'Votre e-mail a été mis à jour.');
                     } elseif ($passwordChanged) {
                         $this->addFlash('success', 'Votre mot de passe a été mis à jour.');
+                    } elseif ($skinChanged) {
+                        $this->addFlash('success', 'Vos avatars ont été mis à jour.');
                     }
-
+    
                     return $this->redirectToRoute('app_user_security');
                 } else {
                     $this->addFlash('success', 'Aucune modification détectée.');

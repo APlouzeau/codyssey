@@ -11,6 +11,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 class ChangeUserFormType extends AbstractType
 {
@@ -46,6 +47,39 @@ class ChangeUserFormType extends AbstractType
                 'second_options' => [
                     'label' => 'CONFIRMATION DU MOT DE PASSE',
                     'attr' => ['autocomplete' => 'new-password'],
+                ],
+            ])
+            ->add('avatar_js', ChoiceType::class, [
+                'label' => 'AVATAR JAVASCRIPT',
+                'mapped' => false,
+                'required' => false,
+                'expanded' => true,
+                'multiple' => false,
+                'choices' => [
+                    'Skin v1' => 'skinv1JS.png',
+                    'Skin v2' => 'skinv2JS.png',
+                ],
+            ])
+            ->add('avatar_php', ChoiceType::class, [
+                'label' => 'AVATAR PHP',
+                'mapped' => false,
+                'required' => false,
+                'expanded' => true,
+                'multiple' => false,
+                'choices' => [
+                    'Skin v1' => 'skinv1PHP.png',
+                    'Skin v2' => 'skinv2PHP.png',
+                ],
+            ])
+            ->add('avatar_py', ChoiceType::class, [
+                'label' => 'AVATAR PYTHON',
+                'mapped' => false,
+                'required' => false,
+                'expanded' => true,
+                'multiple' => false,
+                'choices' => [
+                    'Skin v1' => 'skinv1PY.png',
+                    'Skin v2' => 'skinv2PY.png',
                 ],
             ]);
     }
