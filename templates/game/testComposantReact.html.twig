@@ -1,0 +1,6 @@
+{# templates/home.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div {{ react_component('Hello', { testProp:{{}} }) }}></div>
+{% endblock %}

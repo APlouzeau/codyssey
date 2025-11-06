@@ -29,6 +29,12 @@ final class GameController extends AbstractController
         ]);
     } */
 
+      #[Route('/gameReact/test', name: 'app_game_testReact', methods: ['GET'])]
+    public function testReact(): Response
+    {
+        return $this->render('game/testComposantReact.html.twig');
+    }
+
     #[Route('/game/{language}/{number}', requirements: ['language' => '\w+', 'number' => '\d+'], name: 'app_game_submit', methods: ['GET', 'POST'])]
     public function submitCode(Request $request, string $language, int $number): Response
     {
