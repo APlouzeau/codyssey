@@ -8,10 +8,10 @@
 - [ ] Copier la clé SSH privée générée
 - [ ] Aller sur GitHub : https://github.com/APlouzeau/codyssey/settings/secrets/actions
 - [ ] Créer les 4 secrets :
-  - [ ] `SSH_PRIVATE_KEY` (la clé complète avec BEGIN/END)
-  - [ ] `VPS_HOST` (ex: `vps.plouzor.fr` ou l'IP)
+  - [ ] `VPS_OVH_SSH_KEY` (la clé complète avec BEGIN/END)
+  - [ ] `VPS_HOST` (ex: `135.125.106.184` ou `vps.plouzor.fr`)
   - [ ] `VPS_USER` (ex: `eyola`)
-  - [ ] `VPS_PATH` (ex: `/home/eyola/codyssey`)
+  - [ ] `VPS_PATH` (ex: `/home/eyola/projects/projects/prod/codyssey`)
 
 ### Sur le VPS
 

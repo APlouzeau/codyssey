@@ -65,10 +65,10 @@
 ```
 
 **Les 4 secrets à configurer :**
-- `SSH_PRIVATE_KEY` : Clé SSH générée par le script
-- `VPS_HOST` : Adresse du VPS (ex: `vps.plouzor.fr`)
+- `VPS_OVH_SSH_KEY` : Clé SSH générée par le script
+- `VPS_HOST` : Adresse du VPS (ex: `135.125.106.184`)
 - `VPS_USER` : User SSH (ex: `eyola`)
-- `VPS_PATH` : Chemin du projet (ex: `/home/eyola/codyssey`)
+- `VPS_PATH` : Chemin du projet (ex: `/home/eyola/projects/projects/prod/codyssey`)
 
 ### 2. Premier Déploiement
 

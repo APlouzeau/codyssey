@@ -11,7 +11,7 @@ Pour que le déploiement automatique fonctionne, tu dois configurer les secrets 
 
 ### Secrets nécessaires
 
-#### 1. `SSH_PRIVATE_KEY`
+#### 1. `VPS_OVH_SSH_KEY`
 La clé SSH privée pour te connecter au VPS.
 
 ```bash
