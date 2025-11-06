@@ -165,6 +165,12 @@
     #map-paths {
         z-index: 1;
     }
+
+    .locked {
+        background: #f0f0f0;
+        border-color: #999;
+        pointer-events: none;
+    }
 </style>
 
 <div class="map-container">
@@ -188,7 +194,7 @@
         <div class="menu-icons">
 
             <a href="{{path('app_home')}}"><button class="btn-home" title="Accueil"></button></a>
-            <a href="{{path('app_lesson_index')}}"><button class="btn-courses" title="Cours"></button></a>
+            <a href="{{path('app_lesson_home')}}"><button class="btn-courses" title="Cours"></button></a>
             <button class="btn-inventory" title="Inventaire"></button>
         </div>
     </div>
@@ -218,12 +224,20 @@
         {% endfor %}
     </div>
 
-
+    <p style="position:absolute; bottom: 170px; left:50%; transform:translateX(-50%); color:#555; font-size:14px; z-index:10;">
+        <b>Clique</b> pour te déplacer sur les cases.
+    </p>
+    <p style="position:absolute; bottom: 140px; left:50%; transform:translateX(-50%); color:#555; font-size:14px; z-index:10;">
+        Appuie sur <b>Entrée</b> pour lancer le niveau sélectionné
+    </p>
     <div class="progress-container">
-        <div class="progress-bar">
-            <div class="progress-fill" style="width: 1%;"></div> {# Mettre width correspondante à la valeur d'exp #}
+        <div class="progress-bar" style="position: relative;">
+            <div class="progress-fill" style="width: {{ xp_needed.progress_percentage }}%;"></div>
+            <div style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #333; pointer-events: none;">
+            {{ xp_needed.current_xp }} / {{ xp_needed.xp_for_next_level }} XP
+            </div>
         </div>
-        <p>Niveau </p> {# currentLevel #}
+        <p>Niveau {{ user_level }}</p>
     </div>
 
     <svg id="map-paths" style="position:absolute; top:0; left:0; width:100vw; height:100vh; pointer-events:none; z-index:2;"></svg>
@@ -250,6 +264,22 @@
         <button id="close-inventory">Fermer</button>
     </div>
 </div>
+
+<script>
+    // Correspondance row <-> language
+    // 1=JavaScript, 2=PHP, 3=Python sur la map
+    const maxColPerRow = { 1: 0, 2: 0, 3: 0 };
+    {% for level in next_levels %}
+        {% if level.language.name == 'PHP' %}
+            {% set row = 2 %}
+        {% elseif level.language.name == 'JavaScript' %}
+            {% set row = 1 %}
+        {% elseif level.language.name == 'Python' %}
+            {% set row = 3 %}
+        {% endif %}
+        maxColPerRow[{{ row }}] = Math.max(maxColPerRow[{{ row }}], {{ level.number }});
+    {% endfor %}
+</script>
 
 <script>
     let currentRow = 2; // joueur commence sur la 2e ligne
@@ -353,6 +383,15 @@
                 return;
             }
 
+            // Empêche d'aller plus loin que le niveau suivant le dernier complété
+            if (node.classList.contains("level")) {
+                const col = parseInt(node.dataset.level.split('-')[1]);
+                if (col > maxColPerRow[targetRow]) {
+                    console.log("Tu dois d'abord terminer le niveau précédent !");
+                    return;
+                }
+            }
+
             // Déplacement autorisé
             movePlayerTo(node);
             currentNode = node;
@@ -420,7 +459,7 @@
         inventoryPopup.style.display = "none";
     });
 
-    // Ferme le popup si on clique en dehors
+    // Ferme si on clique en dehors
     window.addEventListener("click", (e) => {
         if (e.target === inventoryPopup) {
             inventoryPopup.style.display = "none";
@@ -459,14 +498,14 @@
         }
     }
 
-    // Fonction utilitaire pour dessiner une ligne entre deux nodes
+    //  dessiner une ligne entre deux nodes
     function drawLineBetween(nodeA, nodeB, color="#b0b0b0") {
         const svg = document.getElementById("map-paths");
         const rectA = nodeA.getBoundingClientRect();
         const rectB = nodeB.getBoundingClientRect();
         const mapRect = document.querySelector('.map-container').getBoundingClientRect();
 
-        // Centre de chaque node
+        // Centrage
         const x1 = rectA.left - mapRect.left + rectA.width/2;
         const y1 = rectA.top - mapRect.top + rectA.height/2;
         const x2 = rectB.left - mapRect.left + rectB.width/2;
@@ -483,9 +522,20 @@
         svg.appendChild(line);
     }
 
-    // Redessine les chemins au chargement et au resize
+    // Redessine au chargement et resize
     window.addEventListener("DOMContentLoaded", drawPaths);
     window.addEventListener("resize", drawPaths);
+
+    // Grise les nodes verrouillées
+    window.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".level-node.level").forEach(node => {
+            const row = parseInt(node.dataset.row);
+            const col = parseInt(node.dataset.level.split('-')[1]);
+            if (col > maxColPerRow[row]) {
+                node.classList.add("locked");
+            }
+        });
+    });
 </script>
 
 {% endblock body %}
