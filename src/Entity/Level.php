@@ -16,9 +16,6 @@ class Level
     #[ORM\Column]
     private ?int $number = null;
 
-    #[ORM\Column]
-    private ?int $score = null;
-
     #[ORM\ManyToOne(inversedBy: 'levels')]
     private ?Avatar $avatar = null;
 
@@ -47,18 +44,6 @@ class Level
     public function setNumber(int $number): static
     {
         $this->number = $number;
-
-        return $this;
-    }
-
-    public function getScore(): ?int
-    {
-        return $this->score;
-    }
-
-    public function setScore(int $score): static
-    {
-        $this->score = $score;
 
         return $this;
     }

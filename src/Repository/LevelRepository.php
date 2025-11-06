@@ -40,4 +40,10 @@ class LevelRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    public function getExperienceByLevelId(int $levelId): ?int
+    {
+        $level = $this->find($levelId);
+        return $level ? $level->getScore() : null;
+    }
 }

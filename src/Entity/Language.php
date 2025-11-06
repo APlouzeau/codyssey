@@ -19,12 +19,6 @@ class Language
     private ?string $name = null;
 
     /**
-     * @var Collection<int, User>
-     */
-    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'languages')]
-    private Collection $users;
-
-    /**
      * @var Collection<int, Level>
      */
     #[ORM\OneToMany(targetEntity: Level::class, mappedBy: 'language')]
@@ -38,7 +32,6 @@ class Language
 
     public function __construct()
     {
-        $this->users = new ArrayCollection();
         $this->levels = new ArrayCollection();
         $this->lessons = new ArrayCollection();
     }
@@ -56,33 +49,6 @@ class Language
     public function setName(string $name): static
     {
         $this->name = $name;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, User>
-     */
-    public function getUsers(): Collection
-    {
-        return $this->users;
-    }
-
-    public function addUser(User $user): static
-    {
-        if (!$this->users->contains($user)) {
-            $this->users->add($user);
-            $user->addLanguage($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUser(User $user): static
-    {
-        if ($this->users->removeElement($user)) {
-            $user->removeLanguage($this);
-        }
 
         return $this;
     }

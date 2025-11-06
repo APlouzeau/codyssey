@@ -27,7 +27,7 @@ class EnonceType extends AbstractType
             ])
             ->add('tips', EntityType::class, [
                 'class' => Tips::class,
-                'choice_label' => 'content',
+                'choice_label' => 'name',
                 'multiple' => true,
             ])
         ;

@@ -37,18 +37,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(options: ['default' => 0])]
     private ?int $XP = 0;
-    /**
-     * @var Collection<int, Language>
-     */
-    #[ORM\ManyToMany(targetEntity: Language::class, inversedBy: 'users')]
-    private Collection $languages;
 
     #[ORM\Column(length: 255)]
     private ?string $pseudo = null;
 
+    /**
+     * @var Collection<int, UserLevel>
+     */
+    #[ORM\OneToMany(targetEntity: UserLevel::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $userLevels;
+
     public function __construct()
     {
-        $this->languages = new ArrayCollection();
+        $this->userLevels = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -121,7 +122,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __serialize(): array
     {
         $data = (array) $this;
-        $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
+        $data["\0" . self::class . "\0password"] = hash('crc32c', $this->password);
 
         return $data;
     }
@@ -145,25 +146,31 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Language>
+     * @return Collection<int, UserLevel>
      */
-    public function getLanguages(): Collection
+    public function getUserLevels(): Collection
     {
-        return $this->languages;
+        return $this->userLevels;
     }
 
-    public function addLanguage(Language $language): static
+    public function addUserLevel(UserLevel $userLevel): static
     {
-        if (!$this->languages->contains($language)) {
-            $this->languages->add($language);
+        if (!$this->userLevels->contains($userLevel)) {
+            $this->userLevels->add($userLevel);
+            $userLevel->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeLanguage(Language $language): static
+    public function removeUserLevel(UserLevel $userLevel): static
     {
-        $this->languages->removeElement($language);
+        if ($this->userLevels->removeElement($userLevel)) {
+            // set the owning side to null (unless already changed)
+            if ($userLevel->getUser() === $this) {
+                $userLevel->setUser(null);
+            }
+        }
 
         return $this;
     }
