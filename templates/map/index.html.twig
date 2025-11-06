@@ -186,6 +186,13 @@
         <p>XP nécessaire pour le niveau suivant : {{ xp_needed.xp_for_next_level }}</p>
         <p>XP actuelle : {{ xp_needed.current_xp }}</p>
         <p>XP restante : {{ xp_needed.xp_remaining }}</p>
+
+        <p>levels de base :</p>
+        <ul>
+            {% for level in firsts_level %}
+                <li>{{ level.language.name }} - {{ level.number }}</li>
+            {% endfor %}
+        </ul>
     </ul>
 
     <div class="map-header">

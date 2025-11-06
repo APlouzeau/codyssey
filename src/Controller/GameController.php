@@ -84,7 +84,11 @@ final class GameController extends AbstractController
                 ], 500);
             }
         }
-        $enonce = $this->gameService->getEnonceForLevel(1);
+        // on récupère les niveau qui correspondent au language et au numéro et ensuite
+        // on dois prendre un level aleatoire en faisant levels->getEnonces()
+        $level = $this->gameService->getEnonceForLanguageAndNumber($language, $number);
+        $enonce = $level->getEnonce();
+
         return $this->render('game/game.html.twig', [
             'gameForm' => $form->createView(),
             'title' => $enonce->getTitle(),
