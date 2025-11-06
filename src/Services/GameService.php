@@ -75,6 +75,7 @@ class GameService
         $this->entityManager->flush();
     }
 
+
     public function getEnonceForLanguageAndNumber(string $language, int $number): Level
     {
         // Utilisez findBy pour récupérer tous les énoncés correspondant aux critères.
@@ -91,8 +92,7 @@ class GameService
 
         // maintenant je dois croiser les deux
         $verifNumber = array_filter($verifNumber, function (Level $level) use ($verifLanguage) {
-            return $level->getLanguage() === $verifLanguage
-            ;
+            return $level->getLanguage() === $verifLanguage;
         });
         if (empty($verifNumber)) {
             throw new \Exception("Aucun niveau trouvé pour la langue '{$language}' et le numéro '{$number}'.");
