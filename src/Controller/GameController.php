@@ -29,8 +29,8 @@ final class GameController extends AbstractController
         ]);
     } */
 
-    #[Route('/game', name: 'app_game_submit', methods: ['GET', 'POST'])]
-    public function submitCode(Request $request): Response
+    #[Route('/game/{language}/{number}', requirements: ['language' => '\w+', 'number' => '\d+'], name: 'app_game_submit', methods: ['GET', 'POST'])]
+    public function submitCode(Request $request, string $language, int $number): Response
     {
         $form = $this->createForm(GamePromptFormType::class);
         $form->handleRequest($request);

@@ -4,6 +4,8 @@ namespace App\Repository;
 
 use App\Entity\User;
 use App\Entity\UserLevel;
+use App\Entity\Level;
+
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -51,7 +53,7 @@ class UserLevelRepository extends ServiceEntityRepository
     public function getCompletionPercentage(int $userId): float
     {
         $totalLevels = $this->getEntityManager()
-            ->getRepository(\App\Entity\Level::class)
+            ->getRepository(Level::class)
             ->count([]);
 
         $completedLevels = $this->count([
@@ -75,6 +77,7 @@ class UserLevelRepository extends ServiceEntityRepository
             ->innerJoin('ul.level', 'l')
             ->innerJoin('l.language', 'lang')
 
+            // Charge les objets Level et Language complets
             ->addSelect('l')
             ->addSelect('lang')
 

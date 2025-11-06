@@ -7,6 +7,7 @@ use App\Entity\Lesson;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -16,8 +17,8 @@ class LessonType extends AbstractType
     {
         $builder
             ->add('title', TextType::class)
+            ->add('number', IntegerType::class)
             ->add('content', TextType::class)
-            // ajouter le choix de l'entité Language
             ->add('language', EntityType::class, [
                 'class' => Language::class,
                 'choice_label' => 'name',
