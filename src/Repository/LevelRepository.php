@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Level;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -44,6 +45,23 @@ class LevelRepository extends ServiceEntityRepository
     public function getExperienceByLevelId(int $levelId): ?int
     {
         $level = $this->find($levelId);
-        return $level ? $level->getScore() : null;
+        return $level?->getScore();
+    }
+
+    public function getNextLevelForUser(Level $currentLevel): Level|string|null
+    {
+        $currentLevelNumber = $currentLevel->getNumber() + 1;
+        if ($currentLevelNumber > 6) {
+            return "Aucun niveau suivant disponible.";
+        }
+        return $this->createQueryBuilder('l')
+            ->where('l.language = :language')
+            ->andWhere('l.number = :number')
+            ->setParameter('language', $currentLevel->getLanguage())
+            ->setParameter('number', $currentLevelNumber)
+            ->orderBy('l.number', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }

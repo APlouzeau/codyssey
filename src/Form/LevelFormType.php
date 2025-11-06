@@ -8,8 +8,8 @@ use App\Entity\Language;
 use App\Entity\Level;
 use App\Entity\LevelType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -19,7 +19,6 @@ class LevelFormType extends AbstractType
     {
         $builder
             ->add('number', IntegerType::class)
-            ->add('score', IntegerType::class)
             ->add('avatar', EntityType::class, [
                 'class' => Avatar::class,
                 'choice_label' => 'name',
@@ -34,7 +33,6 @@ class LevelFormType extends AbstractType
             ])
             ->add('type', EntityType::class, [
                 'class' => LevelType::class,
-                'label' => 'Type de niveau',
                 'choice_label' => 'name',
             ])
         ;

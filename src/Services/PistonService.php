@@ -31,8 +31,7 @@ class PistonService
                 'verify_host' => false,
             ]);
 
-            $result = $response->toArray();
-            return $result;
+            return $response->toArray();
         } catch (\Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface $e) {
             // Récupérer le détail de l'erreur de Piston
             $errorContent = $e->getResponse()->getContent(false);
@@ -45,26 +44,24 @@ class PistonService
 
         $languageConfig = [
             'python' => ['language' => 'python', 'version' => '3.10.0'],
-            'javascript' => ['language' => 'node', 'version' => '18.15.0'], // Vraie version installée !
+            'javascript' => ['language' => 'js', 'version' => '18.15.0'], // Vraie version installée !
             'php' => ['language' => 'php', 'version' => '8.2.3'],
         ];
 
         // Récupérer la config ou utiliser le langage tel quel
-        $config = $languageConfig[$language] ?? ['language' => $language, 'version' => '*'];
+        $config = $languageConfig[strtolower($language)] ?? ['language' => $language, 'version' => '*'];
 
         // Ajouter les balises d'ouverture si nécessaire selon le langage
         if ($language === 'php' && !str_starts_with(trim($code), '<?php')) {
             $code = '<?php ' . $code;
         }
 
-        $request = [
+        return [
             'language' => $config['language'],
             'version' => $config['version'],
             'files' => [
                 ['content' => $code]
             ]
         ];
-
-        return $request;
     }
 }
