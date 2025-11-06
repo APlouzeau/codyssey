@@ -55,6 +55,7 @@ class LevelRepository extends ServiceEntityRepository
             return "Aucun niveau suivant disponible.";
         }
         return $this->createQueryBuilder('l')
+            ->innerJoin('l.language', 'lang')
             ->where('l.language = :language')
             ->andWhere('l.number = :number')
             ->setParameter('language', $currentLevel->getLanguage())
@@ -72,8 +73,10 @@ class LevelRepository extends ServiceEntityRepository
     public function getFirstsLevels(): array
     {
         return $this->createQueryBuilder('l')
+            ->innerJoin('l.language', 'lang')
+            ->addSelect('lang')  // ← IMPORTANT : Charge les données du Language !
             ->where('l.number = 1')
-            ->orderBy('l.language', 'ASC')
+            ->orderBy('lang.name', 'ASC')  // Tri par nom de langage
             ->addOrderBy('l.id', 'ASC')
             ->getQuery()
             ->getResult();
