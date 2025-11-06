@@ -29,8 +29,8 @@ final class GameController extends AbstractController
         ]);
     } */
 
-    #[Route('/game', name: 'app_game_submit', methods: ['GET', 'POST'])]
-    public function submitCode(Request $request): Response
+    #[Route('/game/{language}/{number}', requirements: ['language' => '\w+', 'number' => '\d+'], name: 'app_game_submit', methods: ['GET', 'POST'])]
+    public function submitCode(Request $request, string $language, int $number): Response
     {
         $form = $this->createForm(GamePromptFormType::class);
         $form->handleRequest($request);
@@ -84,7 +84,11 @@ final class GameController extends AbstractController
                 ], 500);
             }
         }
-        $enonce = $this->gameService->getEnonceForLevel(1);
+        // on récupère les niveau qui correspondent au language et au numéro et ensuite
+        // on dois prendre un level aleatoire en faisant levels->getEnonces()
+        $level = $this->gameService->getEnonceForLanguageAndNumber($language, $number);
+        $enonce = $level->getEnonce();
+
         return $this->render('game/game.html.twig', [
             'gameForm' => $form->createView(),
             'title' => $enonce->getTitle(),
