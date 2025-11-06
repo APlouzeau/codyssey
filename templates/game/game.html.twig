@@ -13,9 +13,10 @@
             'language': language,
             'tips': tips|json_encode|raw,
             'levelNumber': levelNumber,
-            'enonce': enonce|json_encode|raw,     
+            'enonce': enonce|json_encode|raw, 
             'lifes': lifes,
             'maxLifes': max_lifes_prop,
+            'xpGain': xpGain,
             'hintContent': (level.hint|default('Pas d\'astuce disponible.'))|json_encode|raw
         }) }}>
             {# Message de chargement #}
