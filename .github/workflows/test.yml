@@ -48,7 +48,17 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: 📦 Setup Node.js
+      - name: � Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, iconv, intl
+          coverage: none
+
+      - name: 📦 Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: �📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
