@@ -2,6 +2,40 @@
 
 {% block title %}{{ content.title }}{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+    /* Hexagon background - doit être en premier pour ne pas être écrasé */
+    body {
+        background-color: #131217 !important;
+        position: relative;
+        overflow-x: hidden;
+    }
+    
+    #pattern {
+        position: fixed;
+        top: -44px;
+        left: -50px;
+        right: 0;
+        bottom: 0;
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    #gradient {
+        background: radial-gradient(var(--color-primary, #38bdf8), transparent 50%);
+        width: 600px;
+        height: 600px;
+        position: fixed;
+        top: -300px;
+        left: -300px;
+        z-index: -2;
+        pointer-events: none;
+        opacity: 0.6;
+    }
+    </style>
+{% endblock %}
+
 {% block body %}
 {# Définir les couleurs selon le langage #}
 {% set colorScheme = {
@@ -26,6 +60,10 @@
 } %}
 
 {% set colors = colorScheme[language|lower] ?? colorScheme['php'] %}
+
+{# Background hexagons #}
+<div id="gradient" style="--color-primary: {{ colors.primary }};"></div>
+<div id="pattern"></div>
 
 <div class="lesson-container" data-language="{{ language|lower }}" style="--color-primary: {{ colors.primary }}; --color-secondary: {{ colors.secondary }}; --color-primary-rgb: {{ colors.primaryRgb }}; --color-secondary-rgb: {{ colors.secondaryRgb }}">
     {# Navigation entre les leçons #}
@@ -97,6 +135,41 @@
             </section>
         {% endfor %}
 
+        {# Références et ressources #}
+        <div class="references-section">
+            <h3 class="references-title">📚 Ressources officielles</h3>
+            <div class="references-links">
+                {% if language|lower == 'php' %}
+                    <a href="https://www.php.net/" target="_blank" rel="noopener noreferrer" class="reference-link">
+                        <span class="link-icon">🌐</span>
+                        <span class="link-text">Documentation</span>
+                    </a>
+                    <a href="https://www.w3schools.com/php/default.asp" target="_blank" rel="noopener noreferrer" class="reference-link">
+                        <span class="link-icon">📖</span>
+                        <span class="link-text">W3Schools</span>
+                    </a>
+                {% elseif language|lower == 'python' %}
+                    <a href="https://www.python.org/" target="_blank" rel="noopener noreferrer" class="reference-link">
+                        <span class="link-icon">🌐</span>
+                        <span class="link-text">Documentation</span>
+                    </a>
+                    <a href="https://www.w3schools.com/python/default.asp" target="_blank" rel="noopener noreferrer" class="reference-link">
+                        <span class="link-icon">📖</span>
+                        <span class="link-text">W3Schools</span>
+                    </a>
+                {% elseif language|lower == 'javascript' %}
+                    <a href="https://developer.mozilla.org/fr/docs/Web/JavaScript" target="_blank" rel="noopener noreferrer" class="reference-link">
+                        <span class="link-icon">🌐</span>
+                        <span class="link-text">Documentation</span>
+                    </a>
+                    <a href="https://www.w3schools.com/js/default.asp" target="_blank" rel="noopener noreferrer" class="reference-link">
+                        <span class="link-icon">📖</span>
+                        <span class="link-text">W3Schools</span>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
         {# Navigation bas de page #}
         <nav class="lesson-footer-nav">
             {% if lessonNumber > 1 %}
@@ -133,7 +206,6 @@
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         line-height: 1.6;
         color: #e0e0e0;
-        background: #0a0e27;
         min-height: 100vh;
     }
 
@@ -141,10 +213,13 @@
         max-width: 1000px;
         margin: 0 auto;
         padding: 2rem;
+        position: relative;
+        z-index: 1;
     }
 
     .lesson-nav {
-        background: #1a1f3a;
+        background: rgba(26, 31, 58, 0.85);
+        backdrop-filter: blur(10px);
         border: 2px solid var(--color-primary);
         border-radius: 12px;
         padding: 1.5rem;
@@ -200,7 +275,8 @@
     }
 
     .lesson-content {
-        background: #1a1f3a;
+        background: rgba(26, 31, 58, 0.85);
+        backdrop-filter: blur(10px);
         border: 2px solid var(--color-primary);
         border-radius: 12px;
         padding: 3rem;
@@ -381,6 +457,58 @@
         margin: 1.5rem 0;
     }
 
+    .references-section {
+        background: rgba(15, 20, 37, 0.6);
+        border: 2px solid rgba(var(--color-primary-rgb), 0.3);
+        border-radius: 12px;
+        padding: 2rem;
+        margin: 3rem 0 2rem 0;
+    }
+
+    .references-title {
+        font-size: 1.3rem;
+        color: var(--color-primary);
+        margin-bottom: 1.5rem;
+        text-align: center;
+        text-shadow: 0 0 10px rgba(var(--color-primary-rgb), 0.3);
+    }
+
+    .references-links {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .reference-link {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 1.5rem;
+        background: rgba(26, 31, 58, 0.6);
+        border: 1px solid rgba(var(--color-primary-rgb), 0.4);
+        border-radius: 8px;
+        text-decoration: none;
+        color: #e0e0e0;
+        transition: all 0.3s;
+        font-weight: 500;
+    }
+
+    .reference-link:hover {
+        background: rgba(var(--color-primary-rgb), 0.15);
+        border-color: var(--color-primary);
+        box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.4);
+        transform: translateY(-2px);
+    }
+
+    .link-icon {
+        font-size: 1.5rem;
+    }
+
+    .link-text {
+        font-size: 1rem;
+    }
+
     .lesson-footer-nav {
         display: flex;
         justify-content: space-between;
@@ -450,6 +578,19 @@
             font-size: 0.85rem;
         }
 
+        .references-section {
+            padding: 1.5rem;
+        }
+
+        .references-links {
+            flex-direction: column;
+        }
+
+        .reference-link {
+            width: 100%;
+            justify-content: center;
+        }
+
         .lesson-footer-nav {
             flex-direction: column;
             gap: 1rem;
@@ -477,5 +618,78 @@ function copyCode(button) {
         }, 2000);
     });
 }
+
+// Hexagon pattern generation
+function initHexagonPattern() {
+    const patternElement = document.getElementById("pattern");
+    
+    if (!patternElement) return;
+    
+    // Clear existing hexagons if any
+    patternElement.innerHTML = '';
+
+    const countY = Math.ceil(window.innerHeight / 40) + 2;
+    const countX = Math.ceil(window.innerWidth / 48) + 2;
+
+    for (let i = 0; i < countY; i++) {
+        for (let j = 0; j < countX; j++) {
+            const hexagon = document.createElement("div");
+            // SVG with filled hexagons (solid fill to block light, with subtle border)
+            hexagon.style.cssText = `
+                background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODciIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgODcgMTAwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMi4xOTg3MyAyNi4xNTQ3TDQzLjUgMi4zMDk0TDg0LjgwMTMgMjYuMTU0N1Y3My44NDUzTDQzLjUgOTcuNjkwNkwyLjE5ODczIDczLjg0NTNWMjYuMTU0N1oiIGZpbGw9IiMxMzEyMTciIHN0cm9rZT0iIzFhMWYyYSIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KPC9zdmc+') no-repeat;
+                width: 44px;
+                height: 50px;
+                background-size: contain;
+                position: absolute;
+                top: ${i * 40}px;
+                left: ${j * 48 + ((i * 24) % 48)}px;
+            `;
+            patternElement.appendChild(hexagon);
+        }
+    }
+}
+
+// Gradient follows mouse
+let mousePosition = { x: 0, y: 0 };
+let animationFrameId = null;
+
+function initGradientFollower() {
+    document.addEventListener("mousemove", (mouse) => {
+        mousePosition = {
+            x: mouse.clientX,
+            y: mouse.clientY
+        };
+    });
+
+    const loop = () => {
+        const gradientElement = document.getElementById("gradient");
+        if (gradientElement) {
+            gradientElement.style.transform = `translate(${mousePosition.x}px, ${mousePosition.y}px)`;
+        }
+        animationFrameId = window.requestAnimationFrame(loop);
+    };
+
+    if (!animationFrameId) {
+        animationFrameId = window.requestAnimationFrame(loop);
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initHexagonPattern();
+    initGradientFollower();
+});
+
+// Initialize on Turbo navigation (for Symfony UX Turbo)
+document.addEventListener('turbo:load', function() {
+    initHexagonPattern();
+    initGradientFollower();
+});
+
+// Also handle turbo:render for good measure
+document.addEventListener('turbo:render', function() {
+    initHexagonPattern();
+    initGradientFollower();
+});
 </script>
 {% endblock %}
