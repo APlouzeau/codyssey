@@ -16,7 +16,7 @@ const THEMES = {
     php: {
         name: 'php',
         background: `${IMAGE_BASE_PATH}Capture_decran_2025-11-06_a_13.50.18.jpg`,
-        character: `${IMAGE_BASE_PATH}skins/skinv1PHP.png`,
+        // character: `${IMAGE_BASE_PATH}skins/skinv1PHP.png`, <-- SUPPRIMÉ
         extensions: [php()],
         languageName: 'php',
         codemirrorTheme: eclipse,
@@ -29,7 +29,7 @@ const THEMES = {
     javascript: {
         name: 'javascript',
         background: `${IMAGE_BASE_PATH}Capture_decran_2025-11-06_a_13.51.11.jpg`,
-        character: `${IMAGE_BASE_PATH}skins/skinv1JS.png`,
+        // character: `${IMAGE_BASE_PATH}skins/skinv1JS.png`, <-- SUPPRIMÉ
         extensions: [javascript({ jsx: true })],
         languageName: 'javascript',
         codemirrorTheme: dracula,
@@ -42,7 +42,7 @@ const THEMES = {
     python: {
         name: 'python',
         background: `${IMAGE_BASE_PATH}1a6a54d6-80e0-4c19-9a21-3f060b1213e0.jpg`,
-        character: `${IMAGE_BASE_PATH}skins/skinv1PY.png`,
+        // character: `${IMAGE_BASE_PATH}skins/skinv1PY.png`, <-- SUPPRIMÉ
         extensions: [python()],
         languageName: 'python',
         codemirrorTheme: dracula,
@@ -83,7 +83,7 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
     const [showHintModal, setShowHintModal] = useState(false); 
     const [hintStatusMessage, setHintStatusMessage] = useState(''); 
     const [isHintUnlocked, setIsHintUnlocked] = useState(false); 
-    const [currentXpGain, setCurrentXpGain] = useState(xpGain); // État pour suivre l'XP ajustée
+    const [currentXpGain, setCurrentXpGain] = useState(xpGain); 
 
     
     // Parsing et constantes
@@ -98,10 +98,10 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
         : "Pas d'astuce disponible."; 
     
     // RÈGLES DE L'INDICE
-    const PURCHASE_LIFES_THRESHOLD = 5; // Achat si Vies <= 5
-    const FREE_LIFES_THRESHOLD = 3;     // Gratuit si Vies <= 3
-    const XP_COST_PERCENTAGE = 0.50;    // Coût en XP
-    const XP_COST = Math.floor(xpGain * XP_COST_PERCENTAGE); // Coût réel en XP
+    const PURCHASE_LIFES_THRESHOLD = 5; 
+    const FREE_LIFES_THRESHOLD = 3;     
+    const XP_COST_PERCENTAGE = 0.50;    
+    const XP_COST = Math.floor(xpGain * XP_COST_PERCENTAGE); 
 
     // Synchronisation des vies
     useEffect(() => {
@@ -363,7 +363,6 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
 
     return (
         <div 
-            // CORRECTION: Enlève h-screen, utilise w-full et h-full pour s'adapter au conteneur parent
             className="flex flex-col lg:flex-row w-full h-full min-h-full overflow-hidden p-2 lg:p-4 bg-cover bg-center transition-all duration-500" 
             style={{ backgroundImage: `url(${theme.background})` }}
         >
@@ -412,14 +411,16 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
                         )}
                     </div>
                     
-                    {/* Personnage */}
+                    {/* Personnage SUPPRIMÉ */}
+                    {/* Ancien bloc Personnage:
                     <div className="hidden lg:block self-center p-2 mt-auto">
                         <img 
                             src={`${theme.character}`} 
                             alt={`${theme.name} character`} 
                             className="w-40 h-auto object-contain drop-shadow-2xl"
                         />
-                    </div>
+                    </div> 
+                    */}
                 </div>
 
                 {/* Colonne Droite : Éditeur & Console */}
@@ -461,7 +462,12 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
                                 {submissionResult.stderr && (
                                     <p className="text-red-400 font-bold">Erreur du compilateur: {submissionResult.stderr}</p>
                                 )}
-                                <p>▶️ Sortie Attendu: <code className="bg-gray-700 p-0.5 rounded text-xs">{submissionResult.expectedOutput || 'N/A'}</code></p>
+                                
+                                {/* MASQUAGE DE LA SORTIE ATTENDUE SI ÉCHEC */}
+                                {submissionResult.isSuccess && (
+                                    <p>▶️ Sortie Attendu: <code className="bg-gray-700 p-0.5 rounded text-xs">{submissionResult.expectedOutput || 'N/A'}</code></p>
+                                )}
+                                
                                 <p>◀️ Votre Sortie: <code className="bg-gray-700 p-0.5 rounded text-xs">{submissionResult.actualOutput || 'Pas de sortie'}</code></p>
                             </div>
                         </div>

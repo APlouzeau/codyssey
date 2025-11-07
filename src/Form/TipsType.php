@@ -20,6 +20,7 @@ class TipsType extends AbstractType
                 'class' => Enonce::class,
                 'choice_label' => 'title',
                 'multiple' => true,
+                'required' => false,
             ])
         ;
     }
