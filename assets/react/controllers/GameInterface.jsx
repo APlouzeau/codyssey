@@ -16,7 +16,7 @@ const THEMES = {
     php: {
         name: 'php',
         background: `${IMAGE_BASE_PATH}Capture_decran_2025-11-06_a_13.50.18.jpg`,
-        character: `${IMAGE_BASE_PATH}Magi-Photoroom.jpg`,
+        character: `${IMAGE_BASE_PATH}skins/skinv1PHP.png`,
         extensions: [php()],
         languageName: 'php',
         codemirrorTheme: eclipse,
@@ -29,7 +29,7 @@ const THEMES = {
     javascript: {
         name: 'javascript',
         background: `${IMAGE_BASE_PATH}Capture_decran_2025-11-06_a_13.51.11.jpg`,
-        character: `${IMAGE_BASE_PATH}Gemini_Generated_Image_vyb1qgvyb1qgvyb1_09.40.48-Photoroom.jpg`,
+        character: `${IMAGE_BASE_PATH}skins/skinv1JS.png`,
         extensions: [javascript({ jsx: true })],
         languageName: 'javascript',
         codemirrorTheme: dracula,
@@ -42,7 +42,7 @@ const THEMES = {
     python: {
         name: 'python',
         background: `${IMAGE_BASE_PATH}1a6a54d6-80e0-4c19-9a21-3f060b1213e0.jpg`,
-        character: `${IMAGE_BASE_PATH}Firefly_Gemini_Flash_1-Photoroom.jpg`,
+        character: `${IMAGE_BASE_PATH}skins/skinv1PY.png`,
         extensions: [python()],
         languageName: 'python',
         codemirrorTheme: dracula,
@@ -69,7 +69,6 @@ const parseJsonProp = (prop) => {
 
 // --- 2. COMPOSANT PRINCIPAL ---
 
-// AJOUT DE LA PROP XPGAIN
 const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber, tips, xpGain }) => {
     
     // États de base
@@ -84,7 +83,7 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
     const [showHintModal, setShowHintModal] = useState(false); 
     const [hintStatusMessage, setHintStatusMessage] = useState(''); 
     const [isHintUnlocked, setIsHintUnlocked] = useState(false); 
-    const [currentXpGain, setCurrentXpGain] = useState(xpGain); // État pour suivre l'XP actuel
+    const [currentXpGain, setCurrentXpGain] = useState(xpGain); // État pour suivre l'XP ajustée
 
     
     // Parsing et constantes
@@ -123,8 +122,7 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
             setHintStatusMessage("Désolé, aucune astuce n'a été trouvée pour ce niveau.");
             return;
         }
-        
-        // Si déjà débloqué, on ne fait rien
+
         if (isHintUnlocked) return;
 
         if (isFree) {
@@ -133,14 +131,13 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
             return;
         }
         
-        // Achat (coût en XP)
-        if (currentLifes <= PURCHASE_LIFES_THRESHOLD) {
-            // Déduction de l'XP
+        // Achat
+        if (currentLifes <= PURCHASE_LIFES_THRESHOLD && currentLifes > FREE_LIFES_THRESHOLD) {
             setCurrentXpGain(currentXpGain - XP_COST); 
             setIsHintUnlocked(true);
             setHintStatusMessage(`Indice acheté ! ${XP_COST} XP déduits de la récompense finale.`);
         } else {
-            setHintStatusMessage("Achat impossible : Vous devez avoir 5 vies ou moins pour acheter l'indice.");
+            setHintStatusMessage("Achat impossible : conditions de vies non remplies.");
         }
     }
 
@@ -153,7 +150,7 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
         }
 
         if (actualHintContent === "Pas d'astuce disponible.") {
-            setHintStatusMessage("Désolé, aucune astuce n'a été trouvée pour ce niveau. Vous ne pouvez pas en débloquer.");
+            setHintStatusMessage("Désolé, aucune astuce n'a été trouvée pour ce niveau. Vous ne pouvez rien débloquer.");
             setShowHintModal(true);
             return;
         }
@@ -165,7 +162,7 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
             return;
         }
         
-        // Logique d'ACHAT (Vies <= 5)
+        // Logique d'ACHAT (Vies <= 5 et > 3)
         if (currentLifes <= PURCHASE_LIFES_THRESHOLD) {
             setHintStatusMessage(`Vous pouvez acheter l'indice pour ${XP_COST} XP (50% de la récompense).`);
             setShowHintModal(true);
@@ -189,7 +186,7 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
         }
     };
     
-    // --- Logique de Soumission (Mise à jour pour l'XP) ---
+    // --- Logique de Soumission (ENVOI DE L'XP AJUSTÉE) ---
     const handleSubmit = useCallback(async () => {
         if (isSubmitting || isGameOver || isVictory) return;
 
@@ -205,8 +202,7 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
                     code: code,
                     level_id: levelId, 
                     current_lifes: currentLifes,
-                    // OPTIONNEL: Si l'API doit connaitre l'XP ajustée:
-                    // adjusted_xp_gain: isHintUnlocked ? currentXpGain : xpGain, 
+                    experience: currentXpGain, // ENVOI DE L'XP AJUSTÉE
                 }),
             });
 
@@ -218,7 +214,9 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
             }
             
             if (result.isSuccess) {
-                // Si l'API ne déduit pas l'XP elle-même, on doit s'assurer que currentXpGain est bien le bon
+                if (result.experienceGained !== undefined) {
+                    setCurrentXpGain(result.experienceGained); 
+                }
                 setIsVictory(true); 
             }
             
@@ -228,7 +226,7 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
         } finally {
             setIsSubmitting(false);
         }
-    }, [code, theme.languageName, levelId, currentLifes, isSubmitting, isGameOver, isVictory, currentXpGain, xpGain]);
+    }, [code, theme.languageName, levelId, currentLifes, isSubmitting, isGameOver, isVictory, currentXpGain]);
 
     // --- Rendu des Vies (SEPARATION VISUELLE) ---
     const renderLifes = () => (
@@ -354,9 +352,8 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
                 isError={false}
             >
                 <p className="text-xl lg:text-2xl font-semibold mb-2">Code purgé avec succès !</p>
-                <p className="text-lg text-yellow-300">XP Obtenue: <span className='font-bold'>{currentXpGain}</span> (Initial: {xpGain})</p>
+                <p className="text-lg text-yellow-300">XP Obtenue: <span className='font-bold'>{currentXpGain}</span> (Potentiel: {xpGain})</p>
                 <p className="text-lg text-yellow-300">Vies restantes: <span className='font-bold'>{currentLifes}</span></p>
-                
             </ScreenWrapper>
         );
     }
@@ -366,10 +363,11 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
 
     return (
         <div 
-            className="flex flex-col lg:flex-row h-screen w-full overflow-hidden p-2 lg:p-4 bg-cover bg-center bg-fixed transition-all duration-500" 
+            // CORRECTION: Enlève h-screen, utilise w-full et h-full pour s'adapter au conteneur parent
+            className="flex flex-col lg:flex-row w-full h-full min-h-full overflow-hidden p-2 lg:p-4 bg-cover bg-center transition-all duration-500" 
             style={{ backgroundImage: `url(${theme.background})` }}
         >
-             <div className="absolute inset-0 bg-black/50 lg:bg-black/40"></div>
+             <div className="inset-0 bg-black/50 lg:bg-black/40"></div>
              
              <div className="relative z-10 flex flex-col lg:flex-row w-full h-full space-y-4 lg:space-y-0 lg:space-x-4">
                 {/* Colonne Gauche : Énoncé, Caractère, Vies */}
@@ -386,7 +384,7 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
                         <button
                             onClick={handleHintButtonClick}
                             className={`text-2xl p-2 rounded-full transition duration-300 hover:scale-110 ${isHintUnlocked ? 'bg-yellow-600 animate-pulse' : 'bg-gray-700/80'} shadow-lg`}
-                            title="Obtenir l'indice (Coût: 50% XP)"
+                            title={`Indice (Coût: ${XP_COST} XP)`}
                         >
                             💡
                         </button>
