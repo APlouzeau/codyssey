@@ -49,7 +49,7 @@ COPY package.json package-lock.json* yarn.lock* pnpm-lock.yaml* ./
 
 # Installation de pnpm/npm et des dépendances
 RUN if [ -f pnpm-lock.yaml ]; then \
-        npm install -g pnpm && pnpm install --frozen-lockfile; \
+        npm install -g pnpm && pnpm install; \
     elif [ -f yarn.lock ]; then \
         yarn install --frozen-lockfile; \
     else \
