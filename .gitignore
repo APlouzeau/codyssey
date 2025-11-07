@@ -21,3 +21,5 @@ yarn-error.log
 ###< symfony/webpack-encore-bundle ###
 
 .DS_Store
+/.env.prod
+/.env.prod
