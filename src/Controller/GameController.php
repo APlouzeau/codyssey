@@ -24,15 +24,6 @@ final class GameController extends AbstractController
         private readonly UserLevelRepository $userLevelRepository
     ) {}
 
-    /*     #[Route('/game', name: 'app_game')]
-    public function index(): Response
-    {
-        return $this->render('game/game.html.twig', [
-            'controller_name' => 'GameController',
-            'experience' => $this->gameService->getExpByLevelId(),
-        ]);
-    } */
-
     #[Route('/game/{language}/{number}', requirements: ['language' => '\w+', 'number' => '\d+'], name: 'app_game_submit', methods: ['GET'])]
     public function submitCode(Request $request, string $language, int $number): Response
     {
@@ -80,8 +71,6 @@ final class GameController extends AbstractController
         if ($user instanceof User) {
             $this->gameService->giveExperienceToUser($user, $experience);
         }
-
-
 
         // Supprimer les résultats de la session
         $request->getSession()->remove('game_result');
@@ -163,5 +152,17 @@ final class GameController extends AbstractController
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+
+    #[Route('/game/{language}/{number}', requirements: ['language' => '\w+', 'number' => '\d+'], name: 'app_game_next_level', methods: ['GET'])]
+    public function getNextLevel(Request $request, string $language, int $number): Response
+
+    {
+        $nextNumber = $number + 1;
+        return $this->redirectToRoute('app_game_submit', [
+            'language' => $language,
+            'number' => $nextNumber
+        ]);
     }
 }
