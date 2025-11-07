@@ -23,7 +23,6 @@ const THEMES = {
         codeContainerStyle: 'bg-gray-100/90 border-4 border-amber-900/70 shadow-2xl rounded-lg',
         uiTextColor: 'text-amber-900',
         buttonStyle: 'bg-amber-800 hover:bg-amber-900 text-yellow-100 font-extrabold shadow-md shadow-amber-900/50',
-        victoryImage: `${IMAGE_BASE_PATH}Magigi-Photoroom.jpg`, 
     },
     javascript: {
         name: 'javascript',
@@ -35,7 +34,6 @@ const THEMES = {
         codeContainerStyle: 'bg-gray-900/90 border-4 border-cyan-500 shadow-[0_0_20px_rgba(0,255,255,0.3)] rounded-xl',
         uiTextColor: 'text-cyan-400',
         buttonStyle: 'bg-cyan-600/70 hover:bg-cyan-500/80 border border-cyan-400 text-white shadow-[0_0_15px_rgba(0,255,255,0.7)]',
-        victoryImage: `${IMAGE_BASE_PATH}victoire.png`,
     },
     python: {
         name: 'python',
@@ -47,7 +45,6 @@ const THEMES = {
         codeContainerStyle: 'bg-green-900/80 border-4 border-lime-500 shadow-xl rounded-lg',
         uiTextColor: 'text-lime-400',
         buttonStyle: 'bg-lime-700 hover:bg-lime-800 text-white shadow-[0_0_10px_rgba(100,205,50,0.5)]',
-        victoryImage: `${IMAGE_BASE_PATH}Firefly_Gemini_Flash_1-Photoroom.jpg`,
     },
 };
 
