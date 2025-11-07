@@ -41,6 +41,9 @@ jobs:
             git fetch origin
             git reset --hard origin/${{ env.BRANCH }}
             
+            echo "🧹 Removing old assets volume..."
+            docker volume rm codyssey_app_build 2>/dev/null || true
+            
             echo "🏗️  Building Docker images..."
             docker compose -f docker-compose.prod.yml build --no-cache
             
