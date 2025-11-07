@@ -341,14 +341,12 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
     }
 
     if (isVictory) {
-        const victoryImage = theme.victoryImage;
-
         return (
             <ScreenWrapper 
                 title="VICTOIRE !" 
                 buttonText="Niveau Suivant" 
                 buttonAction={() => window.location.href = nextLevelPath} 
-                imageSrc={victoryImage} // Laisse l'image de victoire spécifique au thème
+                imageSrc={null} // Pas d'image pour la victoire
                 isError={false}
             >
                 <p className="text-xl lg:text-2xl font-semibold mb-2">Code purgé avec succès !</p>
