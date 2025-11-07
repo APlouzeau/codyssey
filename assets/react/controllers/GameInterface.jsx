@@ -16,7 +16,6 @@ const THEMES = {
     php: {
         name: 'php',
         background: `${IMAGE_BASE_PATH}Capture_decran_2025-11-06_a_13.50.18.jpg`,
-        // character: `${IMAGE_BASE_PATH}skins/skinv1PHP.png`, <-- SUPPRIMÉ
         extensions: [php()],
         languageName: 'php',
         codemirrorTheme: eclipse,
@@ -24,12 +23,11 @@ const THEMES = {
         codeContainerStyle: 'bg-gray-100/90 border-4 border-amber-900/70 shadow-2xl rounded-lg',
         uiTextColor: 'text-amber-900',
         buttonStyle: 'bg-amber-800 hover:bg-amber-900 text-yellow-100 font-extrabold shadow-md shadow-amber-900/50',
-        victoryImage: `${IMAGE_BASE_PATH}Magigi-Photoroom.jpg`,
+        victoryImage: `${IMAGE_BASE_PATH}Magigi-Photoroom.jpg`, 
     },
     javascript: {
         name: 'javascript',
         background: `${IMAGE_BASE_PATH}Capture_decran_2025-11-06_a_13.51.11.jpg`,
-        // character: `${IMAGE_BASE_PATH}skins/skinv1JS.png`, <-- SUPPRIMÉ
         extensions: [javascript({ jsx: true })],
         languageName: 'javascript',
         codemirrorTheme: dracula,
@@ -42,7 +40,6 @@ const THEMES = {
     python: {
         name: 'python',
         background: `${IMAGE_BASE_PATH}1a6a54d6-80e0-4c19-9a21-3f060b1213e0.jpg`,
-        // character: `${IMAGE_BASE_PATH}skins/skinv1PY.png`, <-- SUPPRIMÉ
         extensions: [python()],
         languageName: 'python',
         codemirrorTheme: dracula,
@@ -102,6 +99,7 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
     const FREE_LIFES_THRESHOLD = 3;     
     const XP_COST_PERCENTAGE = 0.50;    
     const XP_COST = Math.floor(xpGain * XP_COST_PERCENTAGE); 
+    const availableHints = isHintUnlocked ? 0 : 1;
 
     // Synchronisation des vies
     useEffect(() => {
@@ -166,6 +164,7 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
         if (currentLifes <= PURCHASE_LIFES_THRESHOLD) {
             setHintStatusMessage(`Vous pouvez acheter l'indice pour ${XP_COST} XP (50% de la récompense).`);
             setShowHintModal(true);
+            return;
         } else {
             // Bloqué (Trop de vies restantes > 5)
             setHintStatusMessage(`Veuillez attendre de descendre à ${PURCHASE_LIFES_THRESHOLD} vies ou moins pour acheter un indice.`);
@@ -242,7 +241,7 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
                 </span>
             ))}
             <span className={`text-xl font-bold ml-2 self-center ${theme.uiTextColor}`}>
-                {currentLifes} / {maxLifes}
+                {currentLifes}
             </span>
         </div>
     );
@@ -304,7 +303,8 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
             <div className={`relative p-8 lg:p-10 rounded-xl shadow-2xl w-full max-w-lg transition-all duration-300 transform scale-100 ${isError ? 'bg-red-900/90 border-4 border-red-500' : 'bg-green-900/90 border-4 border-green-500'} text-white text-center`}>
                 <h1 className={`text-4xl lg:text-6xl font-extrabold mb-4 lg:mb-6 ${isError ? 'text-red-400 animate-pulse' : 'text-green-400'}`}>{title}</h1>
                 
-                {imageSrc && (
+                {/* CORRECTION: Affichage conditionnel de l'image */}
+                {imageSrc && ( 
                     <img 
                         src={imageSrc} 
                         alt={title} 
@@ -331,7 +331,7 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
                 title="GAME OVER" 
                 buttonText="Recommencer le Niveau" 
                 buttonAction={() => window.location.reload()}
-                imageSrc={`${IMAGE_BASE_PATH}Gemini_Generated_Image_engwtnengwtnengw-Photoroom.jpg`} 
+                imageSrc={null} // CORRIGÉ: Pas d'image pour "GAME OVER"
                 isError={true}
             >
                 <p className="text-xl lg:text-2xl font-semibold">Le virus a contaminé le noyau.</p>
@@ -348,7 +348,7 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
                 title="VICTOIRE !" 
                 buttonText="Niveau Suivant" 
                 buttonAction={() => window.location.href = nextLevelPath} 
-                imageSrc={victoryImage}
+                imageSrc={victoryImage} // Laisse l'image de victoire spécifique au thème
                 isError={false}
             >
                 <p className="text-xl lg:text-2xl font-semibold mb-2">Code purgé avec succès !</p>
@@ -380,13 +380,19 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
                         {renderLifes()}
                         
                         {/* 2. Bouton Indice (unique) */}
-                        <button
-                            onClick={handleHintButtonClick}
-                            className={`text-2xl p-2 rounded-full transition duration-300 hover:scale-110 ${isHintUnlocked ? 'bg-yellow-600 animate-pulse' : 'bg-gray-700/80'} shadow-lg`}
-                            title={`Indice (Coût: ${XP_COST} XP)`}
-                        >
-                            💡
-                        </button>
+                        <div className="flex items-center space-x-1">
+                            <span className={`text-xl font-bold ${theme.uiTextColor} transition-colors duration-300`}>
+                                {availableHints}
+                            </span>
+                            <button
+                                onClick={handleHintButtonClick}
+                                className={`text-2xl p-2 rounded-full transition duration-300 hover:scale-110 ${isHintUnlocked ? 'bg-yellow-600 animate-pulse' : 'bg-gray-700/80'} shadow-lg`}
+                                title={`Indice (Coût: ${XP_COST} XP)`}
+                            >
+                                💡
+                            </button>
+                        </div>
+
                     </div>
 
                     {/* Énoncé et Cadre d'Astuce */}
@@ -411,16 +417,6 @@ const GameInterface = ({ levelId, language, enonce, lifes, maxLifes, levelNumber
                         )}
                     </div>
                     
-                    {/* Personnage SUPPRIMÉ */}
-                    {/* Ancien bloc Personnage:
-                    <div className="hidden lg:block self-center p-2 mt-auto">
-                        <img 
-                            src={`${theme.character}`} 
-                            alt={`${theme.name} character`} 
-                            className="w-40 h-auto object-contain drop-shadow-2xl"
-                        />
-                    </div> 
-                    */}
                 </div>
 
                 {/* Colonne Droite : Éditeur & Console */}
