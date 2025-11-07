@@ -61,7 +61,6 @@ final class MapController extends AbstractController
         foreach ($skins as $skin) {
             $skinsWithPaths[$skin->getFileName()] = $this->skinsDirectory . '/' . $skin->getFileName();
         }
-        dd($skinsWithPaths);
 
         return $this->render('map/index.html.twig', [
             'skins' => $skinsWithPaths,
