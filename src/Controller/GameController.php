@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Tips;
 use App\Entity\User;
 use App\Form\GamePromptFormType;
 use App\Repository\LevelRepository;
@@ -32,9 +33,28 @@ final class GameController extends AbstractController
 
         $level = $this->gameService->getEnonceForLanguageAndNumber($language, $number);
         $enonce = $level->getEnonce();
+        $xpGain = $enonce->getXpGain();
+
+
+        $tipsCollection = $enonce->getTips();
+
+        // Solution propre : Mapper la collection Doctrine vers un tableau PHP simple
+        $tips = $tipsCollection->map(function (Tips $tip) {
+            return [
+                'id' => $tip->getId(),
+                'name' => $tip->getName(), // <-- On récupère le contenu de l'indice (clé 'name')
+            ];
+        })->toArray(); // Conversion en tableau PHP natif
+
+
 
         return $this->render('game/game.html.twig', [
             'gameForm' => $form->createView(),
+            'level' => $level,
+            'tips' => $tips, // Tableau PHP simple
+            'levelNumber' => $number,
+            'language' => $language,
+            'xpGain' => $xpGain,
             'title' => $enonce->getTitle(),
             'enonce' => $enonce->getContent(),
             'result' => $enonce->getExpectedResults(),
@@ -102,6 +122,7 @@ final class GameController extends AbstractController
             $code = $data['code'];
             $currentLifes = (int) $data['current_lifes'];
             $levelId = (int) $data['level_id'];
+            $experience = $data['experience'] ?? 0;
 
             // Vérifier que le level existe
             $level = $this->levelRepository->find($levelId);
@@ -111,6 +132,8 @@ final class GameController extends AbstractController
                     'error' => 'Level introuvable'
                 ], 404);
             }
+
+            $enonceId = $level->getEnonce()->getId();
 
             // Exécution du code via Piston
             $codeRequest = $this->pistonService->createCodeRequest($code, $languageName);
@@ -128,7 +151,6 @@ final class GameController extends AbstractController
             if ($isSuccess) {
                 $user = $this->getUser();
                 if ($user instanceof User) {
-                    $experience = $this->gameService->getExpByEnonceId($levelId);
                     $this->gameService->giveExperienceToUser($user, $experience);
                     $score = $this->gameService->calculateScore($currentLifes);
                     $this->userLevelRepository->setUserLevelCompleted($user, $level, $score);
@@ -143,7 +165,9 @@ final class GameController extends AbstractController
                 'code' => $code,
                 'stderr' => $apiResponse['run']['stderr'] ?? null,
                 'executionTime' => $apiResponse['run']['cpu_time'] ?? null,
-                'newLifes' => $newLifes
+                'newLifes' => $newLifes,
+                'enonceId' => $enonceId,
+                'experienceGained' => $isSuccess ? $experience : 0
             ]);
         } catch (\Exception $e) {
             return $this->json([

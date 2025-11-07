@@ -12,7 +12,7 @@
 		.card-link {
 			display: block;
 			text-decoration: none;
-			background-color: rgba(15, 22, 36, 0.9);
+			background-color: rgba(15, 22, 36);
 			padding: 2rem;
 			border-radius: 12px;
 			border: 2px solid #29FDFD;
@@ -25,11 +25,17 @@
 			box-shadow: 0 0 60px #29FDFD;
 			transform: scale(1.02);
 		}
+		.page-bg {
+			background-image: url('{{ asset('images/bg.jpg') }}');
+			background-size: cover;
+			background-position: center;
+			background-repeat: no-repeat;
+		}
 	</style>
 {% endblock %}
 
 {% block body %}
-	<div class="min-h-screen w-full bg-[#0a0f18] relative overflow-hidden font-[Inter]" style="padding-top: 3rem;">
+	<div class="min-h-screen w-full bg-[#0a0f18] relative overflow-hidden font-[Inter] page-bg" style="padding-top: 3rem;">
 		<svg class="absolute inset-0 -z-10 w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 100 100" preserveaspectratio="xMidYMid slice">
 			<defs>
 				<pattern id="hex-home" width="10" height="10" patternunits="userSpaceOnUse" patterntransform="scale(2)">
@@ -44,7 +50,7 @@
 			<div style="width: 100%; max-width: 1000px;">
 				<div style="
                     margin-bottom: 2rem;
-                    background-color: rgba(15, 22, 36, 0.9);
+                    background-color: rgba(15, 22, 36);
                     border: 2px solid #29FDFD;
                     box-shadow: 0 0 40px #29FDFD;
                     border-radius: 12px;

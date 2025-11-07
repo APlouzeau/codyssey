@@ -23,6 +23,9 @@ class Skin
     #[ORM\JoinColumn(nullable: false)]
     private ?Avatar $avatar = null;
 
+    #[ORM\Column]
+    private ?bool $is_current = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -60,6 +63,18 @@ class Skin
     public function setAvatar(?Avatar $avatar): static
     {
         $this->avatar = $avatar;
+
+        return $this;
+    }
+
+    public function isCurrent(): ?bool
+    {
+        return $this->is_current;
+    }
+
+    public function setIsCurrent(bool $is_current): static
+    {
+        $this->is_current = $is_current;
 
         return $this;
     }
