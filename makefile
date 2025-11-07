@@ -1,7 +1,9 @@
-.PHONY: help dev stop first-install check-deps install-deps bdd bdd-create cache-clear assets-dev assets-build assets-watch
+.PHONY: help dev stop first-install check-deps install-deps bdd bdd-create cache-clear assets-dev assets-build assets-watch prod prod-build prod-up prod-down prod-logs prod-migrate
 
 help:
 	@echo "Commandes disponibles :"
+	@echo ""
+	@echo "🔧 Développement local:"
 	@echo "  make first-install  - Installation complète du projet"
 	@echo "  make dev           - Démarre le serveur Symfony"
 	@echo "  make stop          - Arrête le serveur Symfony"
@@ -11,6 +13,14 @@ help:
 	@echo "  make assets-dev    - Compile les assets en mode dev"
 	@echo "  make assets-build  - Compile les assets pour la prod"
 	@echo "  make assets-watch  - Compile les assets en mode watch"
+	@echo ""
+	@echo "🚀 Production (Docker + Traefik):"
+	@echo "  make prod          - Build et démarre en production"
+	@echo "  make prod-build    - Build les images Docker"
+	@echo "  make prod-up       - Démarre les conteneurs"
+	@echo "  make prod-down     - Arrête les conteneurs"
+	@echo "  make prod-logs     - Affiche les logs"
+	@echo "  make prod-migrate  - Lance les migrations en prod"
 
 dev: install-deps assets-build
 	@echo "🚀 Démarrage du serveur de dev..."
@@ -75,3 +85,31 @@ assets-build:
 assets-watch:
 	@echo "👀 Compilation des assets en mode watch..."
 	pnpm run watch
+
+# ==============================================================================
+# PRODUCTION (Docker + Traefik)
+# ==============================================================================
+
+prod-build:
+	@echo "🏗️  Build des images Docker..."
+	docker compose -f docker-compose.prod.yml build --no-cache
+
+prod-up:
+	@echo "🚀 Démarrage de la production..."
+	docker compose -f docker-compose.prod.yml up -d
+	@echo "✅ Codyssey est disponible sur https://codyssey.plouzor.fr"
+
+prod-down:
+	@echo "🛑 Arrêt de la production..."
+	docker compose -f docker-compose.prod.yml down
+
+prod: prod-build prod-up prod-migrate
+	@echo "✨ Déploiement terminé !"
+
+prod-logs:
+	@echo "📋 Logs de production..."
+	docker compose -f docker-compose.prod.yml logs -f
+
+prod-migrate:
+	@echo "🔄 Exécution des migrations en production..."
+	docker compose -f docker-compose.prod.yml exec php php bin/console doctrine:migrations:migrate --no-interaction

@@ -51,11 +51,17 @@
             border-bottom: 2px solid #29FDFD;
             padding-bottom: 0.25rem; /* pb-1 */
         }
+        .page-bg {
+			background-image: url('{{ asset('images/bg.jpg') }}');
+			background-size: cover;
+			background-position: center;
+			background-repeat: no-repeat;
+		}
     </style>
 {% endblock %}
 
 {% block body %}
-    <div class="min-h-screen w-full bg-[#0a0f18] relative flex items-center justify-center overflow-hidden font-[Inter]">
+    <div class="min-h-screen w-full bg-[#0a0f18] relative flex items-center justify-center overflow-hidden font-[Inter] page-bg">
         
         {# SVG de fond réutilisé #}
         <svg class="absolute inset-0 -z-10 w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
@@ -138,7 +144,7 @@
                         </div>
                     </div>
                     
-                    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}" />
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}" />
 
                     {# Bouton SE CONNECTER #}
                     <button type="submit" class="w-full py-4 mt-10 text-2xl font-black tracking-wider rounded-md neon-button" style="font-family: 'Orbitron', sans-serif;">

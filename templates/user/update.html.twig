@@ -1,6 +1,5 @@
 {% extends 'base.html.twig' %}
-{% block title %}Sécurité du compte
-{% endblock %}
+{% block title %}Modifier mon compte{% endblock %}
 
 {% block stylesheets %}
 	{{ parent() }}
@@ -44,7 +43,7 @@
 		.form-section {
 			flex: 1;
 			background-color: rgba(15, 22, 36, 0.9);
-			padding: 2rem;
+			padding: 0rem 2rem 2rem 2rem;
 			border-radius: 12px;
 		}
 		.divider {
@@ -53,12 +52,121 @@
 			opacity: 0.4;
 			margin: 0 1.5rem;
 		}
+		.page-bg {
+			background-image: url('{{ asset('images/bg.jpg') }}');
+			background-size: cover;
+			background-position: center;
+			background-repeat: no-repeat;
+		}
+
+		/* Cards Avatar */
+		.avatar-grid {
+			display: grid;
+			grid-template-columns: 1fr;
+			gap: 1rem;
+		}
+		@media (min-width: 1024px) {
+			.avatar-grid {
+				grid-template-columns: repeat(3, 1fr);
+				gap: 1.5rem;
+			}
+		}
+		.avatar-card {
+			position: relative;
+			background-color: rgba(15, 22, 36, 0.9);
+			border: 2px solid #29FDFD;
+			border-radius: 12px;
+			box-shadow: 0 0 40px #29FDFD;
+			padding: 1rem;
+			overflow: hidden;
+		}
+		.avatar-title {
+			color: #29FDFD;
+			text-align: center;
+			font-family: 'Kumar One', serif;
+			font-size: 1.1rem;
+			margin-bottom: 0.5rem;
+		}
+		.avatar-img-wrap {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 0.75rem;
+			border-radius: 10px;
+			background: linear-gradient(135deg, rgba(41,253,253,0.15), rgba(10,15,24,0.6));
+			border: 1px solid rgba(41,253,253,0.35);
+		}
+		.avatar-img {
+			max-height: 140px;
+			width: auto;
+			filter: drop-shadow(0 0 12px rgba(41,253,253,0.6));
+		}
+		.arrow-btn {
+			position: absolute;
+			top: 50%;
+			transform: translateY(-50%);
+			background-color: rgba(10, 15, 24, 0.85);
+			color: #0a0f18;
+			border: 2px solid #29FDFD;
+			border-radius: 9999px;
+			width: 40px;
+			height: 40px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+			opacity: 0;
+			transition: all 0.25s ease;
+			box-shadow: 0 0 18px rgba(41,253,253,0.6);
+		}
+		.avatar-card:hover .arrow-btn { opacity: 1; }
+		.arrow-btn:hover {
+			box-shadow: 0 0 28px #29FDFD;
+			transform: translateY(-50%) scale(1.04);
+		}
+		.arrow-left { left: 10px; }
+		.arrow-right { right: 10px; }
+
+		/* Icônes SVG des flèches */
+		.arrow-icon {
+			width: 22px;
+			height: 22px;
+			filter: drop-shadow(0 0 8px rgba(41,253,253,0.8));
+		}
+		/* Barre de vignettes */
+		.thumbs {
+			display: flex;
+			gap: 0.5rem;
+			margin-top: 0.75rem;
+			padding-top: 0.5rem;
+			border-top: 1px solid rgba(41,253,253,0.35);
+			overflow-x: auto;
+		}
+		.thumb-item {
+			height: 48px;
+			width: 48px;
+			object-fit: contain;
+			border: 2px solid transparent;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+			background-color: rgba(15, 22, 36, 0.7);
+		}
+		.thumb-item:hover {
+			transform: scale(1.06);
+			box-shadow: 0 0 12px rgba(41,253,253,0.5);
+			border-color: rgba(41,253,253,0.6);
+		}
+		.thumb-item.selected {
+			border-color: #29FDFD;
+			box-shadow: 0 0 16px #29FDFD;
+		}
 	</style>
 {% endblock %}
 
 {% block body %}
 	<div
-		class="min-h-screen w-full bg-[#0a0f18] relative flex items-center justify-center overflow-hidden font-[Inter]">
+		class="min-h-screen w-full bg-[#0a0f18] relative flex items-center justify-center overflow-hidden font-[Inter] pt-16 pb-16 page-bg">
 		{# Fond SVG identique à la page Connexion #}
 		<svg class="absolute inset-0 -z-10 w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 100 100" preserveaspectratio="xMidYMid slice">
 			<defs>
@@ -69,10 +177,10 @@
 			<rect width="100%" height="100%" fill="url(#hex)"/>
 		</svg>
 
-		<div class="container mx-auto px-6 flex items-center justify-center">
+		<div class="container mx-auto px-6 flex flex-col items-center justify-center">
 			<div class="w-full max-w-5xl bg-[#0f1624]/90 backdrop-blur-md p-10 relative z-10 neon-border">
 				<div class="text-[#29FDFD] text-lg font-extrabold tracking-widest text-center mb-10 pb-2 border-b-2 border-[#29FDFD]/50" style="font-family: 'Orbitron', sans-serif;">
-					// SÉCURITÉ DU COMPTE //
+					// MODIFIER MON COMPTE //
 				</div>
 
 				{% for message in app.flashes('success') %}
@@ -81,8 +189,9 @@
 					</div>
 				{% endfor %}
 
-				{{ form_start(form, {'attr': {'class': 'space-y-10'}}) }}
-				<div class="flex flex-col lg:flex-row items-start justify-between mt-10 gap-8">
+				{{ form_start(form) }}
+				<div class="flex flex-col items-start justify-between mt-10">
+				<div class="flex flex-row justify-between w-full">
 					<div class="form-section">
 						<h2 class="text-[#29FDFD] text-xl mb-6 text-center" style="font-family: 'Kumar One', serif;">Modifier mon e-mail</h2>
 
@@ -92,7 +201,7 @@
                                 attr: { class: 'cyber-input', placeholder: 'Entrez votre nouvel e-mail' }
                             }) }}
 						</div>
-
+						<br>
 						<div class="field-container">
 							{{ form_row(form.currentPassword, {
                                 label_attr: { class: 'block text-[#29FDFD] text-sm mb-1', style: "font-family: 'Kumar One', serif;" },
@@ -100,8 +209,6 @@
                             }) }}
 						</div>
 					</div>
-
-					<div class="hidden lg:block divider"></div>
 
 					<div class="form-section">
 						<h2 class="text-[#29FDFD] text-xl mb-6 text-center" style="font-family: 'Kumar One', serif;">Modifier mon mot de passe</h2>
@@ -112,7 +219,7 @@
                                 attr: { class: 'cyber-input', placeholder: 'Nouveau mot de passe' }
                             }) }}
 						</div>
-
+						<br>
 						<div class="field-container">
 							{{ form_row(form.newPassword.second, {
                                 label_attr: { class: 'block text-[#29FDFD] text-sm mb-1', style: "font-family: 'Kumar One', serif;" },
@@ -122,21 +229,239 @@
 					</div>
 				</div>
 
-				<div class="text-center mt-12">
-					<button type="submit" class="w-full lg:w-1/2 mx-auto py-4 text-2xl font-black tracking-wider rounded-md neon-button" style="font-family: 'Orbitron', sans-serif;">
-						&lt; Valider les modifications &gt;
-					</button>
-				</div>
+                {# Sélection d’avatar par langage #}
+                <div class="mt-6 w-full">
+                    <h2 class="text-[#29FDFD] text-xl mb-6 text-center" style="font-family: 'Kumar One', serif;">Choisir mon avatar par langage</h2>
 
-				{{ form_row(form._token) }}
-				{{ form_end(form, {'render_rest': false}) }}
+                    <div class="avatar-grid">
+                        {# JavaScript #}
+                        <div class="avatar-card" data-lang="js" data-index="0">
+                            <div class="avatar-title">JavaScript</div>
+                            <div class="avatar-img-wrap">
+                                <img class="avatar-img" id="avatar-img-js" src="{{ asset('images/skins/skinv1JS.png') }}" alt="Avatar JS">
+                            </div>
+                            <button type="button" class="arrow-btn arrow-left" aria-label="Précédent" data-dir="-1">
+                                <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path d="M15 6L9 12L15 18" stroke="#29FDFD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <button type="button" class="arrow-btn arrow-right" aria-label="Suivant" data-dir="1">
+                                <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path d="M9 6L15 12L9 18" stroke="#29FDFD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <div class="thumbs" data-thumbs-for="js"></div>
+                        </div>
 
-				<p class="text-white/80 text-center text-sm mt-12" style="font-family: 'Inter', sans-serif;">
+                        {# PHP #}
+                        <div class="avatar-card" data-lang="php" data-index="0">
+                            <div class="avatar-title">PHP</div>
+                            <div class="avatar-img-wrap">
+                                <img class="avatar-img" id="avatar-img-php" src="{{ asset('images/skins/skinv1PHP.png') }}" alt="Avatar PHP">
+                            </div>
+                            <button type="button" class="arrow-btn arrow-left" aria-label="Précédent" data-dir="-1">
+                                <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path d="M15 6L9 12L15 18" stroke="#29FDFD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <button type="button" class="arrow-btn arrow-right" aria-label="Suivant" data-dir="1">
+                                <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path d="M9 6L15 12L9 18" stroke="#29FDFD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <div class="thumbs" data-thumbs-for="php"></div>
+                        </div>
+
+                        {# Python #}
+                        <div class="avatar-card" data-lang="py" data-index="0">
+                            <div class="avatar-title">Python</div>
+                            <div class="avatar-img-wrap">
+                                <img class="avatar-img" id="avatar-img-py" src="{{ asset('images/skins/skinv1PY.png') }}" alt="Avatar Python">
+                            </div>
+                            <button type="button" class="arrow-btn arrow-left" aria-label="Précédent" data-dir="-1">
+                                <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path d="M15 6L9 12L15 18" stroke="#29FDFD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <button type="button" class="arrow-btn arrow-right" aria-label="Suivant" data-dir="1">
+                                <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path d="M9 6L15 12L9 18" stroke="#29FDFD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <div class="thumbs" data-thumbs-for="py"></div>
+                        </div>
+                    </div>
+
+                    {# Champs de formulaire Symfony pour les choix d’avatar (radios) #}
+                    <div class="hidden">
+                        {{ form_row(form.avatar_js) }}
+                        {{ form_row(form.avatar_php) }}
+                        {{ form_row(form.avatar_py) }}
+                    </div>
+                </div>
+
+                <script>
+                    (function() {
+                        const basePath = '{{ asset('images/skins/') }}';
+                        const skins = {
+                            js: ['skinv1JS.png', 'skinv2JS.png'],
+                            php: ['skinv1PHP.png', 'skinv2PHP.png'],
+                            py: ['skinv1PY.png', 'skinv2PY.png']
+                        };
+                        const fieldMap = { js: 'avatar_js', php: 'avatar_php', py: 'avatar_py' };
+
+                        const imgEls = {
+                            js: document.getElementById('avatar-img-js'),
+                            php: document.getElementById('avatar-img-php'),
+                            py: document.getElementById('avatar-img-py')
+                        };
+
+                        function setRadio(lang, fileName) {
+                            const name = `change_user_form[${fieldMap[lang]}]`;
+                            const selector = `input[name="${name}"][value="${fileName}"]`;
+                            const radio = document.querySelector(selector);
+                            if (radio) radio.checked = true;
+                        }
+
+                        function setSelection(lang, index) {
+                            const fileName = skins[lang][index];
+                            imgEls[lang].src = basePath + fileName;
+                            setRadio(lang, fileName);
+
+                            const card = document.querySelector('.avatar-card[data-lang="'+lang+'"]');
+                            card.setAttribute('data-index', index);
+
+                            const thumbs = card.querySelectorAll('.thumb-item');
+                            thumbs.forEach(t => t.classList.toggle('selected', parseInt(t.dataset.index, 10) === index));
+                        }
+
+                        function renderThumbs(lang) {
+                            const container = document.querySelector('.thumbs[data-thumbs-for="'+lang+'"]');
+                            container.innerHTML = '';
+                            skins[lang].forEach((fileName, idx) => {
+                                const img = document.createElement('img');
+                                img.src = basePath + fileName;
+                                img.alt = 'Skin ' + lang.toUpperCase() + ' ' + (idx + 1);
+                                img.className = 'thumb-item';
+                                img.dataset.index = idx;
+                                img.addEventListener('click', () => setSelection(lang, idx));
+                                container.appendChild(img);
+                            });
+                        }
+
+                        // Initialisation: prendre la valeur du radio pré-coché
+                        ['js', 'php', 'py'].forEach(lang => {
+                            renderThumbs(lang);
+                            const name = `change_user_form[${fieldMap[lang]}]`;
+                            const checked = document.querySelector(`input[name="${name}"]:checked`);
+                            const initialFile = checked ? checked.value : skins[lang][0];
+                            const initialIndex = Math.max(0, skins[lang].indexOf(initialFile));
+                            setSelection(lang, initialIndex);
+                        });
+
+                        document.querySelectorAll('.avatar-card .arrow-btn').forEach(btn => {
+                            btn.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const card = btn.closest('.avatar-card');
+                                const lang = card.getAttribute('data-lang');
+                                const dir = parseInt(btn.getAttribute('data-dir'), 10);
+                                const max = skins[lang].length;
+
+                                let index = parseInt(card.getAttribute('data-index'), 10);
+                                index = (index + dir + max) % max;
+                                setSelection(lang, index);
+                            });
+                        });
+                    })();
+                </script>
+            </div>
+
+            <div class="text-center mt-6">
+                <button type="submit" class="w-full mx-auto py-4 font-black inline tracking-wider rounded-md neon-button" style="font-family: 'Orbitron', sans-serif;">
+                    ⌜ Valider les modifications ⌟
+                </button>
+            </div>
+            {{ form_row(form._token) }}
+            {{ form_end(form, {'render_rest': false}) }}
+
+				<p class="text-white/80 text-center text-sm mt-4" style="font-family: 'Inter', sans-serif;">
 					<a href="{{ path('app_home') }}" class="text-[#29FDFD] hover:text-white transition duration-300 font-bold">
 						⌜ Retour à l’accueil ⌟
 					</a>
 				</p>
 			</div>
 		</div>
+	</div>
+
+	{# Script pour gérer les flèches et changer l’avatar #}
+	<script>
+		(function() {
+			const basePath = '{{ asset('images/skins/') }}';
+			const skins = {
+				js: ['skinv1JS.png', 'skinv2JS.png'],
+				php: ['skinv1PHP.png', 'skinv2PHP.png'],
+				py: ['skinv1PY.png', 'skinv2PY.png']
+			};
+
+			const hiddenInputs = {
+				js: document.getElementById('avatar_js'),
+				php: document.getElementById('avatar_php'),
+				py: document.getElementById('avatar_py')
+			};
+
+			const imgEls = {
+				js: document.getElementById('avatar-img-js'),
+				php: document.getElementById('avatar-img-php'),
+				py: document.getElementById('avatar-img-py')
+			};
+
+			function setSelection(lang, index) {
+				const fileName = skins[lang][index];
+				imgEls[lang].src = basePath + fileName;
+				hiddenInputs[lang].value = fileName;
+
+				const card = document.querySelector('.avatar-card[data-lang="'+lang+'"]');
+				card.setAttribute('data-index', index);
+
+				const thumbs = card.querySelectorAll('.thumb-item');
+				thumbs.forEach(t => t.classList.toggle('selected', parseInt(t.dataset.index, 10) === index));
+			}
+
+			function renderThumbs(lang) {
+				const container = document.querySelector('.thumbs[data-thumbs-for="'+lang+'"]');
+				container.innerHTML = '';
+				skins[lang].forEach((fileName, idx) => {
+					const img = document.createElement('img');
+					img.src = basePath + fileName;
+					img.alt = 'Skin ' + lang.toUpperCase() + ' ' + (idx + 1);
+					img.className = 'thumb-item' + (idx === 0 ? ' selected' : '');
+					img.dataset.index = idx;
+					img.addEventListener('click', () => setSelection(lang, idx));
+					container.appendChild(img);
+				});
+			}
+
+			['js', 'php', 'py'].forEach(lang => {
+				renderThumbs(lang);
+				setSelection(lang, 0);
+			});
+
+			document.querySelectorAll('.avatar-card').forEach(card => {
+				const lang = card.getAttribute('data-lang');
+				card.addEventListener('click', (e) => {
+					const btn = e.target.closest('.arrow-btn');
+					if (!btn) return;
+
+					const dir = parseInt(btn.getAttribute('data-dir'), 10);
+					let index = parseInt(card.getAttribute('data-index'), 10);
+					const max = skins[lang].length;
+
+					index = (index + dir + max) % max;
+					setSelection(lang, index);
+				});
+			});
+		})();
+	</script>
 	</div>
 {% endblock %}

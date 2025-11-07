@@ -32,7 +32,7 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         # pour les lessons accessible sans etre connecté
-        - { path: ^/lessons, roles: PUBLIC_ACCESS }
+        - { path: ^/lesson, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS } # Allows accessing the login page
         - { path: ^/register, roles: PUBLIC_ACCESS } # Allows accessing the registration page
         # - { path: ^/admin, roles: ROLE_ADMIN }

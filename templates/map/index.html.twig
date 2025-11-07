@@ -175,6 +175,7 @@
 
 <div class="map-container">
     <ul>
+         {#<p>next_levels :</p>
         {% for level in levels_terminated %}
             <li>{{ level.level.language.name }} - {{ level.level.number }} : {{ level.score }} pts</li>
         {% endfor %}
@@ -186,7 +187,8 @@
         <p>Pourcentage d'avancement du niveau : {{ xp_needed.progress_percentage }}</p>
         <p>XP nécessaire pour le niveau suivant : {{ xp_needed.xp_for_next_level }}</p>
         <p>XP actuelle : {{ xp_needed.current_xp }}</p>
-        <p>XP restante : {{ xp_needed.xp_remaining }}</p>
+        <p>XP restante : {{ xp_needed.xp_remaining }}</p> 
+        <p>XP restante : {{ xp_needed.xp_remaining }}</p>#}
     </ul>
 
     <div class="map-header">
@@ -252,7 +254,14 @@
             <div class="skins-section">
                 <h3>Skins débloqués</h3>
                 <div class="skins-icons">
-                    <!-- Icônes de skins à afficher dynamiquement -->
+                    {% for skinName, skinPath in skins %}
+                        <div class="skin-icon" style="display:inline-block; text-align:center;">
+                            <img src="{{ asset(skinPath) }}" alt="{{ skinName }}" style="width:48px; height:48px; border-radius:8px; border:1px solid #ccc; background:#f8f8f8;">
+                            <div style="font-size:12px; color:#444;">{{ skinName }}</div>
+                        </div>
+                    {% else %}
+                        <div>Aucun skin débloqué.</div>
+                    {% endfor %}
                 </div>
             </div>
             <div class="items-section">
@@ -283,6 +292,14 @@
 </script>
 
 <script>
+
+    // Rendre les skins accessibles en JS
+    const unlockedSkins = [
+        {% for skinName, skinPath in skins %}
+            { name: "{{ skinName|e('js') }}", path: "{{ asset(skinPath)|e('js') }}" },
+        {% endfor %}
+    ];
+    
     let currentRow = 2; // joueur commence sur la 2e ligne
     let currentCol = 0; // nouvelle variable pour la colonne, défaut à nulle
     let player = document.getElementById("player");
@@ -443,6 +460,22 @@
         } else {
             currentCol = null;
         }
+
+        // --- Ajout : changer le skin selon la row ---
+        let langKey = "";
+        if (target.dataset.row === "1") langKey = "js";
+        else if (target.dataset.row === "2") langKey = "php";
+        else if (target.dataset.row === "3") langKey = "py";
+
+        // Cherche un skin qui contient le nom du langage
+        const foundSkin = unlockedSkins.find(skin => skin.name.toLowerCase().includes(langKey));
+        if (foundSkin) {
+            player.style.background = `url('${foundSkin.path}') center/cover no-repeat`;
+        } else {
+            // Skin par défaut si pas trouvé
+            player.style.background = "cyan";
+        }
+        // --- Fin ajout ---
 
         console.log("Row:", target.dataset.row, "Colonne:", currentCol);
     }

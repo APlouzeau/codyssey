@@ -47,9 +47,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: UserLevel::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $userLevels;
 
+    /**
+     * @var Collection<int, UserSkin>
+     */
+    #[ORM\OneToMany(targetEntity: UserSkin::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $userSkins;
+
     public function __construct()
     {
         $this->userLevels = new ArrayCollection();
+        $this->userSkins = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -183,6 +190,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPseudo(string $pseudo): static
     {
         $this->pseudo = $pseudo;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserSkin>
+     */
+    public function getUserSkins(): Collection
+    {
+        return $this->userSkins;
+    }
+
+    public function addUserSkin(UserSkin $userSkin): static
+    {
+        if (!$this->userSkins->contains($userSkin)) {
+            $this->userSkins->add($userSkin);
+            $userSkin->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserSkin(UserSkin $userSkin): static
+    {
+        if ($this->userSkins->removeElement($userSkin)) {
+            // set the owning side to null (unless already changed)
+            if ($userSkin->getUser() === $this) {
+                $userSkin->setUser(null);
+            }
+        }
 
         return $this;
     }
