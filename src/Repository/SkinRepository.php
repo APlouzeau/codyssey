@@ -16,28 +16,30 @@ class SkinRepository extends ServiceEntityRepository
         parent::__construct($registry, Skin::class);
     }
 
-//    /**
-//     * @return Skin[] Returns an array of Skin objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('s')
-//            ->andWhere('s.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('s.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * Récupère tous les skins pour un avatar donné
+     *
+     * @return Skin[]
+     */
+    public function findByAvatar(int $avatarId): array
+    {
+        return $this->createQueryBuilder('s')
+            ->where('s.avatar = :avatarId')
+            ->setParameter('avatarId', $avatarId)
+            ->orderBy('s.fileName', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 
-//    public function findOneBySomeField($value): ?Skin
-//    {
-//        return $this->createQueryBuilder('s')
-//            ->andWhere('s.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * Récupère un skin par son nom de fichier
+     */
+    public function findOneByFileName(string $fileName): ?Skin
+    {
+        return $this->createQueryBuilder('s')
+            ->where('s.fileName = :fileName')
+            ->setParameter('fileName', $fileName)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

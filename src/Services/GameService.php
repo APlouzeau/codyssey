@@ -16,6 +16,9 @@ class GameService
     private EnonceRepository $enonceRepository;
     private EntityManagerInterface $entityManager;
     private LanguageRepository $languageRepository;
+    private const MAX_POINTS = 7;
+    private const MID_POINTS = 4;
+    private const MIN_POINTS = 1;
 
     public function __construct(LevelRepository $levelRepository, EnonceRepository $enonceRepository, EntityManagerInterface $entityManager, LanguageRepository $languageRepository)
     {
@@ -36,15 +39,35 @@ class GameService
         return trim($expected) === trim($actual);
     }
 
+    // public function getExpectedOutputForLevel(int $levelId): string
+    // {
+    //     $level = $this->enonceRepository->find($levelId);
+
+    //     if (!$level) {
+    //         throw new \Exception("Level not found");
+    //     }
+
+    //     return $level->getExpectedResults();
+    // }
+
     public function getExpectedOutputForLevel(int $levelId): string
     {
-        $level = $this->enonceRepository->find($levelId);
-
+        // CORRECTION : Utiliser LevelRepository pour trouver le Level
+        $level = $this->levelRepository->find($levelId); 
+        
         if (!$level) {
-            throw new \Exception("Level not found");
+            throw new \Exception("Level (ID: {$levelId}) not found");
         }
 
-        return $level->getExpectedResults();
+        // Le Level doit avoir une relation vers l'Enonce
+        $enonce = $level->getEnonce(); // Assurez-vous que cette méthode existe sur l'entité Level
+
+        if (!$enonce) {
+            throw new \Exception("Enonce not linked to Level (ID: {$levelId})");
+        }
+
+        // Retourner le résultat attendu de l'Enonce
+        return $enonce->getExpectedResults();
     }
 
     public function getEnonceForLevel(int $levelId): Enonce
@@ -75,6 +98,7 @@ class GameService
         $this->entityManager->flush();
     }
 
+
     public function getEnonceForLanguageAndNumber(string $language, int $number): Level
     {
         // Utilisez findBy pour récupérer tous les énoncés correspondant aux critères.
@@ -91,8 +115,7 @@ class GameService
 
         // maintenant je dois croiser les deux
         $verifNumber = array_filter($verifNumber, function (Level $level) use ($verifLanguage) {
-            return $level->getLanguage() === $verifLanguage
-            ;
+            return $level->getLanguage() === $verifLanguage;
         });
         if (empty($verifNumber)) {
             throw new \Exception("Aucun niveau trouvé pour la langue '{$language}' et le numéro '{$number}'.");
@@ -103,5 +126,23 @@ class GameService
         // dd($verifLanguage, $verifNumber, $randomLevel);
 
         return $randomLevel;
+    }
+
+    public function promptIsFalse(int $currentLifes): int
+    {
+        if ($currentLifes > 0) {
+            return $currentLifes - 1;
+        }
+        return 0;
+    }
+
+    public function calculateScore(int $currentLifes,): int
+    {
+        return match (true) {
+            $currentLifes > self::MAX_POINTS => 3,
+            $currentLifes > self::MID_POINTS => 2,
+            $currentLifes > 0 => 1,
+            default => 0,
+        };
     }
 }
