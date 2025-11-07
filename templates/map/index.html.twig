@@ -69,15 +69,38 @@
         width: 45px;
         height: 45px;
         border-radius: 10px;
-        background: white;
-        border: 2px solid #ccc;
+        background: transparent;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         z-index: 9;
+        padding: 0;
+        box-shadow: none;
+        position: relative;
     }
-    /* Remplacer par sprite */
-
-    .level[data-type="blue"]   { border-color: #3d8bfd; }
-    .level[data-type="green"]  { border-color: #4cc66e; }
-    .level[data-type="yellow"] { border-color: #ffbe3d; }
+    .level-node svg {
+        width: 38px;
+        height: 38px;
+        display: block;
+        margin: auto;
+        /* Couleur par défaut */
+        color: #fff;
+        transition: color 0.2s, filter 0.2s;
+        filter: drop-shadow(0 1px 2px rgba(0,0,0,0.08));
+    }
+    .level-node svg .node-fill {
+        fill: #e8f7fb; /* couleur de fond interne, plus claire */
+    }
+    .level[data-type="blue"]   svg { color: #3d8bfd; }
+    .level[data-type="green"]  svg { color: #4cc66e; }
+    .level[data-type="yellow"] svg { color: #ffbe3d; }
+    .boss svg { color: red !important; }
+    .locked svg { color: #999 !important; filter: grayscale(1) brightness(1.2);}
+    .start-node svg, .end-node svg {
+        color: #ffffffff !important;
+        opacity: 0.7;
+    }
 
     .boss {
         border-color: red;
@@ -171,6 +194,38 @@
         border-color: #999;
         pointer-events: none;
     }
+
+    .map-legends {
+        position: absolute;
+        left: 6%;
+        top: 20%;
+        width: 90px;
+        height: 225px; /* 3 rows * 75px (gap + node height) */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        z-index: 3;
+        pointer-events: none;
+    }
+
+    .legend-row {
+        width: 90px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        font-size: 13px;
+        color: #555;
+        opacity: 0.85;
+        font-family: 'Michroma', sans-serif;
+        background: none;
+        pointer-events: none;
+        user-select: none;
+        font-weight: 500;
+    }
+    .legend-row-1 { color: #3d8bfd; }
+    .legend-row-2 { color: #4cc66e; }
+    .legend-row-3 { color: #ffbe3d; }
 </style>
 
 <div class="map-container">
@@ -185,43 +240,101 @@
             
         <p>Level du joueur : {{ user_level }}</p>
         <p>Pourcentage d'avancement du niveau : {{ xp_needed.progress_percentage }}</p>
-        <p>XP nécessaire pour le niveau suivant : {{ xp_needed.xp_for_next_level }}</p>
+        <p>XP nécessaire pour le niveau suivant : {{ xp_needed.xp_for_next_level }}</p> 
         <p>XP actuelle : {{ xp_needed.current_xp }}</p>
         <p>XP restante : {{ xp_needed.xp_remaining }}</p> 
         <p>XP restante : {{ xp_needed.xp_remaining }}</p>#}
     </ul>
 
+    <div class="map-container">
+    <canvas id="bg-canvas" style="position:absolute;top:0;left:0;width:100vw;height:100vh;z-index:0;"></canvas>
+
     <div class="map-header">
         <div class="avatar-icon"></div>
 
-        <div class="menu-icons">
-
-            <a href="{{path('app_home')}}"><button class="btn-home" title="Accueil"></button></a>
-            <a href="{{path('app_lesson_home')}}"><button class="btn-courses" title="Cours"></button></a>
-            <button class="btn-inventory" title="Inventaire"></button>
+        <div class="menu-icons" style="display: flex; flex-direction: column; align-items: center;">
+            <div style="display: flex; gap: 10px;">
+                <a href="{{path('app_home')}}">
+                    <button class="btn-home" title="Accueil" style="display: flex; align-items: center; justify-content: center;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3L2 12h3v8z"/></svg>
+                    </button>
+                </a>
+                <a href="{{path('app_lesson_home')}}">
+                    <button class="btn-courses" title="Cours" style="display: flex; align-items: center; justify-content: center;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M13 9V3.5L18.5 9M6 2c-1.11 0-2 .89-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/></svg>
+                    </button>
+                </a>
+                <button class="btn-inventory" title="Inventaire" style="display: flex; align-items: center; justify-content: center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20"><path fill="currentColor" d="M14 5h2v14H4V5h2V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2zm3 0h1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1zM3 5v14H2a2 2 0 0 1-2-2V7c0-1.1.9-2 2-2zm5-1v1h4V4z"/></svg>
+                </button>
+            </div>
+            <div class="menu-legends" style="display: flex; gap: 22px; margin-top: 3px; font-size: 11px; color: #888; font-family: 'Michroma', sans-serif; text-align: center;">
+                <span style="width: 35px; display: inline-block;">Accueil</span>
+                <span style="width: 35px; display: inline-block;">Cours</span>
+                <span style="width: 35px; display: inline-block;">Inventaire</span>
+            </div>
         </div>
     </div>
 
     <div id="player" class="player"></div>
 
+    <div class="map-legends">
+        <div class="legend-row legend-row-1">
+            <span style="display:flex;align-items:center;gap:6px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="2.1em" height="2.4em" viewBox="0 0 448 512"><path fill="currentColor" d="M224.5 508c-6.7 0-13.5-1.8-19.4-5.2l-61.7-36.5c-9.2-5.2-4.7-7-1.7-8c12.3-4.3 14.8-5.2 27.9-12.7c1.4-.8 3.2-.5 4.6.4l47.4 28.1c1.7 1 4.1 1 5.7 0L412 367.5c1.7-1 2.8-3 2.8-5V149.3c0-2.1-1.1-4-2.9-5.1L227.3 37.7c-1.7-1-4-1-5.7 0L37.1 144.3c-1.8 1-2.9 3-2.9 5.1v213.1c0 2 1.1 4 2.9 4.9l50.6 29.2c27.5 13.7 44.3-2.4 44.3-18.7V167.5c0-3 2.4-5.3 5.4-5.3h23.4c2.9 0 5.4 2.3 5.4 5.3V378c0 36.6-20 57.6-54.7 57.6c-10.7 0-19.1 0-42.5-11.6l-48.4-27.9c-12-6.9-19.4-19.8-19.4-33.7V149.3c0-13.8 7.4-26.8 19.4-33.7L205.1 9c11.7-6.6 27.2-6.6 38.8 0l184.7 106.7c12 6.9 19.4 19.8 19.4 33.7v213.1c0 13.8-7.4 26.7-19.4 33.7L243.9 502.8c-5.9 3.4-12.6 5.2-19.4 5.2m149.1-210.1c0-39.9-27-50.5-83.7-58c-57.4-7.6-63.2-11.5-63.2-24.9c0-11.1 4.9-25.9 47.4-25.9c37.9 0 51.9 8.2 57.7 33.8c.5 2.4 2.7 4.2 5.2 4.2h24c1.5 0 2.9-.6 3.9-1.7s1.5-2.6 1.4-4.1c-3.7-44.1-33-64.6-92.2-64.6c-52.7 0-84.1 22.2-84.1 59.5c0 40.4 31.3 51.6 81.8 56.6c60.5 5.9 65.2 14.8 65.2 26.7c0 20.6-16.6 29.4-55.5 29.4c-48.9 0-59.6-12.3-63.2-36.6c-.4-2.6-2.6-4.5-5.3-4.5h-23.9c-3 0-5.3 2.4-5.3 5.3c0 31.1 16.9 68.2 97.8 68.2c58.4-.1 92-23.2 92-63.4"/></svg>
+            </span>
+        </div>
+        <div class="legend-row legend-row-2">
+            <span style="display:flex;align-items:center;gap:6px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="2.4em" height="2.4em" viewBox="0 0 24 24"><path fill="currentColor" d="M12 5.5C5.271 5.5 0 8.355 0 12s5.271 6.5 12 6.5s12-2.855 12-6.5s-5.271-6.5-12-6.5m-1.246 2h1.31l-.416 2h1.17c.742 0 1.24.104 1.524.363c.277.256.361.676.25 1.248l-.52 2.389H12.74l.479-2.209q.086-.457-.067-.625c-.101-.111-.324-.166-.658-.166h-1.049l-.633 3H9.5zM5 9.5h2.666c1.271 0 2.041.852 1.74 2.123C9.056 13.1 8.12 13.5 6.396 13.5h-.824L5.311 15H3.986zm10.5 0h2.666c1.271 0 2.041.852 1.74 2.123c-.35 1.477-1.287 1.877-3.01 1.877h-.824l-.261 1.5h-1.325zm-9.365 1l-.377 2h.855c.74 0 1.428-.084 1.543-1.187c.043-.428-.135-.813-.99-.813zm10.5 0l-.377 2h.855c.74 0 1.428-.084 1.543-1.187c.043-.428-.134-.813-.99-.813z"/></svg>
+            </span>
+        </div>
+        <div class="legend-row legend-row-3">
+            <span style="display:flex;align-items:center;gap:6px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="2.4em" height="2.4em" viewBox="0 0 16 16"><path fill="currentColor" d="M5.79 1.574h3.866c.14 0 .252.11.252.246v5.186a.25.25 0 0 1-.252.246H6.344c-.975 0-1.766.77-1.766 1.72v1.162a.25.25 0 0 1-.253.243H1.867a.25.25 0 0 1-.253-.246V6.177a.25.25 0 0 1 .252-.246H7.98c.418 0 .757-.33.757-.737a.747.747 0 0 0-.757-.738H5.537V1.82a.25.25 0 0 1 .253-.246m5.632 2.592V1.82c0-.95-.79-1.72-1.766-1.72H5.79c-.976 0-1.767.77-1.767 1.72v2.636H1.867C.89 4.456.1 5.226.1 6.176v3.955c0 .95.79 1.72 1.766 1.72h2.46q.128 0 .252-.017v2.346c0 .95.79 1.72 1.766 1.72h3.866c.976 0 1.767-.77 1.767-1.72v-2.636h2.156c.976 0 1.767-.77 1.767-1.72V5.868c0-.95-.79-1.72-1.767-1.72h-2.458q-.129 0-.253.017zm-5.33 5.974V8.994a.25.25 0 0 1 .252-.246h3.312c.976 0 1.766-.77 1.766-1.72V5.866a.25.25 0 0 1 .253-.243h2.458c.14 0 .253.11.253.246v3.954a.25.25 0 0 1-.252.246H8.02a.747.747 0 0 0-.757.737c0 .408.339.738.757.738h2.442v2.636a.25.25 0 0 1-.253.246H6.344a.25.25 0 0 1-.252-.246z"/></svg>
+            </span>
+        </div>
+    </div>
     <div class="level-grid">
         {% for row in 1..3 %}
             <div class="level-row">
 
-                <div class="level-node start-node" data-row="{{ row }}"></div>
+                <div class="level-node start-node" data-row="{{ row }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+                      <g>
+                        <path class="node-fill" d="M8.5 1.443a1 1 0 0 0-1 0L2.572 4.29a1 1 0 0 0-.5.866v5.69a1 1 0 0 0 .5.866L7.5 14.557a1 1 0 0 0 1 0l4.928-2.846a1 1 0 0 0 .5-.866v-5.69a1 1 0 0 0-.5-.866z"/>
+                        <path fill="currentColor" d="M9 .577l4.928 2.846a2 2 0 0 1 1 1.732v5.69a2 2 0 0 1-1 1.732L9 15.423a2 2 0 0 1-2 0l-4.928-2.846a2 2 0 0 1-1-1.732v-5.69a2 2 0 0 1 1-1.732L7 .577a2 2 0 0 1 2 0"/>
+                      </g>
+                    </svg>
+                </div>
 
                 {% for col in 1..4 %}
                     <div class="level-node level"
                         data-row="{{ row }}"
                         data-level="{{ row }}-{{ col }}"
                         data-type="{% if row == 1 %}blue{% elseif row == 2 %}green{% else %}yellow{% endif %}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+                          <g>
+                            <path class="node-fill" d="M8.5 1.443a1 1 0 0 0-1 0L2.572 4.29a1 1 0 0 0-.5.866v5.69a1 1 0 0 0 .5.866L7.5 14.557a1 1 0 0 0 1 0l4.928-2.846a1 1 0 0 0 .5-.866v-5.69a1 1 0 0 0-.5-.866z"/>
+                            <path fill="currentColor" d="M9 .577l4.928 2.846a2 2 0 0 1 1 1.732v5.69a2 2 0 0 1-1 1.732L9 15.423a2 2 0 0 1-2 0l-4.928-2.846a2 2 0 0 1-1-1.732v-5.69a2 2 0 0 1 1-1.732L7 .577a2 2 0 0 1 2 0"/>
+                          </g>
+                        </svg>
                     </div>
                 {% endfor %}
 
                 {% if row == 2 %}
-                    <div class="level-node boss" data-row="{{ row }}" data-level="boss"></div>
+                    <div class="level-node boss" data-row="{{ row }}" data-level="boss">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M2 0C.9 0 0 .9 0 2v4h2V2h4V0zm16 0v2h4v4h2V2c0-1.1-.9-2-2-2zm-6 3c-4.4 0-8 3.6-8 8c0 2.5 1.2 4.8 3 6.2V21h2v-3h2v3h2v-3h2v3h2v-3.8c1.8-1.5 3-3.7 3-6.2c0-4.4-3.6-8-8-8M8 14c-1.1 0-2-.9-2-2s.9-2 2-2s2 .9 2 2s-.9 2-2 2m2.5 2l1.5-3l1.5 3zm5.5-2c-1.1 0-2-.9-2-2s.9-2 2-2s2 .9 2 2s-.9 2-2 2M0 18v4c0 1.1.9 2 2 2h4v-2H2v-4zm22 0v4h-4v2h4c1.1 0 2-.9 2-2v-4z"/></svg>
+                    </div>
                 {% else %}
-                    <div class="level-node end-node" data-row="{{ row }}"></div>
+                    <div class="level-node end-node" data-row="{{ row }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+                          <g>
+                            <path class="node-fill" d="M8.5 1.443a1 1 0 0 0-1 0L2.572 4.29a1 1 0 0 0-.5.866v5.69a1 1 0 0 0 .5.866L7.5 14.557a1 1 0 0 0 1 0l4.928-2.846a1 1 0 0 0 .5-.866v-5.69a1 1 0 0 0-.5-.866z"/>
+                            <path fill="currentColor" d="M9 .577l4.928 2.846a2 2 0 0 1 1 1.732v5.69a2 2 0 0 1-1 1.732L9 15.423a2 2 0 0 1-2 0l-4.928-2.846a2 2 0 0 1-1-1.732v-5.69a2 2 0 0 1 1-1.732L7 .577a2 2 0 0 1 2 0"/>
+                          </g>
+                        </svg>
+                    </div>
                 {% endif %}
             </div>
         {% endfor %}
@@ -570,6 +683,59 @@
             }
         });
     });
+
+    /* === HEXAGON BACKGROUND ANIMATION === */
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+
+    function resizeCanvas() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    const hexRadius = 40;
+    const hexHeight = Math.sqrt(3) * hexRadius;
+    const hexWidth = 2 * hexRadius;
+    const vertDist = hexHeight;
+    const horizDist = hexWidth * 3/4;
+
+    function drawHex(x, y, color) {
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+            ctx.lineTo(
+                x + hexRadius * Math.cos(Math.PI / 3 * i),
+                y + hexRadius * Math.sin(Math.PI / 3 * i)
+            );
+        }
+        ctx.closePath();
+        ctx.strokeStyle = color;
+        ctx.globalAlpha = 0.1;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+    }
+
+    function animateHexes() {
+        ctx.clearRect(0, 0, width, height);
+        let time = Date.now() * 0.001;
+        for (let row = 0; row < height / vertDist + 2; row++) {
+            for (let col = 0; col < width / horizDist + 2; col++) {
+                let x = col * horizDist + ((row % 2) * horizDist / 2);
+                let y = row * vertDist * 0.87;
+                let hue = (time * 40 + row * 20 + col * 20) % 360;
+                drawHex(x, y, `hsl(${hue}, 80%, 60%)`);
+            }
+        }
+        requestAnimationFrame(animateHexes);
+    }
+    animateHexes();
 </script>
 
 {% endblock body %}
