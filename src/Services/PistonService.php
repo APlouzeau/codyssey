@@ -29,6 +29,7 @@ class PistonService
                 'json' => $codeRequest,
                 'verify_peer' => false,
                 'verify_host' => false,
+                'timeout' => 30, // Timeout de 30 secondes
             ]);
 
             return $response->toArray();

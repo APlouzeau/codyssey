@@ -16,6 +16,7 @@ services:
       - app_build:/app/public/build
     networks:
       - codyssey_internal
+      - web
     depends_on:
       database:
         condition: service_healthy
